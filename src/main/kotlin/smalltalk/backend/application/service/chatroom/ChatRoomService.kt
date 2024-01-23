@@ -1,4 +1,4 @@
-package smalltalk.backend
+package smalltalk.backend.application.service.chatroom
 
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
@@ -6,7 +6,7 @@ import smalltalk.backend.presentation.dto.chatmessage.ChatMessage
 
 
 @Service
-class ChatService (
+class ChatRoomService (
     private val simpMessagingTemplate: SimpMessagingTemplate
 ) {
 
