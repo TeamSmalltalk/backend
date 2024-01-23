@@ -1,4 +1,4 @@
-package smalltalk.backend
+package smalltalk.backend.presentation.dto.chatmessage
 
 
 data class ChatMessage (
