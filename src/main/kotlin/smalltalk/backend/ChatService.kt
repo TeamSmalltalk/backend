@@ -5,11 +5,11 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class ChattingService (
+class ChatService (
     private val simpMessagingTemplate: SimpMessagingTemplate
 ) {
 
-    fun send(roomId: String, chattingMessage: ChattingMessage) {
+    fun send(roomId: String, chattingMessage: ChatMessage) {
         simpMessagingTemplate.convertAndSend(roomId, chattingMessage)
     }
 }
