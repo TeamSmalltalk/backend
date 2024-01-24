@@ -1,0 +1,14 @@
+services:
+  redis:
+    image: ${REDIS_IMAGE}
+    ports:
+      - "${REDIS_LOCAL_PORT}:${REDIS_SERVER_PORT}"
+
+  app:
+    image: ${APP_IMAGE}  # TODO 배포 시 .env 추가
+    build: .
+    restart: always
+    ports:
+      - "${APP_LOCAL_PORT}:${APP_SERVER_PORT}"
+    env_file:
+      - .env
