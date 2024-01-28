@@ -8,11 +8,11 @@ import smalltalk.backend.application.service.chatroom.ChatRoomService
 
 @Controller
 class ChatRoomController (
-    private val chattingService: ChatRoomService
+    private val chatRoomService: ChatRoomService
 ) {
 
     @MessageMapping("/{roomId}")
     fun send(@DestinationVariable roomId: String, chattingMessage: ChatMessage) {
-        chattingService.send(roomId, chattingMessage)
+
     }
 }
