@@ -20,6 +20,7 @@ class WebSocketConfig : WebSocketMessageBrokerConfigurer {
 
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
         // ws://domain/ws-connect 주소로 웹 소켓 연결이 가능
-        registry.addEndpoint("/ws-connect")
+        registry.addEndpoint("/ws-connect").setAllowedOrigins("*")
+        registry.addEndpoint("/ws-connect").setAllowedOrigins("*").withSockJS()
     }
 }
