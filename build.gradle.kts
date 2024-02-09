@@ -24,6 +24,8 @@ repositories {
 	mavenCentral()
 }
 
+val kotlinLoggingVersion = "6.0.3"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	implementation("org.springframework.boot:spring-boot-starter-web")
@@ -33,6 +35,8 @@ dependencies {
 
 	// 다른 DBMS 없이 redis 단독으로 사용할 경우
 	implementation("org.springframework:spring-tx:6.0.6")
+
+	implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
