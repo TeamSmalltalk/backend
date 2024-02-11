@@ -1,19 +1,19 @@
-package smalltalk.backend.infrastructure.repository
+package smalltalk.backend.infrastructure.repository.room
 
 import org.springframework.stereotype.Repository
-import smalltalk.backend.domain.chatroom.ChatRoom
+import smalltalk.backend.domain.room.Room
 
 @Repository
-class RedisChatRoomRepository : ChatRoomRepository {
+class RedisRoomRepository : RoomRepository {
     override fun save(chatRoomName: String) {
         TODO("Not yet implemented")
     }
 
-    override fun findById(chatRoomId: Long): ChatRoom {
+    override fun findById(chatRoomId: Long): Room {
         TODO("Not yet implemented")
     }
 
-    override fun findAll(): ChatRoom {
+    override fun findAll(): Room {
         TODO("Not yet implemented")
     }
 
@@ -21,7 +21,7 @@ class RedisChatRoomRepository : ChatRoomRepository {
         TODO("Not yet implemented")
     }
 
-    override fun addMember(): ChatRoom {
+    override fun addMember(): Room {
         TODO("Not yet implemented")
     }
 
