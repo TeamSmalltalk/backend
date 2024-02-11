@@ -1,6 +1,6 @@
-package smalltalk.backend.domain.chatroom
+package smalltalk.backend.domain.room
 
-class ChatRoom(
+class Room(
     name: String
 ) {
     val id: Long? = null
