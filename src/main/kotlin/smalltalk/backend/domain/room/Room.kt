@@ -1,10 +1,10 @@
 package smalltalk.backend.domain.room
 
+import java.io.Serializable
+
 class Room(
-    name: String
-) {
-    val id: Long? = null
-    var name: String = name
-        private set
-    val memberTotalCount: Int = 0
-}
+    val id: Long?,
+    val name: String?,
+    val idQueue: MutableList<Int>?,
+    val members: MutableList<Int>?
+) : Serializable
