@@ -9,19 +9,16 @@ class RedisRoomRepository(
     private val redisTemplate: RedisTemplate<String, Room>
 ) : RoomRepository {
     companion object {
-        private const val CHAT_ROOM_LIMIT_MEMBER_COUNT = 10
+        private const val ROOM_LIMIT_MEMBER_COUNT = 10
 
-        private const val CHAT_ROOM_COUNTER = "roomCounter"
-        private const val CHAT_ROOM_KEY = "room:"
-        private const val CHAT_ROOM_NAME_KEY = ":name"
-        private const val CHAT_ROOM_ID_QUEUE_KEY = ":idQueue"
-        private const val CHAT_ROOM_MEMBERS_KEY = ":members"
+        private const val ROOM_COUNTER_KEY = "roomCounter"
+        private const val ROOM_KEY = "room:"
     }
 
     override fun save(chatRoomName: String): Long? {
 
         val chatRoomId = generateChatRoomId()
-        redisTemplate.opsForValue()["room:$chatRoomId"] = Room(chatRoomId, chatRoomName, (1..10).toMutableList(), mutableListOf())
+        redisTemplate.opsForValue()[ROOM_KEY + chatRoomId] = Room(chatRoomId, chatRoomName, (1..ROOM_LIMIT_MEMBER_COUNT).toMutableList(), mutableListOf())
 
         return chatRoomId
     }
@@ -43,5 +40,5 @@ class RedisRoomRepository(
         TODO("Not yet implemented")
     }
 
-    private fun generateChatRoomId(): Long? = redisTemplate.opsForValue().increment(CHAT_ROOM_COUNTER)
+    private fun generateChatRoomId(): Long? = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)
 }

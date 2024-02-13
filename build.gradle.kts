@@ -25,6 +25,8 @@ repositories {
 }
 
 val kotlinLoggingVersion = "6.0.3"
+val junitJupiterVersion = "5.8.1"
+val testContainersVersion = "1.19.4"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
@@ -32,14 +34,14 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-websocket")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
-
-	// 다른 DBMS 없이 redis 단독으로 사용할 경우
-	implementation("org.springframework:spring-tx:6.0.6")
-
 	implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+	testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
+	testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
 }
 
 tasks.withType<KotlinCompile> {
