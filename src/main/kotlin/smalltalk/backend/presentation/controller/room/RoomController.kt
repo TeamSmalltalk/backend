@@ -11,7 +11,7 @@ class RoomController (
     private val roomService: RoomService
 ) {
 
-    @MessageMapping("/{roomId}")
+    @MessageMapping("{roomId}")
     fun send(@DestinationVariable("roomId") roomId: String, message: Message) {
         roomService.send(roomId, message)
     }

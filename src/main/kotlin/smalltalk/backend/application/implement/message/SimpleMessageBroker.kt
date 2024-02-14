@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 @Component
 class SimpleMessageBroker(
     private val template: SimpMessagingTemplate
-) : MessageBroker {
+): MessageBroker {
 
     override fun send(topic: String, message: Any) {
         template.convertAndSend(topic, message);
