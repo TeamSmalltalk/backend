@@ -2,6 +2,7 @@ package smalltalk.backend.config.websocket
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.messaging.converter.MappingJackson2MessageConverter
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
@@ -14,29 +15,45 @@ import org.springframework.web.socket.messaging.WebSocketStompClient
 @Configuration
 @EnableWebSocketMessageBroker
 class WebSocketConfig (
-    private val stompHandler: StompHandler
+    private val inboundChannelInterceptor: InboundChannelInterceptor,
+    private val outboundChannelInterceptor: OutboundChannelInterceptor
 ): WebSocketMessageBrokerConfigurer {
 
-    override fun configureMessageBroker(config: MessageBrokerRegistry) {
-        // /rooms/something 주소를 구독하는 클라이언트에게 메시지를 보낼 수 있게 브로커 활성화
-        config.enableSimpleBroker("/rooms")
-        // /rooms/chat/something 과 같은 주소로 메세지를 보낼 수 있음, @MessageMapping 에선 /somthing 만 mapping 하면 됨
-        config.setApplicationDestinationPrefixes("/rooms/chat")
+    companion object {
+        const val SEND_DESTINATION_PREFIX = "/rooms/chat/"
+        const val SUBSCRIBE_DESTINATION_PREFIX = "/rooms/"
+        const val STOMP_ENDPOINT = "/ws-connect"
+    }
+
+    override fun configureMessageBroker(registry: MessageBrokerRegistry) {
+        registry
+            .setApplicationDestinationPrefixes(SEND_DESTINATION_PREFIX)
+            .enableSimpleBroker(SUBSCRIBE_DESTINATION_PREFIX)
     }
 
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
-        // ws://domain/ws-connect 주소로 웹 소켓 연결이 가능
-        registry.addEndpoint("/ws-connect").setAllowedOrigins("*")
-        registry.addEndpoint("/ws-connect").setAllowedOrigins("*").withSockJS()
+        registry.apply {
+            addEndpoint(STOMP_ENDPOINT)
+                .setAllowedOrigins("*")
+            addEndpoint(STOMP_ENDPOINT)
+                .setAllowedOrigins("*")
+                .withSockJS()
+        }
     }
 
-    // 메시지가 클라이언트로부터 들어올 때 호출
     override fun configureClientInboundChannel(registration: ChannelRegistration) {
-        registration.interceptors(stompHandler)
+        registration.interceptors(inboundChannelInterceptor)
+    }
+
+
+    override fun configureClientOutboundChannel(registration: ChannelRegistration) {
+        registration.interceptors(outboundChannelInterceptor)
     }
 
     @Bean
     fun webSocketClient() : WebSocketStompClient =
-        WebSocketStompClient(StandardWebSocketClient())
+        WebSocketStompClient(StandardWebSocketClient()).apply {
+            messageConverter = MappingJackson2MessageConverter()
+        }
 }
 
