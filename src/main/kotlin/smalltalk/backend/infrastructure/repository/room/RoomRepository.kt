@@ -1,12 +1,15 @@
 package smalltalk.backend.infrastructure.repository.room
 
+import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
 
+@Repository
 interface RoomRepository {
-    fun save(chatRoomName: String): Long?
-    fun findById(chatRoomId: Long?): Room?
-    fun findAll(): Set<Room>
-    fun deleteById(chatRoomId: Long): Long
-    fun addMember(chatRoomId: Long)
-    fun deleteMember(chatRoomId: Long, memberId: Long)
+    fun save(roomName: String): Long?
+    fun findById(roomId: Long?): Room?
+    fun findAll(): List<Room>
+    fun deleteById(roomId: Long): Long
+    fun addMember(roomId: Long)
+    fun deleteMember(roomId: Long, memberId: Long)
+    fun deleteAll(): Long
 }

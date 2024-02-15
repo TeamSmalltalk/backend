@@ -1,22 +1,32 @@
 package smalltalk.backend.config.redis
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
-import smalltalk.backend.domain.room.Room
 
 @Configuration
-class RedisConfig {
+class RedisConfig(
+    @Value("\${spring.redis.host}")
+    private val host: String,
+    @Value("\${spring.redis.port}")
+    private val port: Int
+) {
 
-    // Spring 에서 RedisConnectionFactory Bean 자동 구성
     @Bean
-    fun redisTemplate(redisConnectionFactory: LettuceConnectionFactory) =
-        RedisTemplate<String, Room>().apply {
+    fun objectMapper() = ObjectMapper()
+
+    @Bean
+    fun redisConnectionFactory() = LettuceConnectionFactory(host, port)
+
+    @Bean
+    fun redisTemplate() =
+        RedisTemplate<String, Any>().apply {
             keySerializer = StringRedisSerializer()
-            valueSerializer = Jackson2JsonRedisSerializer(Room::class.java)
-            connectionFactory = redisConnectionFactory
+            valueSerializer = StringRedisSerializer()
+            connectionFactory = redisConnectionFactory()
         }
 }
