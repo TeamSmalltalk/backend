@@ -1,11 +1,11 @@
-package smalltalk.backend.config.test
+package smalltalk.backend.config.redis
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.boot.test.context.TestConfiguration
 import org.testcontainers.containers.GenericContainer
 
 @TestConfiguration
-class RedisTestContainerConfig {
+class RedisContainerConfig {
 
     companion object {
 

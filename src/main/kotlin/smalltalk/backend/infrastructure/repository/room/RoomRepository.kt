@@ -3,7 +3,6 @@ package smalltalk.backend.infrastructure.repository.room
 import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
 
-@Repository
 interface RoomRepository {
     fun save(roomName: String): Long?
     fun findById(roomId: Long?): Room?

@@ -6,13 +6,13 @@ import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import smalltalk.backend.config.redis.RedisConfig
-import smalltalk.backend.config.test.RedisTestContainerConfig
+import smalltalk.backend.config.redis.RedisContainerConfig
+import smalltalk.backend.config.redis.TestRedisConfig
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = [RoomRepository::class, RedisConfig::class, RedisRoomRepository::class, RedisTestContainerConfig::class])
+@SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class, TestRedisConfig::class, RedisContainerConfig::class])
 @DirtiesContext
-class RoomRepositoryTest (
+internal class RoomRepositoryTest (
     private val roomRepository: RoomRepository
 ): DescribeSpec({
 

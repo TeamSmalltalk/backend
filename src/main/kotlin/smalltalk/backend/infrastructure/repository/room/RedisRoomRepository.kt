@@ -2,12 +2,15 @@ package smalltalk.backend.infrastructure.repository.room
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
 
-internal class RedisRoomRepository(
+@Repository
+class RedisRoomRepository(
     private val redisTemplate: RedisTemplate<String, Any>,
     private val objectMapper: ObjectMapper
 ) : RoomRepository {
+
     companion object {
         private const val ROOM_LIMIT_MEMBER_COUNT = 10
         private const val ROOM_COUNTER_KEY = "roomCounter"
