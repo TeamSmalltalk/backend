@@ -17,23 +17,26 @@ class RedisRoomRepository(
         private const val ROOM_KEY = "room:"
     }
 
+
+
     override fun save(roomName: String): Long? {
 
-        val roomId = generateChatRoomId()
-        redisTemplate.opsForValue()[ROOM_KEY + roomId] =
+        val generatedRoomId = generateRoomId()
+
+        redisTemplate.opsForValue()[ROOM_KEY + generatedRoomId] =
             objectMapper.writeValueAsString(
                 Room(
-                    roomId,
+                    generatedRoomId,
                     roomName,
-                    (1..ROOM_LIMIT_MEMBER_COUNT).toMutableList(), mutableListOf()
+                    (1..ROOM_LIMIT_MEMBER_COUNT).toMutableList(),
+                    mutableListOf()
                 )
             )
 
-        return roomId
+        return generatedRoomId
     }
 
-    override fun findById(roomId: Long?): Room? =
-        objectMapper.readValue(redisTemplate.opsForValue()[ROOM_KEY + roomId].toString(), Room::class.java)
+    override fun findById(roomId: Long): Room? = findByKey(ROOM_KEY + roomId, Room::class.java)
 
     override fun findAll(): List<Room> {
         TODO("Not yet implemented")
@@ -51,7 +54,12 @@ class RedisRoomRepository(
 
     override fun deleteAll() = redisTemplate.delete(findKeysByPattern())
 
-    private fun generateChatRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)
+    private fun generateRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)
+
+    private fun <T> findByKey(key: String, clazz: Class<T>) =
+        redisTemplate.opsForValue()[key]?.let {
+            objectMapper.readValue(it.toString(), clazz)
+        }
 
     private fun findKeysByPattern() = redisTemplate.keys("$ROOM_KEY*")
 }

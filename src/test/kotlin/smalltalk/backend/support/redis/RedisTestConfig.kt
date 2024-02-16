@@ -1,4 +1,4 @@
-package smalltalk.backend.config.redis
+package smalltalk.backend.support.redis
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
@@ -9,7 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @TestConfiguration
-class TestRedisConfig(
+class RedisTestConfig(
     @Value("\${spring.redis.host}")
     private val host: String,
     @Value("\${spring.redis.port}")

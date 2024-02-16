@@ -1,39 +1,46 @@
 package smalltalk.backend.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import smalltalk.backend.config.redis.RedisContainerConfig
-import smalltalk.backend.config.redis.TestRedisConfig
+import smalltalk.backend.support.redis.RedisContainerConfig
+import smalltalk.backend.support.redis.RedisTestConfig
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class, TestRedisConfig::class, RedisContainerConfig::class])
+@SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class, RedisTestConfig::class, RedisContainerConfig::class])
 @DirtiesContext
 internal class RoomRepositoryTest (
     private val roomRepository: RoomRepository
-): DescribeSpec({
+): ExpectSpec({
 
     val logger = KotlinLogging.logger {  }
 
-    afterEach {
+    afterContainer {
+
         roomRepository.deleteAll()
         logger.info { "Delete all room" }
     }
 
-    describe("채팅방을 생성할 때") {
+    context("채팅방을 2개 저장할 경우") {
 
-        context("채팅방 이름을 입력받으면") {
+        val firstRoomName = "안녕하세요~"
+        val secondRoomName = "반가워요!"
 
-            val roomId = roomRepository.save("My 채팅방")
+        expect("첫 번째 채팅방 id를 반환한다.") {
 
-            it("채팅방 id를 반환한다") {
+            val firstSavedRoomId = roomRepository.save(firstRoomName)
 
-                val room = roomRepository.findById(roomId)
-                room?.id shouldBe roomId
-            }
+            firstSavedRoomId shouldBe 1L
+        }
+
+        expect("두 번째 채팅방 id를 반환한다.") {
+
+            val secondSavedRoomId = roomRepository.save(secondRoomName)
+
+            secondSavedRoomId shouldBe 2L
         }
     }
 })
