@@ -21,12 +21,12 @@ internal class RoomRepositoryTest (
         val firstRoomName = "안녕하세요~"
         val secondRoomName = "반가워요!"
 
-        expect("첫 번째 채팅방 id를 반환한다") {
+        expect("첫 번째로 저장된 채팅방 id를 반환한다") {
             val firstSavedRoomId = roomRepository.save(firstRoomName)
             firstSavedRoomId shouldBe 1L
         }
 
-        expect("두 번째 채팅방 id를 반환한다") {
+        expect("두 번째로 저장된 채팅방 id를 반환한다") {
             val secondSavedRoomId = roomRepository.save(secondRoomName)
             secondSavedRoomId shouldBe 2L
         }
@@ -38,13 +38,13 @@ internal class RoomRepositoryTest (
         val firstSavedRoomId = roomRepository.save(firstRoomName)
         val secondSavedRoomId = roomRepository.save(secondRoomName)
 
-        expect("첫 번째 채팅방을 조회한다") {
+        expect("첫 번째로 저장된 채팅방을 반환한다") {
             val firstFoundRoom = roomRepository.findById(firstSavedRoomId!!)
             firstFoundRoom?.id shouldBe firstSavedRoomId
             firstFoundRoom?.name shouldBe firstRoomName
         }
 
-        expect("두 번째 채팅방을 조회한다") {
+        expect("두 번째로 저장된 채팅방을 반환한다") {
             val secondFoundRoom = roomRepository.findById(secondSavedRoomId!!)
             secondFoundRoom?.id shouldBe secondSavedRoomId
             secondFoundRoom?.name shouldBe secondRoomName
