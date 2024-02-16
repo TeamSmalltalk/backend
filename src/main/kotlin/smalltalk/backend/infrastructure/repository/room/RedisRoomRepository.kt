@@ -10,14 +10,11 @@ class RedisRoomRepository(
     private val redisTemplate: RedisTemplate<String, Any>,
     private val objectMapper: ObjectMapper
 ) : RoomRepository {
-
     companion object {
         private const val ROOM_LIMIT_MEMBER_COUNT = 10
         private const val ROOM_COUNTER_KEY = "roomCounter"
         private const val ROOM_KEY = "room:"
     }
-
-
 
     override fun save(roomName: String): Long? {
 
@@ -52,7 +49,11 @@ class RedisRoomRepository(
         TODO("Not yet implemented")
     }
 
-    override fun deleteAll() = redisTemplate.delete(findKeysByPattern())
+    override fun deleteAll() =
+        redisTemplate.run {
+            delete(ROOM_COUNTER_KEY)
+            delete(findKeysByPattern("$ROOM_KEY*"))
+        }
 
     private fun generateRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)
 
@@ -61,5 +62,5 @@ class RedisRoomRepository(
             objectMapper.readValue(it.toString(), clazz)
         }
 
-    private fun findKeysByPattern() = redisTemplate.keys("$ROOM_KEY*")
+    private fun findKeysByPattern(key: String) = redisTemplate.keys(key)
 }
