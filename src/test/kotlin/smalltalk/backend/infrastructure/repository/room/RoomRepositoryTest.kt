@@ -42,6 +42,9 @@ internal class RoomRepositoryTest (
         expect("채팅방이 1개 이상 존재하면 모든 채팅방을 반환한다") {
             roomRepository.findAll().size shouldBe 3
         }
+        expect("채팅방이 존재하지 않는다면 비어있는 리스트를 반환한다") {
+            roomRepository.findAll().size shouldBe 0
+        }
     }
 
     afterEach {
