@@ -17,9 +17,7 @@ class RedisRoomRepository(
     }
 
     override fun save(roomName: String): Long? {
-
         val generatedRoomId = generateRoomId()
-
         redisTemplate.opsForValue()[ROOM_KEY + generatedRoomId] =
             objectMapper.writeValueAsString(
                 Room(
@@ -29,7 +27,6 @@ class RedisRoomRepository(
                     mutableListOf()
                 )
             )
-
         return generatedRoomId
     }
 
@@ -42,11 +39,20 @@ class RedisRoomRepository(
 
     override fun deleteById(roomId: Long) = redisTemplate.delete(ROOM_KEY + roomId)
 
-    override fun addMember(roomId: Long) {
+    override fun addMember(room: Room) =
+        room.apply {
+            idQueue?.let {
+                it.removeFirstOrNull()?.let { memberId ->
+                    members?.add(memberId)
+                }
+            }
+        }
+
+    override fun deleteMember(roomId: Long, memberId: Long) {
         TODO("Not yet implemented")
     }
 
-    override fun deleteMember(roomId: Long, memberId: Long) {
+    override fun updateRoom(room: Room) {
         TODO("Not yet implemented")
     }
 

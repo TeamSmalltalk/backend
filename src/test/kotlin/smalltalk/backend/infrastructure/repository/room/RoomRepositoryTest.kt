@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeOneOf
 import io.kotest.matchers.ints.shouldBeZero
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -12,14 +13,15 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.redis.RedisTestConfig
+import java.math.BigInteger
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class, RedisTestConfig::class, RedisContainerConfig::class])
 @DirtiesContext
-internal class RoomRepositoryTest (
+internal class RoomRepositoryTest(
     private val roomRepository: RoomRepository
-): ExpectSpec({
-    val logger = KotlinLogging.logger {  }
+) : ExpectSpec({
+    val logger = KotlinLogging.logger { }
     context("채팅방을 저장할 경우") {
         val roomName = "Team small talk 입니다~"
         expect("입력 받은 채팅방 이름을 통해 저장된 채팅방의 id를 반환한다") {
@@ -69,6 +71,24 @@ internal class RoomRepositoryTest (
         expect("채팅방이 1개 이상 존재하면 모든 채팅방을 삭제한다") {
             roomRepository.deleteAll()
             roomRepository.findAll().size.shouldBeZero()
+        }
+    }
+
+    context("채팅방에 입장할 경우") {
+        val foundRoom =
+            roomRepository.run {
+                save("siuuuuu")?.let {
+                    findById(it)
+                }
+            }
+        expect("채팅방을 반환한다") {
+            val updatedRoom =
+                foundRoom?.let {
+                    roomRepository.addMember(it)
+                }
+            updatedRoom?.idQueue?.size shouldBe 9
+            updatedRoom?.members?.size shouldBe 1
+            updatedRoom?.members?.last() shouldBe 1
         }
     }
 
