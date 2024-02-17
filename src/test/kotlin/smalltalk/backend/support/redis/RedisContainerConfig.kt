@@ -19,11 +19,11 @@ class RedisContainerConfig {
         init {
             GenericContainer<Nothing>(REDIS_IMAGE).apply {
                 withExposedPorts(REDIS_CONTAINER_PORT)
-                this.start()
+                start()
                 logger.info { "Redis container start" }
-                System.setProperty(LOCAL_REDIS_HOST_PATH, this.host)
-                System.setProperty(LOCAL_REDIS_PORT_PATH, this.getMappedPort(REDIS_CONTAINER_PORT).toString())
-                logger.info { "Redis container info = ${this.containerInfo}" }
+                System.setProperty(LOCAL_REDIS_HOST_PATH, host)
+                System.setProperty(LOCAL_REDIS_PORT_PATH, getMappedPort(REDIS_CONTAINER_PORT).toString())
+                logger.info { "Redis container info = $containerInfo" }
             }
         }
     }
