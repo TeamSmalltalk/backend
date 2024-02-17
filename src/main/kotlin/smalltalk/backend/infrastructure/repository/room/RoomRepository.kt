@@ -7,7 +7,7 @@ interface RoomRepository {
     fun save(roomName: String): Long?
     fun findById(roomId: Long): Room?
     fun findAll(): List<Room>
-    fun deleteById(roomId: Long): Long
+    fun deleteById(roomId: Long): Boolean
     fun addMember(roomId: Long)
     fun deleteMember(roomId: Long, memberId: Long)
     fun deleteAll(): Long

@@ -40,7 +40,7 @@ class RedisRoomRepository(
             findByKey(it, Room::class.java)
         }
 
-    override fun deleteById(roomId: Long): Long = TODO()
+    override fun deleteById(roomId: Long) = redisTemplate.delete(ROOM_KEY + roomId)
 
     override fun addMember(roomId: Long) {
         TODO("Not yet implemented")
