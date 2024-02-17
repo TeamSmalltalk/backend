@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldBeOneOf
 import io.kotest.matchers.ints.shouldBeZero
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -13,7 +12,6 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.redis.RedisTestConfig
-import java.math.BigInteger
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class, RedisTestConfig::class, RedisContainerConfig::class])
@@ -32,9 +30,13 @@ internal class RoomRepositoryTest(
     context("채팅방을 id로 조회할 경우") {
         roomRepository.save("Team small talk 입니다~")
         expect("id가 1이면 일치하는 채팅방을 반환한다") {
-            val firstFoundRoom = roomRepository.findById(1L)
-            firstFoundRoom?.id shouldBe 1L
-            firstFoundRoom?.name shouldBe "Team small talk 입니다~"
+            val foundRoom = roomRepository.findById(1L)
+            foundRoom?.run {
+                id shouldBe 1L
+                name shouldBe "Team small talk 입니다~"
+                idQueue?.size shouldBe 10
+                members?.size?.shouldBeZero()
+            }
         }
         expect("id가 일치하는 채팅방이 없으면 null 값을 반환한다") {
             roomRepository.findById(1L).shouldBeNull()
@@ -56,8 +58,10 @@ internal class RoomRepositoryTest(
     context("id가 일치하는 채팅방을 삭제할 경우") {
         roomRepository.save("Team small talk 입니다~")
         expect("id가 1이면 일치하는 채팅방을 삭제한다") {
-            roomRepository.deleteById(1L).shouldBeTrue()
-            roomRepository.findById(1L).shouldBeNull()
+            roomRepository.run {
+                deleteById(1L).shouldBeTrue()
+                findById(1L).shouldBeNull()
+            }
         }
         expect("id가 일치하는 채팅방이 없으면 false 값을 반환한다") {
             roomRepository.deleteById(1L).shouldBeFalse()
@@ -69,8 +73,10 @@ internal class RoomRepositoryTest(
             roomRepository.save("채팅방$it")
         }
         expect("채팅방이 1개 이상 존재하면 모든 채팅방을 삭제한다") {
-            roomRepository.deleteAll()
-            roomRepository.findAll().size.shouldBeZero()
+            roomRepository.run {
+                deleteAll()
+                findAll().size.shouldBeZero()
+            }
         }
     }
 
@@ -86,13 +92,16 @@ internal class RoomRepositoryTest(
                 foundRoom?.let {
                     roomRepository.addMember(it)
                 }
-            updatedRoom?.idQueue?.size shouldBe 9
-            updatedRoom?.members?.size shouldBe 1
-            updatedRoom?.members?.last() shouldBe 1
+            updatedRoom?.run {
+                idQueue?.size shouldBe 9
+                members?.size shouldBe 1
+                members?.last() shouldBe 1
+            }
         }
     }
 
     afterEach {
         roomRepository.deleteAll()
+        logger.info { "Delete all room" }
     }
 })
