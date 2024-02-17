@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
+import java.math.BigInteger
 
 @Repository
 class RedisRoomRepository(
@@ -16,8 +17,8 @@ class RedisRoomRepository(
         private const val ROOM_KEY = "room:"
     }
 
-    override fun save(roomName: String): Long? {
-        val generatedRoomId = generateRoomId()
+    override fun save(roomName: String): BigInteger? {
+        val generatedRoomId = generateRoomId()?.toBigInteger()
         redisTemplate.opsForValue()[ROOM_KEY + generatedRoomId] =
             objectMapper.writeValueAsString(
                 Room(
@@ -30,14 +31,14 @@ class RedisRoomRepository(
         return generatedRoomId
     }
 
-    override fun findById(roomId: Long): Room? = findByKey(ROOM_KEY + roomId, Room::class.java)
+    override fun findById(roomId: BigInteger): Room? = findByKey(ROOM_KEY + roomId, Room::class.java)
 
     override fun findAll() =
         findKeysByPattern("$ROOM_KEY*").mapNotNull {
             findByKey(it, Room::class.java)
         }
 
-    override fun deleteById(roomId: Long) = redisTemplate.delete(ROOM_KEY + roomId)
+    override fun deleteById(roomId: BigInteger) = redisTemplate.delete(ROOM_KEY + roomId)
 
     override fun addMember(room: Room) =
         room.apply {
@@ -48,7 +49,7 @@ class RedisRoomRepository(
             }
         }
 
-    override fun deleteMember(roomId: Long, memberId: Long) {
+    override fun deleteMember(roomId: BigInteger, memberId: BigInteger) {
         TODO("Not yet implemented")
     }
 

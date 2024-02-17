@@ -12,6 +12,8 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.redis.RedisTestConfig
+import java.math.BigInteger
+import java.math.BigInteger.*
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class, RedisTestConfig::class, RedisContainerConfig::class])
@@ -23,23 +25,23 @@ internal class RoomRepositoryTest(
     context("채팅방을 저장할 경우") {
         val roomName = "Team small talk 입니다~"
         expect("입력 받은 채팅방 이름을 통해 저장된 채팅방의 id를 반환한다") {
-            roomRepository.save(roomName) shouldBe 1L
+            roomRepository.save(roomName) shouldBe ONE
         }
     }
 
     context("채팅방을 id로 조회할 경우") {
         roomRepository.save("Team small talk 입니다~")
         expect("id가 1이면 일치하는 채팅방을 반환한다") {
-            val foundRoom = roomRepository.findById(1L)
+            val foundRoom = roomRepository.findById(ONE)
             foundRoom?.run {
-                id shouldBe 1L
+                id shouldBe ONE
                 name shouldBe "Team small talk 입니다~"
                 idQueue?.size shouldBe 10
                 members?.size?.shouldBeZero()
             }
         }
         expect("id가 일치하는 채팅방이 없으면 null 값을 반환한다") {
-            roomRepository.findById(1L).shouldBeNull()
+            roomRepository.findById(ONE).shouldBeNull()
         }
     }
 
@@ -59,12 +61,12 @@ internal class RoomRepositoryTest(
         roomRepository.save("Team small talk 입니다~")
         expect("id가 1이면 일치하는 채팅방을 삭제한다") {
             roomRepository.run {
-                deleteById(1L).shouldBeTrue()
-                findById(1L).shouldBeNull()
+                deleteById(ONE).shouldBeTrue()
+                findById(ONE).shouldBeNull()
             }
         }
         expect("id가 일치하는 채팅방이 없으면 false 값을 반환한다") {
-            roomRepository.deleteById(1L).shouldBeFalse()
+            roomRepository.deleteById(ONE).shouldBeFalse()
         }
     }
 
@@ -102,6 +104,5 @@ internal class RoomRepositoryTest(
 
     afterEach {
         roomRepository.deleteAll()
-        logger.info { "Delete all room" }
     }
 })
