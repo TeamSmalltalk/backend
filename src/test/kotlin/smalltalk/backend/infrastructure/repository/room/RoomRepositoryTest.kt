@@ -33,7 +33,7 @@ internal class RoomRepositoryTest (
         }
     }
 
-    context("채팅방을 조회할 경우") {
+    context("채팅방을 채팅방 id로 조회할 경우") {
 
         expect("첫 번째로 저장된 채팅방을 반환한다") {
             val firstFoundRoom = roomRepository.findById(1L)
@@ -44,6 +44,12 @@ internal class RoomRepositoryTest (
         expect("존재하지 않는 채팅방이면 null 값을 반환한다") {
             val foundRoom = roomRepository.findById(4L)
             foundRoom.shouldBeNull()
+        }
+    }
+
+    context("모든 채팅방을 조회할 경우") {
+        expect("모든 채팅방을 반환한다") {
+            roomRepository.findAll().size shouldBe 3
         }
     }
 

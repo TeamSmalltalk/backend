@@ -35,9 +35,10 @@ class RedisRoomRepository(
 
     override fun findById(roomId: Long): Room? = findByKey(ROOM_KEY + roomId, Room::class.java)
 
-    override fun findAll(): List<Room> {
-        TODO("Not yet implemented")
-    }
+    override fun findAll() =
+        findKeysByPattern("$ROOM_KEY*").mapNotNull {
+            findByKey(it, Room::class.java)
+        }
 
     override fun deleteById(roomId: Long): Long = TODO()
 
