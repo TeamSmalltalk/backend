@@ -1,7 +1,6 @@
 package smalltalk.backend.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.kotest.core.spec.IsolationMode
 import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -17,14 +16,12 @@ import smalltalk.backend.support.redis.RedisTestConfig
 internal class RoomRepositoryTest (
     private val roomRepository: RoomRepository
 ): ExpectSpec({
-    isolationMode = IsolationMode.InstancePerLeaf
     val logger = KotlinLogging.logger {  }
 
     beforeEach {
         roomRepository.save("안녕하세요~")
         roomRepository.save("반가워요!")
         roomRepository.save("siuuuuu")
-        logger.info { "Save dummy data" }
     }
 
     context("채팅방을 저장할 경우") {
