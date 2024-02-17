@@ -8,8 +8,8 @@ interface RoomRepository {
     fun findById(roomId: BigInteger): Room?
     fun findAll(): List<Room>
     fun addMember(room: Room): Room
-    fun deleteMember(roomId: BigInteger, memberId: BigInteger)
-    fun updateRoom(room: Room)
-    fun deleteById(roomId: BigInteger): Boolean
-    fun deleteAll(): Long
+    fun deleteMember(room: Room, memberId: Int): Room
+    fun update(updatedRoom: Room)
+    fun deleteById(roomId: BigInteger)
+    fun deleteAll()
 }

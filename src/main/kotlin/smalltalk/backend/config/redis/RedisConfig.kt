@@ -8,7 +8,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @Configuration
 class RedisConfig {
-
     @Bean
     fun redisTemplate(redisConnectionFactory: LettuceConnectionFactory) =
         RedisTemplate<String, Any>().apply {

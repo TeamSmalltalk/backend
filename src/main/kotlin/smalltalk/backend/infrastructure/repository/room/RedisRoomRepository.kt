@@ -20,7 +20,7 @@ class RedisRoomRepository(
     override fun save(roomName: String): BigInteger? {
         val generatedRoomId = generateRoomId()?.toBigInteger()
         redisTemplate.opsForValue()[ROOM_KEY + generatedRoomId] =
-            objectMapper.writeValueAsString(
+            convertTypeToString(
                 Room(
                     generatedRoomId,
                     roomName,
@@ -38,7 +38,9 @@ class RedisRoomRepository(
             findByKey(it, Room::class.java)
         }
 
-    override fun deleteById(roomId: BigInteger) = redisTemplate.delete(ROOM_KEY + roomId)
+    override fun deleteById(roomId: BigInteger) {
+        redisTemplate.delete(ROOM_KEY + roomId)
+    }
 
     override fun addMember(room: Room) =
         room.apply {
@@ -49,19 +51,22 @@ class RedisRoomRepository(
             }
         }
 
-    override fun deleteMember(roomId: BigInteger, memberId: BigInteger) {
-        TODO("Not yet implemented")
+    override fun deleteMember(room: Room, memberId: Int) =
+        room.apply {
+            members?.remove(memberId)
+            idQueue?.add(memberId)
+        }
+
+    override fun update(updatedRoom: Room) {
+        redisTemplate.opsForValue()[ROOM_KEY + updatedRoom.id] = convertTypeToString(updatedRoom)
     }
 
-    override fun updateRoom(room: Room) {
-        TODO("Not yet implemented")
-    }
-
-    override fun deleteAll() =
+    override fun deleteAll() {
         redisTemplate.run {
             delete(ROOM_COUNTER_KEY)
             delete(findKeysByPattern("$ROOM_KEY*"))
         }
+    }
 
     private fun generateRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)
 
@@ -71,4 +76,6 @@ class RedisRoomRepository(
         }
 
     private fun findKeysByPattern(key: String) = redisTemplate.keys(key)
+
+    private fun convertTypeToString(any: Any) = objectMapper.writeValueAsString(any)
 }
