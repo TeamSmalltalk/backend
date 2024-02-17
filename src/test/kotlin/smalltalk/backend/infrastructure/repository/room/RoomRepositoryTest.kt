@@ -40,13 +40,14 @@ internal class RoomRepositoryTest (
     }
 
     context("모든 채팅방을 조회할 경우") {
-        for (i in 1..3)
-            roomRepository.save("채팅방$i")
+        repeat(3) {
+            roomRepository.save("채팅방$it")
+        }
         expect("채팅방이 1개 이상 존재하면 모든 채팅방을 반환한다") {
             roomRepository.findAll().size shouldBe 3
         }
         expect("채팅방이 존재하지 않는다면 비어있는 리스트를 반환한다") {
-            roomRepository.findAll().size shouldBe 0
+            roomRepository.findAll().size.shouldBeZero()
         }
     }
 
@@ -62,8 +63,9 @@ internal class RoomRepositoryTest (
     }
 
     context("모든 채팅방을 삭제할 경우") {
-        for (i in 1..3)
-            roomRepository.save("채팅방$i")
+        repeat(3) {
+            roomRepository.save("채팅방$it")
+        }
         expect("채팅방이 1개 이상 존재하면 모든 채팅방을 삭제한다") {
             roomRepository.deleteAll()
             roomRepository.findAll().size.shouldBeZero()
