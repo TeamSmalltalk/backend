@@ -17,34 +17,28 @@ internal class RoomRepositoryTest (
     private val roomRepository: RoomRepository
 ): ExpectSpec({
     val logger = KotlinLogging.logger {  }
-
-    beforeEach {
-        roomRepository.save("안녕하세요~")
-        roomRepository.save("반가워요!")
-        roomRepository.save("siuuuuu")
-    }
-
     context("채팅방을 저장할 경우") {
-        val roomName = "Team small talk"
+        val roomName = "Team small talk 입니다~"
         expect("입력 받은 채팅방 이름을 통해 저장된 채팅방의 id를 반환한다") {
-            val savedRoomId = roomRepository.save(roomName)
-            savedRoomId shouldBe 4L
+            roomRepository.save(roomName) shouldBe 1L
         }
     }
 
     context("채팅방을 채팅방 id로 조회할 경우") {
+        roomRepository.save("Team small talk 입니다~")
         expect("id가 1이면 일치하는 채팅방을 반환한다") {
             val firstFoundRoom = roomRepository.findById(1L)
             firstFoundRoom?.id shouldBe 1L
-            firstFoundRoom?.name shouldBe "안녕하세요~"
+            firstFoundRoom?.name shouldBe "Team small talk 입니다~"
         }
         expect("id가 일치하는 채팅방이 없으면 null 값을 반환한다") {
-            val foundRoom = roomRepository.findById(4L)
-            foundRoom.shouldBeNull()
+            roomRepository.findById(1L).shouldBeNull()
         }
     }
 
     context("모든 채팅방을 조회할 경우") {
+        for (i in 1..3)
+            roomRepository.save("채팅방$i")
         expect("채팅방이 1개 이상 존재하면 모든 채팅방을 반환한다") {
             roomRepository.findAll().size shouldBe 3
         }
