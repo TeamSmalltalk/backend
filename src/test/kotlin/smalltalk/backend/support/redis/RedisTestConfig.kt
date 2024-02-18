@@ -15,7 +15,6 @@ class RedisTestConfig(
     @Value("\${spring.redis.port}")
     private val port: Int
 ) {
-
     @Bean
     fun objectMapper() = ObjectMapper()
 

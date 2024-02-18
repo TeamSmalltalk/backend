@@ -2,8 +2,6 @@ package smalltalk.backend.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
-import io.kotest.matchers.booleans.shouldBeFalse
-import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.ints.shouldBeZero
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -13,7 +11,6 @@ import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.redis.RedisTestConfig
-import java.math.BigInteger
 import java.math.BigInteger.*
 
 @ActiveProfiles("test")
@@ -23,6 +20,7 @@ internal class RoomRepositoryTest(
     private val roomRepository: RoomRepository
 ) : ExpectSpec({
     val logger = KotlinLogging.logger { }
+
     context("채팅방을 저장할 경우") {
         val roomName = "Team small talk 입니다~"
         expect("입력 받은 채팅방 이름을 통해 저장된 채팅방의 id를 반환한다") {
