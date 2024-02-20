@@ -8,7 +8,7 @@ import smalltalk.backend.domain.room.Room
 
 @Repository
 class RedisRoomRepository(
-    private val redisTemplate: RedisTemplate<String, Any>,
+    private val redisTemplate: RedisTemplate<String, String>,
     private val objectMapper: ObjectMapper
 ) : RoomRepository {
     companion object {
@@ -31,11 +31,11 @@ class RedisRoomRepository(
         return generatedRoomId
     }
 
-    override fun findById(roomId: Long): Room? = findByKey(ROOM_KEY + roomId, Room::class.java)
+    override fun findById(roomId: Long): Room? = findByKey(ROOM_KEY + roomId)
 
     override fun findAll() =
         findKeysByPattern("$ROOM_KEY*").mapNotNull {
-            findByKey(it, Room::class.java)
+            findByKey(it)
         }
 
     override fun deleteById(roomId: Long) {
@@ -67,12 +67,12 @@ class RedisRoomRepository(
     private fun generateRoomId() =
         redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)?: throw RoomIdNotFoundException()
 
-    private fun <T> findByKey(key: String, clazz: Class<T>) =
+    private fun findByKey(key: String) =
         redisTemplate.opsForValue()[key]?.let {
-            objectMapper.readValue(it.toString(), clazz)
+            objectMapper.readValue(it, Room::class.java)
         }
 
     private fun findKeysByPattern(key: String) = redisTemplate.keys(key)
 
-    private fun convertTypeToString(any: Any) = objectMapper.writeValueAsString(any)
+    private fun convertTypeToString(room: Room) = objectMapper.writeValueAsString(room)
 }
