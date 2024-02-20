@@ -3,8 +3,8 @@ package smalltalk.backend.infrastructure.repository.room
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Repository
+import smalltalk.backend.application.exception.room.situation.RoomIdNotFoundException
 import smalltalk.backend.domain.room.Room
-import java.math.BigInteger
 
 @Repository
 class RedisRoomRepository(
@@ -17,8 +17,8 @@ class RedisRoomRepository(
         private const val ROOM_KEY = "room:"
     }
 
-    override fun save(roomName: String): BigInteger? {
-        val generatedRoomId = generateRoomId()?.toBigInteger()
+    override fun save(roomName: String): Long {
+        val generatedRoomId = generateRoomId()
         redisTemplate.opsForValue()[ROOM_KEY + generatedRoomId] =
             convertTypeToString(
                 Room(
@@ -31,30 +31,26 @@ class RedisRoomRepository(
         return generatedRoomId
     }
 
-    override fun findById(roomId: BigInteger): Room? = findByKey(ROOM_KEY + roomId, Room::class.java)
+    override fun findById(roomId: Long): Room? = findByKey(ROOM_KEY + roomId, Room::class.java)
 
     override fun findAll() =
         findKeysByPattern("$ROOM_KEY*").mapNotNull {
             findByKey(it, Room::class.java)
         }
 
-    override fun deleteById(roomId: BigInteger) {
+    override fun deleteById(roomId: Long) {
         redisTemplate.delete(ROOM_KEY + roomId)
     }
 
     override fun addMember(room: Room) =
         room.apply {
-            idQueue?.let {
-                it.removeFirstOrNull()?.let { memberId ->
-                    members?.add(memberId)
-                }
-            }
+            members.add(idQueue.removeFirst())
         }
 
     override fun deleteMember(room: Room, memberId: Int) =
         room.apply {
-            members?.remove(memberId)
-            idQueue?.add(memberId)
+            members.remove(memberId)
+            idQueue.add(memberId)
         }
 
     override fun update(updatedRoom: Room) {
@@ -68,7 +64,8 @@ class RedisRoomRepository(
         }
     }
 
-    private fun generateRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)
+    private fun generateRoomId() =
+        redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)?: throw RoomIdNotFoundException()
 
     private fun <T> findByKey(key: String, clazz: Class<T>) =
         redisTemplate.opsForValue()[key]?.let {

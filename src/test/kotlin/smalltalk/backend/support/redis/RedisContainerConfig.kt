@@ -13,7 +13,7 @@ class RedisContainerConfig {
         private const val LOCAL_REDIS_HOST_PATH = "spring.redis.host"
         private const val LOCAL_REDIS_PORT_PATH = "spring.redis.port"
         init {
-            GenericContainer<Nothing>(REDIS_IMAGE).run {
+            GenericContainer<Nothing>(REDIS_IMAGE).apply {
                 withExposedPorts(REDIS_CONTAINER_PORT)
                 start()
                 logger.info { "Redis container start" }
