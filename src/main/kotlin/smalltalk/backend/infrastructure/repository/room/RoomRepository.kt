@@ -1,7 +1,6 @@
 package smalltalk.backend.infrastructure.repository.room
 
 import smalltalk.backend.domain.room.Room
-import java.math.BigInteger
 
 interface RoomRepository {
     fun save(roomName: String): Long
