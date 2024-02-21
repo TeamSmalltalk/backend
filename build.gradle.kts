@@ -26,6 +26,9 @@ repositories {
 
 val kotlinLoggingVersion = "6.0.3"
 val coroutinesVersion = "1.8.0-RC2"
+val testContainersVersion = "1.19.4"
+val kotestRunnerVersion = "5.8.0"
+val kotestExtensionsVersion = "1.1.3"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
@@ -36,8 +39,13 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 	implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
-	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")
+	testImplementation("org.springframework.boot:spring-boot-testcontainers")
+	testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
+	testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
+	testImplementation("io.kotest:kotest-runner-junit5:$kotestRunnerVersion")
+	testImplementation("io.kotest.extensions:kotest-extensions-spring:$kotestExtensionsVersion")
 }
 
 tasks.withType<KotlinCompile> {

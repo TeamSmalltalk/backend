@@ -1,10 +1,15 @@
 package smalltalk.backend.domain.room
 
-class Room(
-    name: String
-) {
-    val id: Long? = null
-    var name: String = name
-        private set
-    val memberTotalCount: Int = 0
-}
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+
+class Room @JsonCreator constructor(
+    @JsonProperty("id")
+    val id: Long,
+    @JsonProperty("name")
+    val name: String,
+    @JsonProperty("idQueue")
+    val idQueue: MutableList<Int>,
+    @JsonProperty("members")
+    val members: MutableList<Int>
+)
