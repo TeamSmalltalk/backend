@@ -22,8 +22,15 @@ internal class RoomRepositoryTest(
 
     context("채팅방을 저장할 경우") {
         val roomName = "Team small talk 입니다~"
-        expect("입력 받은 채팅방 이름을 통해 저장된 채팅방의 id를 반환한다") {
-            roomRepository.save(roomName) shouldBe 1L
+        expect("입력 받은 채팅방 이름을 통해 저장된 채팅방을 반환한다") {
+            val savedRoom = roomRepository.save(roomName)
+            savedRoom.run {
+                id shouldBe 1L
+                name shouldBe "Team small talk 입니다~"
+                idQueue.size shouldBe 9
+                members.size shouldBe 1
+                members.last() shouldBe 1
+            }
         }
     }
 
@@ -34,8 +41,8 @@ internal class RoomRepositoryTest(
             foundRoom?.run {
                 id shouldBe 1L
                 name shouldBe "Team small talk 입니다~"
-                idQueue.size shouldBe 10
-                members.size.shouldBeZero()
+                idQueue.size shouldBe 9
+                members.size shouldBe 1
             }
         }
         expect("id가 일치하는 채팅방이 없으면 null 값을 반환한다") {
@@ -89,9 +96,9 @@ internal class RoomRepositoryTest(
                     roomRepository.addMember(it)
                 }
             updatedRoom?.run {
-                idQueue.size shouldBe 9
-                members.size shouldBe 1
-                members.last() shouldBe 1
+                idQueue.size shouldBe 8
+                members.size shouldBe 2
+                members.last() shouldBe 2
             }
         }
     }
@@ -111,9 +118,9 @@ internal class RoomRepositoryTest(
             val foundRoom = roomRepository.findById(1L)
             foundRoom?.run {
                 id shouldBe 1L
-                idQueue.size shouldBe 9
-                members.size shouldBe 1
-                members.last() shouldBe 1
+                idQueue.size shouldBe 8
+                members.size shouldBe 2
+                members.last() shouldBe 2
             }
         }
     }

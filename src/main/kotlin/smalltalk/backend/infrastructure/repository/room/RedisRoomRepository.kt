@@ -17,18 +17,17 @@ class RedisRoomRepository(
         private const val ROOM_KEY = "room:"
     }
 
-    override fun save(roomName: String): Long {
+    override fun save(roomName: String): Room {
         val generatedRoomId = generateRoomId()
-        redisTemplate.opsForValue()[ROOM_KEY + generatedRoomId] =
-            convertTypeToString(
-                Room(
-                    generatedRoomId,
-                    roomName,
-                    (1..ROOM_LIMIT_MEMBER_COUNT).toMutableList(),
-                    mutableListOf()
-                )
+        val room =
+            Room(
+                generatedRoomId,
+                roomName,
+                (2..ROOM_LIMIT_MEMBER_COUNT).toMutableList(),
+                mutableListOf(1)
             )
-        return generatedRoomId
+        redisTemplate.opsForValue()[ROOM_KEY + generatedRoomId] = convertTypeToString(room)
+        return room
     }
 
     override fun findById(roomId: Long): Room? = findByKey(ROOM_KEY + roomId)
