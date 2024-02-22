@@ -9,7 +9,7 @@ class Room @JsonCreator constructor(
     @JsonProperty("name")
     val name: String,
     @JsonProperty("idQueue")
-    val idQueue: MutableList<Int>,
+    val idQueue: MutableList<Long>,
     @JsonProperty("members")
-    val members: MutableList<Int>
+    val members: MutableList<Long>
 )

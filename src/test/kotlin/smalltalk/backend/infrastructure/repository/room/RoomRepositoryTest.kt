@@ -29,7 +29,7 @@ internal class RoomRepositoryTest(
                 name shouldBe "Team small talk 입니다~"
                 idQueue.size shouldBe 9
                 members.size shouldBe 1
-                members.last() shouldBe 1
+                members.last() shouldBe 1L
             }
         }
     }
@@ -98,7 +98,7 @@ internal class RoomRepositoryTest(
             updatedRoom?.run {
                 idQueue.size shouldBe 8
                 members.size shouldBe 2
-                members.last() shouldBe 2
+                members.last() shouldBe 2L
             }
         }
     }
@@ -120,7 +120,7 @@ internal class RoomRepositoryTest(
                 id shouldBe 1L
                 idQueue.size shouldBe 8
                 members.size shouldBe 2
-                members.last() shouldBe 2
+                members.last() shouldBe 2L
             }
         }
     }
@@ -132,8 +132,8 @@ internal class RoomRepositoryTest(
                     Room(
                         1L,
                         "miuuuuu",
-                        (2..10).toMutableList(),
-                        mutableListOf(1)
+                        (2L..10L).toMutableList(),
+                        mutableListOf(1L)
                     )
                 )
                 findById(1L)
@@ -141,7 +141,7 @@ internal class RoomRepositoryTest(
         expect("퇴장한 채팅방을 반환한다") {
             val updatedRoom =
                 foundRoom?.let {
-                    roomRepository.deleteMember(it, 1)
+                    roomRepository.deleteMember(it, 1L)
                 }
             updatedRoom?.run {
                 id shouldBe 1L
