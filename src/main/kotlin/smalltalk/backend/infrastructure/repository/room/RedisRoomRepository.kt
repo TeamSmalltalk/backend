@@ -12,23 +12,22 @@ class RedisRoomRepository(
     private val objectMapper: ObjectMapper
 ) : RoomRepository {
     companion object {
-        private const val ROOM_LIMIT_MEMBER_COUNT = 10
+        private const val ROOM_LIMIT_MEMBER_COUNT = 10L
         private const val ROOM_COUNTER_KEY = "roomCounter"
         private const val ROOM_KEY = "room:"
     }
 
-    override fun save(roomName: String): Long {
+    override fun save(roomName: String): Room {
         val generatedRoomId = generateRoomId()
-        redisTemplate.opsForValue()[ROOM_KEY + generatedRoomId] =
-            convertTypeToString(
-                Room(
-                    generatedRoomId,
-                    roomName,
-                    (1..ROOM_LIMIT_MEMBER_COUNT).toMutableList(),
-                    mutableListOf()
-                )
+        val room =
+            Room(
+                generatedRoomId,
+                roomName,
+                (2L..ROOM_LIMIT_MEMBER_COUNT).toMutableList(),
+                mutableListOf(1L)
             )
-        return generatedRoomId
+        redisTemplate.opsForValue()[ROOM_KEY + generatedRoomId] = convertTypeToString(room)
+        return room
     }
 
     override fun findById(roomId: Long): Room? = findByKey(ROOM_KEY + roomId)
@@ -47,7 +46,7 @@ class RedisRoomRepository(
             members.add(idQueue.removeFirst())
         }
 
-    override fun deleteMember(room: Room, memberId: Int) =
+    override fun deleteMember(room: Room, memberId: Long) =
         room.apply {
             members.remove(memberId)
             idQueue.add(memberId)

@@ -22,8 +22,15 @@ internal class RoomRepositoryTest(
 
     context("채팅방을 저장할 경우") {
         val roomName = "Team small talk 입니다~"
-        expect("입력 받은 채팅방 이름을 통해 저장된 채팅방의 id를 반환한다") {
-            roomRepository.save(roomName) shouldBe 1L
+        expect("입력 받은 채팅방 이름을 통해 저장된 채팅방을 반환한다") {
+            val savedRoom = roomRepository.save(roomName)
+            savedRoom.run {
+                id shouldBe 1L
+                name shouldBe "Team small talk 입니다~"
+                idQueue.size shouldBe 9
+                members.size shouldBe 1
+                members.last() shouldBe 1L
+            }
         }
     }
 
@@ -34,8 +41,8 @@ internal class RoomRepositoryTest(
             foundRoom?.run {
                 id shouldBe 1L
                 name shouldBe "Team small talk 입니다~"
-                idQueue.size shouldBe 10
-                members.size.shouldBeZero()
+                idQueue.size shouldBe 9
+                members.size shouldBe 1
             }
         }
         expect("id가 일치하는 채팅방이 없으면 null 값을 반환한다") {
@@ -89,9 +96,9 @@ internal class RoomRepositoryTest(
                     roomRepository.addMember(it)
                 }
             updatedRoom?.run {
-                idQueue.size shouldBe 9
-                members.size shouldBe 1
-                members.last() shouldBe 1
+                idQueue.size shouldBe 8
+                members.size shouldBe 2
+                members.last() shouldBe 2L
             }
         }
     }
@@ -111,9 +118,9 @@ internal class RoomRepositoryTest(
             val foundRoom = roomRepository.findById(1L)
             foundRoom?.run {
                 id shouldBe 1L
-                idQueue.size shouldBe 9
-                members.size shouldBe 1
-                members.last() shouldBe 1
+                idQueue.size shouldBe 8
+                members.size shouldBe 2
+                members.last() shouldBe 2L
             }
         }
     }
@@ -125,8 +132,8 @@ internal class RoomRepositoryTest(
                     Room(
                         1L,
                         "miuuuuu",
-                        (2..10).toMutableList(),
-                        mutableListOf(1)
+                        (2L..10L).toMutableList(),
+                        mutableListOf(1L)
                     )
                 )
                 findById(1L)
@@ -134,7 +141,7 @@ internal class RoomRepositoryTest(
         expect("퇴장한 채팅방을 반환한다") {
             val updatedRoom =
                 foundRoom?.let {
-                    roomRepository.deleteMember(it, 1)
+                    roomRepository.deleteMember(it, 1L)
                 }
             updatedRoom?.run {
                 id shouldBe 1L
