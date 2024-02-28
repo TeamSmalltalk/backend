@@ -29,6 +29,7 @@ val coroutinesVersion = "1.8.0-RC2"
 val testContainersVersion = "1.19.4"
 val kotestRunnerVersion = "5.8.0"
 val kotestExtensionsVersion = "1.1.3"
+val mockkVersion = "4.0.2"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
@@ -46,6 +47,7 @@ dependencies {
 	testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
 	testImplementation("io.kotest:kotest-runner-junit5:$kotestRunnerVersion")
 	testImplementation("io.kotest.extensions:kotest-extensions-spring:$kotestExtensionsVersion")
+	testImplementation("com.ninja-squad:springmockk:$mockkVersion")
 }
 
 tasks.withType<KotlinCompile> {
