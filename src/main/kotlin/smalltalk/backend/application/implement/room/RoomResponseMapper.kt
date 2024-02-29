@@ -1,6 +1,7 @@
 package smalltalk.backend.application.implement.room
 
 import smalltalk.backend.presentation.dto.room.OpenResponse
+import smalltalk.backend.presentation.dto.room.SimpleInfoResponse
 
 class RoomResponseMapper {
     companion object {
@@ -8,6 +9,12 @@ class RoomResponseMapper {
             OpenResponse(
                 roomId,
                 memberId
+            )
+        fun toSimpleInfoResponse(id: Long, name: String, memberCount: Int) =
+            SimpleInfoResponse(
+                id,
+                name,
+                memberCount
             )
     }
 }
