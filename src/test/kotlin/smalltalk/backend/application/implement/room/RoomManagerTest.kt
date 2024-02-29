@@ -17,6 +17,27 @@ class RoomManagerTest : BehaviorSpec({
     val roomManager = RoomManager(roomRepository)
     val logger = KotlinLogging.logger{ }
 
+    Given("채팅방 이름이 있는 경우") {
+        val roomName = "안녕하세요~"
+        val room =
+            Room(
+                1L,
+                roomName,
+                (2L..10L).toMutableList(),
+                mutableListOf(1L)
+            )
+        every { roomRepository.save(any()) } returns room
+        When("채팅방을 저장하면") {
+            val openResponse = roomManager.create(roomName)
+            Then("room id와 member id가 반환된다") {
+                openResponse.run {
+                    roomId shouldBe room.id
+                    memberId shouldBe room.members.last()
+                }
+            }
+        }
+    }
+
     Given("id가 1L인 채팅방만 존재하는 경우") {
         val room =
             Room(
