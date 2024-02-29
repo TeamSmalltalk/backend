@@ -17,7 +17,7 @@ import smalltalk.backend.support.redis.RedisTestConfig
 @ActiveProfiles("test")
 @SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class, RedisTestConfig::class, RedisContainerConfig::class])
 @DirtiesContext
-internal class RoomRepositoryTest(
+class RoomRepositoryTest(
     private val roomRepository: RoomRepository
 ) : ExpectSpec({
     val logger = KotlinLogging.logger { }
