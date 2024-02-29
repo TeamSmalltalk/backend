@@ -69,6 +69,42 @@ class RoomManagerTest : BehaviorSpec({
         }
     }
 
+    Given("채팅방이 여러 개 존재하는 경우") {
+        val foundRooms =
+            listOf(
+                Room(
+                    1L,
+                    "안녕하세요~",
+                    (2L..10L).toMutableList(),
+                    mutableListOf(1L)
+                ),
+                Room(
+                    2L,
+                    "반가워요!",
+                    (2L..10L).toMutableList(),
+                    mutableListOf(1L)
+                ),
+                Room(
+                    3L,
+                    "siuuuuu",
+                    (2L..10L).toMutableList(),
+                    mutableListOf(1L)
+                )
+            )
+        every { roomRepository.findAll() } returns foundRooms
+        When("모든 채팅방을 조회하면") {
+            val readRooms = roomManager.readAll()
+            Then("채팅방 id, 이름, 멤버 수로 이루어진 리스트를 반환한다") {
+                readRooms.size shouldBe foundRooms.size
+                readRooms.zip(foundRooms).forEach { (readRoom, foundRoom) ->
+                    readRoom.id shouldBe foundRoom.id
+                    readRoom.name shouldBe foundRoom.name
+                    readRoom.memberCount shouldBe foundRoom.members.size
+                }
+            }
+        }
+    }
+
     afterRootTest {
         clearAllMocks()
     }

@@ -15,4 +15,9 @@ class RoomManager(
     }
 
     fun read(roomId: Long) = roomRepository.findById(roomId)?: throw RoomNotFoundException()
+
+    fun readAll() =
+        roomRepository.findAll().map {
+            toSimpleInfoResponse(it.id, it.name, it.members.size)
+        }
 }
