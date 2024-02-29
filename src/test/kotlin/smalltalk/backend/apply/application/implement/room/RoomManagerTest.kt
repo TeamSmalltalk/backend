@@ -1,4 +1,4 @@
-package smalltalk.backend.application.implement.room
+package smalltalk.backend.apply.application.implement.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.assertions.throwables.shouldThrow
@@ -8,6 +8,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import smalltalk.backend.application.exception.room.situation.RoomNotFoundException
+import smalltalk.backend.application.implement.room.RoomManager
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.support.spec.afterRootTest
