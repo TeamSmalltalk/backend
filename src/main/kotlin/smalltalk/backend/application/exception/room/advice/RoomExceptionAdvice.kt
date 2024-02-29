@@ -15,7 +15,7 @@ class RoomExceptionAdvice {
     @ExceptionHandler(RoomIdNotFoundException::class)
     fun roomIdNotFoundException() {}
 
-    @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Room could not be found")
+    @ResponseStatus(value = NOT_FOUND, reason = "Room could not be found")
     @ExceptionHandler(RoomNotFoundException::class)
     fun roomNotFoundException() {}
 }
