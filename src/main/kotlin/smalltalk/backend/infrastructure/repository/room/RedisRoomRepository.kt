@@ -63,8 +63,7 @@ class RedisRoomRepository(
         }
     }
 
-    private fun generateRoomId() =
-        redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)?: throw RoomIdNotFoundException()
+    private fun generateRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)?: throw RoomIdNotFoundException()
 
     private fun findByKey(key: String) =
         redisTemplate.opsForValue()[key]?.let {
