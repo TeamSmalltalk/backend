@@ -18,6 +18,8 @@ class RoomManager(
 
     fun readAll() =
         roomRepository.findAll().map {
-            toSimpleInfoResponse(it.id, it.name, it.members.size)
+            it.run {
+                toSimpleInfoResponse(id, name, members.size)
+            }
         }
 }
