@@ -19,37 +19,37 @@ class RoomManagerTest : BehaviorSpec({
 
     Given("채팅방 이름이 있는 경우") {
         val roomName = "안녕하세요~"
-        val room =
+        val savedRoom =
             Room(
                 1L,
                 roomName,
                 (2L..10L).toMutableList(),
                 mutableListOf(1L)
             )
-        every { roomRepository.save(any()) } returns room
+        every { roomRepository.save(any()) } returns savedRoom
         When("채팅방을 저장하면") {
             val openResponse = roomManager.create(roomName)
             Then("room id와 member id가 반환된다") {
                 openResponse.run {
-                    roomId shouldBe room.id
-                    memberId shouldBe room.members.last()
+                    roomId shouldBe savedRoom.id
+                    memberId shouldBe savedRoom.members.last()
                 }
             }
         }
     }
 
     Given("id가 1L인 채팅방만 존재하는 경우") {
-        val room =
+        val foundRoom =
             Room(
                 1L,
                 "안녕하세요~",
                 (2L..10L).toMutableList(),
                 mutableListOf(1L)
             )
-        every { roomRepository.findById(1L) } returns room
+        every { roomRepository.findById(1L) } returns foundRoom
         every { roomRepository.findById(2L) } returns null
         When("id가 1L인 채팅방을 조회하면") {
-            val readRoom = roomManager.read(room.id)
+            val readRoom = roomManager.read(foundRoom.id)
             Then("id와 일치하는 채팅방이 반환된다") {
                 readRoom.run {
                     id shouldBe 1L
