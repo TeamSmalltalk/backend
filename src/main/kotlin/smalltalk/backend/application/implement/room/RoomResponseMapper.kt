@@ -1,11 +1,11 @@
 package smalltalk.backend.application.implement.room
 
-import smalltalk.backend.presentation.dto.room.openResponse
+import smalltalk.backend.presentation.dto.room.OpenResponse
 
 class RoomResponseMapper {
     companion object {
         fun toOpenResponse(roomId: Long, memberId: Long) =
-            openResponse(
+            OpenResponse(
                 roomId,
                 memberId
             )

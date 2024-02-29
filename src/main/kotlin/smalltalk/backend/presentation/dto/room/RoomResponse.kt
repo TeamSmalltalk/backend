@@ -1,6 +1,6 @@
 package smalltalk.backend.presentation.dto.room
 
-data class openResponse(
+data class OpenResponse(
     val roomId: Long,
     val memberId: Long
 )
