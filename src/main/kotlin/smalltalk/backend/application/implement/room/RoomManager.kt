@@ -11,7 +11,7 @@ class RoomManager(
 ) {
     fun create(roomName: String): OpenResponse {
         val savedRoom = roomRepository.save(roomName)
-        return RoomResponseMapper.toOpenResponse(savedRoom.id, savedRoom.members.last())
+        return toOpenResponse(savedRoom.id, savedRoom.members.last())
     }
 
     fun read(roomId: Long) = roomRepository.findById(roomId)?: throw RoomNotFoundException()
