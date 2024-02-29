@@ -9,7 +9,10 @@ import io.mockk.every
 import io.mockk.mockk
 import smalltalk.backend.application.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.application.implement.room.RoomManager
-import smalltalk.backend.domain.room.Room
+import smalltalk.backend.apply.ID
+import smalltalk.backend.apply.MEMBERS_INITIAL_ID
+import smalltalk.backend.apply.NAME
+import smalltalk.backend.apply.createRoom
 import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.support.spec.afterRootTest
 
@@ -20,13 +23,7 @@ class RoomManagerTest : BehaviorSpec({
 
     Given("채팅방 이름이 있는 경우") {
         val roomName = "안녕하세요~"
-        val savedRoom =
-            Room(
-                1L,
-                roomName,
-                (2L..10L).toMutableList(),
-                mutableListOf(1L)
-            )
+        val savedRoom = createRoom(name = roomName)
         every { roomRepository.save(any()) } returns savedRoom
         When("채팅방을 저장하면") {
             val openResponse = roomManager.create(roomName)
@@ -40,24 +37,18 @@ class RoomManagerTest : BehaviorSpec({
     }
 
     Given("id가 1L인 채팅방만 존재하는 경우") {
-        val foundRoom =
-            Room(
-                1L,
-                "안녕하세요~",
-                (2L..10L).toMutableList(),
-                mutableListOf(1L)
-            )
+        val foundRoom = createRoom()
         every { roomRepository.findById(1L) } returns foundRoom
         every { roomRepository.findById(2L) } returns null
         When("id가 1L인 채팅방을 조회하면") {
             val readRoom = roomManager.read(foundRoom.id)
             Then("id와 일치하는 채팅방이 반환된다") {
                 readRoom.run {
-                    id shouldBe 1L
-                    name shouldBe "안녕하세요~"
+                    id shouldBe ID
+                    name shouldBe NAME
                     idQueue.size shouldBe 9
                     members.size shouldBe 1
-                    members.last() shouldBe 1L
+                    members.last() shouldBe MEMBERS_INITIAL_ID
                 }
             }
         }
@@ -71,27 +62,9 @@ class RoomManagerTest : BehaviorSpec({
     }
 
     Given("채팅방이 여러 개 존재하는 경우") {
-        val foundRooms =
-            listOf(
-                Room(
-                    1L,
-                    "안녕하세요~",
-                    (2L..10L).toMutableList(),
-                    mutableListOf(1L)
-                ),
-                Room(
-                    2L,
-                    "반가워요!",
-                    (2L..10L).toMutableList(),
-                    mutableListOf(1L)
-                ),
-                Room(
-                    3L,
-                    "siuuuuu",
-                    (2L..10L).toMutableList(),
-                    mutableListOf(1L)
-                )
-            )
+        val foundRooms = (1L..3L).map {
+            createRoom(id = it)
+        }
         every { roomRepository.findAll() } returns foundRooms
         When("모든 채팅방을 조회하면") {
             val readRooms = roomManager.readAll()
