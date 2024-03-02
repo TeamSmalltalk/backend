@@ -3,7 +3,7 @@ package smalltalk.backend.infrastructure.repository.room
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Repository
-import smalltalk.backend.application.exception.room.situation.RoomIdNotFoundException
+import smalltalk.backend.application.exception.room.situation.GeneratingRoomIdFailureException
 import smalltalk.backend.domain.room.Room
 
 @Repository
@@ -66,7 +66,7 @@ class RedisRoomRepository(
         }
     }
 
-    private fun generateRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)?: throw RoomIdNotFoundException()
+    private fun generateRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)?: throw GeneratingRoomIdFailureException()
 
     private fun findByKey(key: String) =
         redisTemplate.opsForValue()[key]?.let {
