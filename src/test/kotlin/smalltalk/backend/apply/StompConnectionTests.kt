@@ -1,4 +1,4 @@
-package smalltalk.backend
+package smalltalk.backend.apply
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.junit.jupiter.api.AfterEach

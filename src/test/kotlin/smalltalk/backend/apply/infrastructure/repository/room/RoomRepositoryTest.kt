@@ -1,4 +1,4 @@
-package smalltalk.backend.infrastructure.repository.room
+package smalltalk.backend.apply.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
@@ -9,13 +9,15 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.domain.room.Room
+import smalltalk.backend.infrastructure.repository.room.RedisRoomRepository
+import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.redis.RedisTestConfig
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class, RedisTestConfig::class, RedisContainerConfig::class])
 @DirtiesContext
-internal class RoomRepositoryTest(
+class RoomRepositoryTest(
     private val roomRepository: RoomRepository
 ) : ExpectSpec({
     val logger = KotlinLogging.logger { }
