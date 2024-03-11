@@ -5,7 +5,7 @@ import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.support.ChannelInterceptor
 import org.springframework.stereotype.Component
-import kotlin.math.log
+
 
 @Component
 class InboundChannelInterceptor: ChannelInterceptor {
@@ -14,8 +14,5 @@ class InboundChannelInterceptor: ChannelInterceptor {
 
     override fun preSend(message: Message<*>, channel: MessageChannel): Message<*>? {
         return message
-    }
-
-    override fun postSend(message: Message<*>, channel: MessageChannel, sent: Boolean) {
     }
 }

@@ -16,19 +16,23 @@ import org.springframework.web.socket.messaging.WebSocketStompClient
 @EnableWebSocketMessageBroker
 class WebSocketConfig (
     private val inboundChannelInterceptor: InboundChannelInterceptor,
-    private val outboundChannelInterceptor: OutboundChannelInterceptor
+    private val outboundChannelInterceptor: OutboundChannelInterceptor,
 ): WebSocketMessageBrokerConfigurer {
 
     companion object {
         const val SEND_DESTINATION_PREFIX = "/rooms/chat/"
-        const val SUBSCRIBE_DESTINATION_PREFIX = "/rooms/"
+        const val SUBSCRIBE_ROOM_DESTINATION_PREFIX = "/rooms/"
+        const val SUBSCRIBE_SYSTEM_DESTINATION_PREFIX = "/alarm"
         const val STOMP_ENDPOINT = "/ws-connect"
     }
 
     override fun configureMessageBroker(registry: MessageBrokerRegistry) {
         registry
             .setApplicationDestinationPrefixes(SEND_DESTINATION_PREFIX)
-            .enableSimpleBroker(SUBSCRIBE_DESTINATION_PREFIX)
+            .enableSimpleBroker(
+                SUBSCRIBE_ROOM_DESTINATION_PREFIX,
+                SUBSCRIBE_SYSTEM_DESTINATION_PREFIX
+            )
     }
 
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {

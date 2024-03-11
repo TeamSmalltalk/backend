@@ -11,4 +11,7 @@ class SimpleMessageBroker(
     override fun send(topic: String, message: Any) {
         template.convertAndSend(topic, message);
     }
+
+    fun sendToUser(sessionId: String, message: Any) {
+    }
 }
