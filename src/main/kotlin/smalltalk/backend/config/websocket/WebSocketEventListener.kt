@@ -12,7 +12,7 @@ import smalltalk.backend.domain.session.WebSocketSessionStorage
 
 
 
-@Component
+//@Component
 class WebSocketEventListener (
     private val webSocketSessionStorage: WebSocketSessionStorage
 ){
