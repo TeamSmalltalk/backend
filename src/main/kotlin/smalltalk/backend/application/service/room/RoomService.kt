@@ -1,7 +1,9 @@
 package smalltalk.backend.application.service.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
+import org.springframework.web.socket.messaging.SessionSubscribeEvent
 import smalltalk.backend.application.implement.room.RoomManager
 import smalltalk.backend.application.implement.message.MessageBroker
 import smalltalk.backend.config.websocket.WebSocketConfig
@@ -19,10 +21,12 @@ class RoomService (
 
     fun send(roomId: String, message: Message) {
         logger.debug { "call send method in service" }
-        messageBroker.send(WebSocketConfig.SEND_DESTINATION_PREFIX + roomId, message)
+        messageBroker.send(WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId, message)
     }
 
-    fun enter() {
+    @EventListener
+    fun enter(event: SessionSubscribeEvent) {
+
 
     }
 
