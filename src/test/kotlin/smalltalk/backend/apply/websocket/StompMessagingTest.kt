@@ -1,4 +1,4 @@
-package smalltalk.backend.apply
+package smalltalk.backend.apply.websocket
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -7,7 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter
 import org.springframework.web.socket.messaging.WebSocketStompClient
-import smalltalk.backend.application.implement.message.MessageBroker
 import smalltalk.backend.presentation.dto.message.Message
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
