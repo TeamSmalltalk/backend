@@ -1,16 +1,16 @@
 package smalltalk.backend.application.implement.room
 
-import smalltalk.backend.presentation.dto.room.OpenResponse
-import smalltalk.backend.presentation.dto.room.SimpleInfoResponse
+import smalltalk.backend.presentation.dto.room.OpenRoomResponse
+import smalltalk.backend.presentation.dto.room.SimpleRoomInfoResponse
 
-fun toOpenResponse(roomId: Long, memberId: Long) =
-    OpenResponse(
+fun toOpenRoomResponse(roomId: Long, memberId: Long) =
+    OpenRoomResponse(
         roomId,
         memberId
     )
 
-fun toSimpleInfoResponse(id: Long, name: String, memberCount: Int) =
-    SimpleInfoResponse(
+fun toSimpleRoomInfoResponse(id: Long, name: String, memberCount: Int) =
+    SimpleRoomInfoResponse(
         id,
         name,
         memberCount
