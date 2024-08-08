@@ -2,6 +2,7 @@ package smalltalk.backend.config.websocket
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
@@ -60,4 +61,3 @@ class WebSocketConfig (
             messageConverter = MappingJackson2MessageConverter()
         }
 }
-
