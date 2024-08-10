@@ -6,6 +6,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @TestConfiguration
@@ -22,10 +23,5 @@ class RedisTestConfig(
     fun redisConnectionFactory() = LettuceConnectionFactory(host, port)
 
     @Bean
-    fun redisTemplate() =
-        RedisTemplate<String, String>().apply {
-            keySerializer = StringRedisSerializer()
-            valueSerializer = StringRedisSerializer()
-            connectionFactory = redisConnectionFactory()
-        }
+    fun stringRedisTemplate() = StringRedisTemplate(redisConnectionFactory())
 }

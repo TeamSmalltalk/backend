@@ -1,14 +1,14 @@
 package smalltalk.backend.infrastructure.repository.room
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
 import smalltalk.backend.application.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.domain.room.Room
 
 @Repository
 class RedisRoomRepository(
-    private val redisTemplate: RedisTemplate<String, String>,
+    private val template: StringRedisTemplate,
     private val objectMapper: ObjectMapper
 ) : RoomRepository {
     companion object {
@@ -29,7 +29,7 @@ class RedisRoomRepository(
                 (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
                 mutableListOf(MEMBERS_INITIAL_ID)
             )
-        redisTemplate.opsForValue()[ROOM_KEY_PREFIX + generatedRoomId] = convertTypeToString(room)
+        template.opsForValue()[ROOM_KEY_PREFIX + generatedRoomId] = convertTypeToString(room)
         return room
     }
 
@@ -41,7 +41,7 @@ class RedisRoomRepository(
         }
 
     override fun deleteById(roomId: Long) {
-        redisTemplate.delete(ROOM_KEY_PREFIX + roomId)
+        template.delete(ROOM_KEY_PREFIX + roomId)
     }
 
     override fun deleteMember(room: Room, memberId: Long) =
@@ -52,7 +52,7 @@ class RedisRoomRepository(
 
     override fun update(room: Room) {
         val key = (ROOM_KEY_PREFIX + room.id).toByteArray()
-        redisTemplate.execute {
+        template.execute {
             return@execute it.apply {
                 watch(key)
                 multi()
@@ -69,20 +69,20 @@ class RedisRoomRepository(
     }
 
     override fun deleteAll() {
-        redisTemplate.run {
+        template.run {
             delete(ROOM_COUNTER_KEY)
             delete(findKeysByPattern(ROOM_KEY_PATTERN))
         }
     }
 
-    private fun generateRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
+    private fun generateRoomId() = template.opsForValue().increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
 
     private fun findByKey(key: String) =
-        redisTemplate.opsForValue()[key]?.let {
+        template.opsForValue()[key]?.let {
             objectMapper.readValue(it, Room::class.java)
         }
 
-    private fun findKeysByPattern(key: String) = redisTemplate.keys(key)
+    private fun findKeysByPattern(key: String) = template.keys(key)
 
     private fun convertTypeToString(room: Room) = objectMapper.writeValueAsString(room)
 }
