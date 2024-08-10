@@ -8,7 +8,7 @@ import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import smalltalk.backend.domain.room.Room
+import smalltalk.backend.apply.NAME
 import smalltalk.backend.infrastructure.repository.room.RedisRoomRepository
 import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
@@ -25,26 +25,24 @@ class RoomRepositoryTest(
     val logger = KotlinLogging.logger { }
 
     context("채팅방을 저장할 경우") {
-        val roomName = "Team small talk 입니다~"
+        val roomName = NAME
         expect("입력 받은 채팅방 이름을 통해 저장된 채팅방을 반환한다") {
             val savedRoom = roomRepository.save(roomName)
             savedRoom.run {
                 id shouldBe 1L
-                name shouldBe "Team small talk 입니다~"
+                name shouldBe NAME
                 idQueue.size shouldBe 9
                 members.size shouldBe 1
-                members.last() shouldBe 1L
             }
         }
     }
 
     context("채팅방을 id로 조회할 경우") {
-        roomRepository.save("Team small talk 입니다~")
-        expect("id가 1이면 일치하는 채팅방을 반환한다") {
+        roomRepository.save(NAME)
+        expect("id가 1L이면 일치하는 채팅방을 반환한다") {
             val foundRoom = roomRepository.findById(1L)
             foundRoom?.run {
-                id shouldBe 1L
-                name shouldBe "Team small talk 입니다~"
+                name shouldBe NAME
                 idQueue.size shouldBe 9
                 members.size shouldBe 1
             }
@@ -67,8 +65,8 @@ class RoomRepositoryTest(
     }
 
     context("id가 일치하는 채팅방을 삭제할 경우") {
-        roomRepository.save("Team small talk 입니다~")
-        expect("id가 1이면 일치하는 채팅방을 삭제한다") {
+        roomRepository.save(NAME)
+        expect("id가 1L이면 일치하는 채팅방을 삭제한다") {
             roomRepository.run {
                 deleteById(1L)
                 findById(1L).shouldBeNull()
@@ -89,13 +87,14 @@ class RoomRepositoryTest(
     }
 
     context("채팅방 정보를 갱신할 경우") {
-        val savedRoom = roomRepository.save("siuuuuu")
+        val savedRoom = roomRepository.save(NAME)
         expect("정보가 갱신된 채팅방을 저장한다") {
             roomRepository.update(savedRoom)
             val foundRoom = roomRepository.findById(1L)
             foundRoom?.run {
                 idQueue.size shouldBe 8
                 members.size shouldBe 2
+                members.last() shouldBe 2L
             }
         }
     }
