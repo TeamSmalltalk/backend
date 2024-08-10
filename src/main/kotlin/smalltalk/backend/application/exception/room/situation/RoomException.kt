@@ -1,4 +1,4 @@
 package smalltalk.backend.application.exception.room.situation
 
-class GeneratingRoomIdFailureException: RuntimeException()
+class RoomIdNotGeneratedException: RuntimeException()
 class RoomNotFoundException: RuntimeException()
