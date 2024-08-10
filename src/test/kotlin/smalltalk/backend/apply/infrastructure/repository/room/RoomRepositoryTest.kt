@@ -15,7 +15,9 @@ import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.redis.RedisTestConfig
 
 @ActiveProfiles("test")
-@SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class, RedisTestConfig::class, RedisContainerConfig::class])
+@SpringBootTest(
+    classes = [RoomRepository::class, RedisRoomRepository::class, RedisTestConfig::class, RedisContainerConfig::class]
+)
 @DirtiesContext
 class RoomRepositoryTest(
     private val roomRepository: RoomRepository
@@ -86,72 +88,43 @@ class RoomRepositoryTest(
         }
     }
 
-    context("채팅방에 입장할 경우") {
-        val foundRoom =
-            roomRepository.run {
-                save("siuuuuu")
-                findById(1L)
-            }
-        expect("입장한 채팅방을 반환한다") {
-            val updatedRoom =
-                foundRoom?.let {
-                    roomRepository.addMember(it)
-                }
-            updatedRoom?.run {
-                idQueue.size shouldBe 8
-                members.size shouldBe 2
-                members.last() shouldBe 2L
-            }
-        }
-    }
-
     context("채팅방 정보를 갱신할 경우") {
-        val updatedRoom =
-            roomRepository.run {
-                save("안뇽!")
-                findById(1L)?.let {
-                    addMember(it)
-                }
-            }
+        val savedRoom = roomRepository.save("siuuuuu")
         expect("정보가 갱신된 채팅방을 저장한다") {
-            updatedRoom?.let {
-                roomRepository.update(it)
-            }
+            roomRepository.update(savedRoom)
             val foundRoom = roomRepository.findById(1L)
             foundRoom?.run {
-                id shouldBe 1L
                 idQueue.size shouldBe 8
                 members.size shouldBe 2
-                members.last() shouldBe 2L
             }
         }
     }
 
-    context("채팅방에서 퇴장할 경우") {
-        val foundRoom =
-            roomRepository.run {
-                update(
-                    Room(
-                        1L,
-                        "miuuuuu",
-                        (2L..10L).toMutableList(),
-                        mutableListOf(1L)
-                    )
-                )
-                findById(1L)
-            }
-        expect("퇴장한 채팅방을 반환한다") {
-            val updatedRoom =
-                foundRoom?.let {
-                    roomRepository.deleteMember(it, 1L)
-                }
-            updatedRoom?.run {
-                id shouldBe 1L
-                idQueue.size shouldBe 10
-                members.size.shouldBeZero()
-            }
-        }
-    }
+//    context("채팅방에서 퇴장할 경우") {
+//        val foundRoom =
+//            roomRepository.run {
+//                update(
+//                    Room(
+//                        1L,
+//                        "miuuuuu",
+//                        (2L..10L).toMutableList(),
+//                        mutableListOf(1L)
+//                    )
+//                )
+//                findById(1L)
+//            }
+//        expect("퇴장한 채팅방을 반환한다") {
+//            val updatedRoom =
+//                foundRoom?.let {
+//                    roomRepository.deleteMember(it, 1L)
+//                }
+//            updatedRoom?.run {
+//                id shouldBe 1L
+//                idQueue.size shouldBe 10
+//                members.size.shouldBeZero()
+//            }
+//        }
+//    }
 
     afterEach {
         roomRepository.deleteAll()

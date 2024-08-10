@@ -44,19 +44,28 @@ class RedisRoomRepository(
         redisTemplate.delete(ROOM_KEY_PREFIX + roomId)
     }
 
-    override fun addMember(room: Room) =
-        room.apply {
-            members.add(idQueue.removeFirst())
-        }
-
     override fun deleteMember(room: Room, memberId: Long) =
         room.apply {
             members.remove(memberId)
             idQueue.add(memberId)
         }
 
-    override fun update(updatedRoom: Room) {
-        redisTemplate.opsForValue()[ROOM_KEY_PREFIX + updatedRoom.id] = convertTypeToString(updatedRoom)
+    override fun update(room: Room) {
+        val key = (ROOM_KEY_PREFIX + room.id).toByteArray()
+        redisTemplate.execute {
+            return@execute it.apply {
+                watch(key)
+                multi()
+                commands().set(
+                    key,
+                    convertTypeToString(
+                        room.apply {
+                            members.add(idQueue.removeFirst())
+                        }
+                    ).toByteArray()
+                )
+            }.exec()
+        }
     }
 
     override fun deleteAll() {
@@ -66,7 +75,7 @@ class RedisRoomRepository(
         }
     }
 
-    private fun generateRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY)?: throw GeneratingRoomIdFailureException()
+    private fun generateRoomId() = redisTemplate.opsForValue().increment(ROOM_COUNTER_KEY) ?: throw GeneratingRoomIdFailureException()
 
     private fun findByKey(key: String) =
         redisTemplate.opsForValue()[key]?.let {
