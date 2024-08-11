@@ -11,7 +11,7 @@ import smalltalk.backend.application.exception.room.situation.RoomNotFoundExcept
 
 @RestControllerAdvice
 class RoomExceptionAdvice {
-    @ResponseStatus(value = BAD_REQUEST, reason = "Could not generate room id")
+    @ResponseStatus(value = INTERNAL_SERVER_ERROR, reason = "Could not generate room id")
     @ExceptionHandler(RoomIdNotGeneratedException::class)
     fun roomIdNotGeneratedException() {}
 
