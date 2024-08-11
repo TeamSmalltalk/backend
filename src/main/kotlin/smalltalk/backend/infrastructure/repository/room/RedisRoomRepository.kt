@@ -50,22 +50,29 @@ class RedisRoomRepository(
             idQueue.add(memberId)
         }
 
-    override fun update(room: Room) {
+    override fun addMember(room: Room): Long {
         val key = (ROOM_KEY_PREFIX + room.id).toByteArray()
-        template.execute {
-            return@execute it.apply {
-                watch(key)
-                multi()
-                commands().set(
-                    key,
-                    convertTypeToString(
-                        room.apply {
-                            members.add(idQueue.removeFirst())
-                        }
-                    ).toByteArray()
-                )
-            }.exec()
+        var memberId = 0L
+        if (
+            template.execute {
+                return@execute it.apply {
+                    watch(key)
+                    multi()
+                    stringCommands().set(
+                        key,
+                        convertTypeToString(
+                            room.apply {
+                                memberId = idQueue.removeFirst()
+                                members.add(memberId)
+                            }
+                        ).toByteArray()
+                    )
+                }.exec()
+            }.isNullOrEmpty()
+        ) {
+            memberId = 0L
         }
+        return memberId
     }
 
     override fun deleteAll() {
@@ -75,7 +82,8 @@ class RedisRoomRepository(
         }
     }
 
-    private fun generateRoomId() = template.opsForValue().increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
+    private fun generateRoomId() =
+        template.opsForValue().increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
 
     private fun findByKey(key: String) =
         template.opsForValue()[key]?.let {

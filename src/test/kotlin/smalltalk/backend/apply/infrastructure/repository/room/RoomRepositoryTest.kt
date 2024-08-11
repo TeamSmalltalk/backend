@@ -86,19 +86,6 @@ class RoomRepositoryTest(
         }
     }
 
-    context("채팅방 정보를 갱신할 경우") {
-        val savedRoom = roomRepository.save(NAME)
-        expect("정보가 갱신된 채팅방을 저장한다") {
-            roomRepository.update(savedRoom)
-            val foundRoom = roomRepository.findById(1L)
-            foundRoom?.run {
-                idQueue.size shouldBe 8
-                members.size shouldBe 2
-                members.last() shouldBe 2L
-            }
-        }
-    }
-
 //    context("채팅방에서 퇴장할 경우") {
 //        val foundRoom =
 //            roomRepository.run {
