@@ -2,7 +2,10 @@ package smalltalk.backend.apply.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldBeOneOf
 import io.kotest.matchers.ints.shouldBeZero
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -62,6 +65,17 @@ class RoomRepositoryTest(
         }
         expect("채팅방이 존재하지 않는다면 비어있는 리스트를 반환한다") {
             roomRepository.findAll().size.shouldBeZero()
+        }
+    }
+
+    context("채팅방 멤버 추가") {
+        val savedRoom = roomRepository.save(NAME)
+        expect("추가된 memberId를 반환한다") {
+            val memberId = roomRepository.addMember(savedRoom)
+            roomRepository.findById(savedRoom.id)?.run {
+                idQueue.contains(memberId).shouldBeFalse()
+                members.last() shouldBe memberId
+            }
         }
     }
 
