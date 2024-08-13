@@ -40,16 +40,6 @@ class RedisRoomRepository(
             findByKey(it)
         }
 
-    override fun deleteById(roomId: Long) {
-        template.delete(ROOM_KEY_PREFIX + roomId)
-    }
-
-    override fun deleteMember(room: Room, memberId: Long) =
-        room.apply {
-            members.remove(memberId)
-            idQueue.add(memberId)
-        }
-
     override fun addMember(room: Room): Long {
         val key = (ROOM_KEY_PREFIX + room.id).toByteArray()
         var memberId = 0L
@@ -73,6 +63,27 @@ class RedisRoomRepository(
             memberId = 0L
         }
         return memberId
+    }
+
+    override fun deleteMember(room: Room, memberId: Long) {
+        template.opsForValue()[ROOM_KEY_PREFIX + room.id] =
+            convertTypeToString(
+                room.apply {
+                    members.remove(memberId)
+                    idQueue.add(memberId)
+                }
+            )
+    }
+
+    override fun deleteByRoom(room: Room) {
+        val key = (ROOM_KEY_PREFIX + room.id).toByteArray()
+        template.execute {
+            return@execute it.apply {
+                watch(key)
+                multi()
+                stringCommands().getDel(key)
+            }.exec()
+        }
     }
 
     override fun deleteAll() {

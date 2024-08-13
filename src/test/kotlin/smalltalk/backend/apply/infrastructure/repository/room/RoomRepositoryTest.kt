@@ -2,6 +2,7 @@ package smalltalk.backend.apply.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.ints.shouldBeZero
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -64,13 +65,23 @@ class RoomRepositoryTest(
         }
     }
 
-    context("id가 일치하는 채팅방을 삭제할 경우") {
-        roomRepository.save(NAME)
-        expect("id가 1L이면 일치하는 채팅방을 삭제한다") {
-            roomRepository.run {
-                deleteById(1L)
-                findById(1L).shouldBeNull()
+    context("채팅방 멤버 삭제") {
+        val savedRoom = roomRepository.save(NAME)
+        val memberIdToDelete = 1L
+        expect("일치하는 memberId를 삭제한다") {
+            roomRepository.deleteMember(savedRoom, memberIdToDelete)
+            roomRepository.findById(savedRoom.id)?.run {
+                idQueue.last() shouldBe 1L
+                members.shouldBeEmpty()
             }
+        }
+    }
+
+    context("채팅방 삭제") {
+        val savedRoom = roomRepository.save(NAME)
+        expect("일치하는 채팅방을 삭제한다") {
+            roomRepository.deleteByRoom(savedRoom)
+            roomRepository.findById(savedRoom.id).shouldBeNull()
         }
     }
 
@@ -85,32 +96,6 @@ class RoomRepositoryTest(
             }
         }
     }
-
-//    context("채팅방에서 퇴장할 경우") {
-//        val foundRoom =
-//            roomRepository.run {
-//                update(
-//                    Room(
-//                        1L,
-//                        "miuuuuu",
-//                        (2L..10L).toMutableList(),
-//                        mutableListOf(1L)
-//                    )
-//                )
-//                findById(1L)
-//            }
-//        expect("퇴장한 채팅방을 반환한다") {
-//            val updatedRoom =
-//                foundRoom?.let {
-//                    roomRepository.deleteMember(it, 1L)
-//                }
-//            updatedRoom?.run {
-//                id shouldBe 1L
-//                idQueue.size shouldBe 10
-//                members.size.shouldBeZero()
-//            }
-//        }
-//    }
 
     afterEach {
         roomRepository.deleteAll()
