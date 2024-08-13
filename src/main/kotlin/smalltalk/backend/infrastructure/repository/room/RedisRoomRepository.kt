@@ -33,7 +33,8 @@ class RedisRoomRepository(
         return room
     }
 
-    override fun findById(roomId: Long): Room? = findByKey(ROOM_KEY_PREFIX + roomId)
+    override fun findById(roomId: Long) =
+        findByKey(ROOM_KEY_PREFIX + roomId)
 
     override fun findAll() =
         findKeysByPattern(ROOM_KEY_PATTERN).mapNotNull {
@@ -101,7 +102,9 @@ class RedisRoomRepository(
             objectMapper.readValue(it, Room::class.java)
         }
 
-    private fun findKeysByPattern(key: String) = template.keys(key)
+    private fun findKeysByPattern(key: String) =
+        template.keys(key)
 
-    private fun convertTypeToString(room: Room) = objectMapper.writeValueAsString(room)
+    private fun convertTypeToString(room: Room) =
+        objectMapper.writeValueAsString(room)
 }

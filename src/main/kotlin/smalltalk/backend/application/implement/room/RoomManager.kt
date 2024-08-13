@@ -16,7 +16,8 @@ class RoomManager(
         return toOpenRoomResponse(savedRoom.id, savedRoom.members.last())
     }
 
-    fun read(roomId: Long) = roomRepository.findById(roomId) ?: throw RoomNotFoundException()
+    fun read(roomId: Long) =
+        roomRepository.findById(roomId) ?: throw RoomNotFoundException()
 
     fun readAll() =
         roomRepository.findAll().map {
