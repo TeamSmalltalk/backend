@@ -13,7 +13,7 @@ import smalltalk.backend.apply.ID
 import smalltalk.backend.apply.MEMBERS_INITIAL_ID
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.apply.createRoom
-import smalltalk.backend.infrastructure.repository.room.RoomRepository
+import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.spec.afterRootTest
 
 class RoomManagerTest : BehaviorSpec({

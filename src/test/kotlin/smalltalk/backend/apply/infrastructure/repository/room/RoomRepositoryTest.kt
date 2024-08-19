@@ -12,8 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.apply.NAME
-import smalltalk.backend.infrastructure.repository.room.RedisRoomRepository
-import smalltalk.backend.infrastructure.repository.room.RoomRepository
+import smalltalk.backend.infra.repository.room.RedisRoomRepository
+import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.redis.RedisTestConfig
 import smalltalk.backend.support.spec.afterRootTest
@@ -85,12 +85,12 @@ class RoomRepositoryTest(
 
     context("채팅방 삭제") {
         val savedRooms =
-            (0 until 3).map {
+            (0..2).map {
                 roomRepository.save("채팅방$it")
             }.toList()
         expect("정보와 일치하는 채팅방을 삭제한다") {
             roomRepository.run {
-                deleteByRoom(savedRooms.last())
+                deleteById(savedRooms.last().id)
                 findById(3L).shouldBeNull()
             }
         }

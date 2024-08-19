@@ -9,8 +9,8 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.application.implement.room.RoomManager
 import smalltalk.backend.apply.NAME
-import smalltalk.backend.infrastructure.repository.room.RedisRoomRepository
-import smalltalk.backend.infrastructure.repository.room.RoomRepository
+import smalltalk.backend.infra.repository.room.RedisRoomRepository
+import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.redis.RedisTestConfig
 import java.util.concurrent.CountDownLatch

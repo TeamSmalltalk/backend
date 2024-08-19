@@ -4,16 +4,16 @@ import org.springframework.stereotype.Component
 import smalltalk.backend.application.exception.room.situation.FullRoomException
 import smalltalk.backend.application.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.domain.room.Room
-import smalltalk.backend.infrastructure.repository.room.RoomRepository
-import smalltalk.backend.presentation.dto.room.OpenRoomResponse
+import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.presentation.dto.room.response.Open
 
 @Component
 class RoomManager(
     private val roomRepository: RoomRepository
 ) {
-    fun create(roomName: String): OpenRoomResponse {
+    fun create(roomName: String): Open {
         val savedRoom = roomRepository.save(roomName)
-        return toOpenRoomResponse(savedRoom.id, savedRoom.members.last())
+        return toOpen(savedRoom.id, savedRoom.members.last())
     }
 
     fun read(roomId: Long) =
@@ -22,18 +22,12 @@ class RoomManager(
     fun readAll() =
         roomRepository.findAll().map {
             it.run {
-                toSimpleRoomInfoResponse(id, name, members.size)
+                toSimpleInfo(id, name, members.size)
             }
         }
 
     fun addMember(roomId: Long): Long {
-        var memberId: Long
-        do {
-            val readRoom = read(roomId)
-            checkFull(readRoom)
-            memberId = roomRepository.addMember(readRoom)
-        } while (memberId == 0L)
-        return memberId
+        TODO("Room Repository 구현 후 작성")
     }
 
     private fun checkFull(roomToCheck: Room) {
