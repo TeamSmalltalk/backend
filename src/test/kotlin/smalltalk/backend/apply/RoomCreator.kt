@@ -3,7 +3,7 @@ package smalltalk.backend.apply
 import smalltalk.backend.domain.room.Room
 
 const val ID = 1L
-const val NAME = "Team small talk 입니다~"
+const val NAME = "Room"
 const val ID_QUEUE_INITIAL_ID = 2L
 const val ID_QUEUE_LIMIT_ID = 10L
 const val MEMBERS_INITIAL_ID = 1L
