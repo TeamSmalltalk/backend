@@ -15,12 +15,12 @@ import smalltalk.backend.apply.NAME
 import smalltalk.backend.infra.repository.room.RedisRoomRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
-import smalltalk.backend.support.redis.RedisTestConfig
+import smalltalk.backend.support.redis.RedisConfig
 import smalltalk.backend.support.spec.afterRootTest
 
 @ActiveProfiles("test")
 @SpringBootTest(
-    classes = [RoomRepository::class, RedisRoomRepository::class, RedisTestConfig::class, RedisContainerConfig::class]
+    classes = [RoomRepository::class, RedisRoomRepository::class, RedisConfig::class, RedisContainerConfig::class]
 )
 @DirtiesContext
 class RoomRepositoryTest(

@@ -1,15 +1,13 @@
 package smalltalk.backend.infra.repository.room
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Repository
 import smalltalk.backend.application.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.domain.room.Room
 
 @Repository
 class RedisRoomRepository(
-    private val template: StringRedisTemplate,
-    private val objectMapper: ObjectMapper
+    private val template: RedisTemplate<String, Any>
 ) : RoomRepository {
     companion object {
         private const val ID_QUEUE_INITIAL_ID = 2L
@@ -29,17 +27,15 @@ class RedisRoomRepository(
                 (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
                 mutableListOf(MEMBERS_INITIAL_ID)
             )
-        template.opsForValue()[ROOM_KEY_PREFIX + generatedRoomId] = convertTypeToString(room)
+        template.opsForValue()[ROOM_KEY_PREFIX + generatedRoomId] = room
         return room
     }
 
     override fun findById(roomId: Long) =
-        findByKey(ROOM_KEY_PREFIX + roomId)
+        template.opsForValue()[ROOM_KEY_PREFIX + roomId] as? Room
 
     override fun findAll() =
-        findKeysByPattern(ROOM_KEY_PATTERN).mapNotNull {
-            findByKey(it)
-        }
+        findKeysByPattern().mapNotNull { findById(it.substring(5).toLong()) }
 
     override fun deleteById(roomId: Long) {
         TODO("분산락 적용")
@@ -48,7 +44,7 @@ class RedisRoomRepository(
     override fun deleteAll() {
         template.run {
             delete(ROOM_COUNTER_KEY)
-            delete(findKeysByPattern(ROOM_KEY_PATTERN))
+            delete(findKeysByPattern())
         }
     }
 
@@ -63,14 +59,6 @@ class RedisRoomRepository(
     private fun generateRoomId() =
         template.opsForValue().increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
 
-    private fun findByKey(key: String) =
-        template.opsForValue()[key]?.let {
-            objectMapper.readValue(it, Room::class.java)
-        }
-
-    private fun findKeysByPattern(key: String) =
-        template.keys(key)
-
-    private fun convertTypeToString(room: Room) =
-        objectMapper.writeValueAsString(room)
+    private fun findKeysByPattern() =
+        template.keys(ROOM_KEY_PATTERN)
 }
