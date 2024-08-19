@@ -30,7 +30,7 @@ class RoomRepositoryTest(
 
     context("채팅방 저장") {
         val roomName = NAME
-        expect("저장된 채팅방을 반환한다") {
+        expect("채팅방을 반환한다") {
             val savedRoom = roomRepository.save(roomName)
             savedRoom.run {
                 id shouldBe 1L
@@ -42,13 +42,11 @@ class RoomRepositoryTest(
     }
 
     context("채팅방 조회") {
-        repeat(3) {
-            roomRepository.save("채팅방$it")
-        }
+        (1..3).map { roomRepository.save("채팅방$it") }
         expect("id와 일치하는 채팅방을 조회한다") {
             val foundRoom = roomRepository.findById(1L)
             foundRoom?.run {
-                name shouldBe "채팅방0"
+                name shouldBe "채팅방1"
                 idQueue shouldHaveSize 9
                 members shouldHaveSize 1
             }
