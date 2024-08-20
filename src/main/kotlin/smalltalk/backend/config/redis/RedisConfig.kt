@@ -30,10 +30,11 @@ class RedisConfig {
     fun redisConnectFactory() = LettuceConnectionFactory(host, port.toInt())
 
     @Bean
-    fun redisTemplate(redisConnectionFactory: LettuceConnectionFactory) =
-        RedisTemplate<String, Any>().apply {
+    fun redisTemplate(redisConnectionFactory: LettuceConnectionFactory): RedisTemplate<String, *> {
+        return RedisTemplate<String, Any>().apply {
             keySerializer = StringRedisSerializer()
             valueSerializer = GenericJackson2JsonRedisSerializer()
             connectionFactory = redisConnectionFactory
         }
+    }
 }

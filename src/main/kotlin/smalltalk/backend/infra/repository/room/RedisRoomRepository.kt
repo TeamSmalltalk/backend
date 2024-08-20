@@ -7,7 +7,7 @@ import smalltalk.backend.domain.room.Room
 
 @Repository
 class RedisRoomRepository(
-    private val template: RedisTemplate<String, Any>
+    private val template: RedisTemplate<String, Room>
 ) : RoomRepository {
     companion object {
         private const val ID_QUEUE_INITIAL_ID = 2L
@@ -32,7 +32,7 @@ class RedisRoomRepository(
     }
 
     override fun findById(roomId: Long) =
-        template.opsForValue()[ROOM_KEY_PREFIX + roomId] as? Room
+        template.opsForValue()[ROOM_KEY_PREFIX + roomId]
 
     override fun findAll() =
         findKeysByPattern().mapNotNull { findById(it.substring(5).toLong()) }
