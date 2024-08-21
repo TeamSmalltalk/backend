@@ -1,13 +1,15 @@
 package smalltalk.backend.infra.repository.room
 
-import org.springframework.data.redis.core.RedisTemplate
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
 import smalltalk.backend.application.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.domain.room.Room
 
 @Repository
 class RedisRoomRepository(
-    private val template: RedisTemplate<String, Room>
+    private val template: StringRedisTemplate,
+    private val mapper: ObjectMapper
 ) : RoomRepository {
     companion object {
         private const val ID_QUEUE_INITIAL_ID = 2L
@@ -27,15 +29,14 @@ class RedisRoomRepository(
                 (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
                 mutableListOf(MEMBERS_INITIAL_ID)
             )
-        template.opsForValue()[ROOM_KEY_PREFIX + generatedRoomId] = room
+        template.opsForValue()[ROOM_KEY_PREFIX + generatedRoomId] = convertToStringValue(room)
         return room
     }
 
-    override fun findById(roomId: Long) =
-        template.opsForValue()[ROOM_KEY_PREFIX + roomId]
+    override fun findById(roomId: Long) = findByKey(ROOM_KEY_PREFIX + roomId)
 
     override fun findAll() =
-        findKeysByPattern().mapNotNull { findById(it.substring(5).toLong()) }
+        findKeysByPattern().mapNotNull { findByKey(it) }
 
     override fun deleteById(roomId: Long) {
         TODO("분산락 적용")
@@ -58,6 +59,12 @@ class RedisRoomRepository(
 
     private fun generateRoomId() =
         template.opsForValue().increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
+
+    private fun convertToStringValue(value: Room) =
+        mapper.writeValueAsString(value)
+
+    private fun findByKey(key: String) =
+        template.opsForValue()[key]?.let { mapper.readValue(it, Room::class.java) }
 
     private fun findKeysByPattern() =
         template.keys(ROOM_KEY_PATTERN)
