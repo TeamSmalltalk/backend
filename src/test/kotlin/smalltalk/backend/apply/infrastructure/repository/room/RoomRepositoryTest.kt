@@ -12,10 +12,10 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.apply.NAME
+import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.infra.repository.room.RedisRoomRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
-import smalltalk.backend.support.redis.RedisConfig
 import smalltalk.backend.support.spec.afterRootTest
 
 @ActiveProfiles("test")
