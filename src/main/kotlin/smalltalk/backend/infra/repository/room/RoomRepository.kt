@@ -8,6 +8,6 @@ interface RoomRepository {
     fun findAll(): List<Room>
     fun deleteById(roomId: Long)
     fun deleteAll()
-    fun addMember(room: Room): Long
+    fun addMember(roomId: Long): Long
     fun deleteMember(room: Room, memberId: Long)
 }

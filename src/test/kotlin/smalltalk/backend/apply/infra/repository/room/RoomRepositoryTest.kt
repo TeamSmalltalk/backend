@@ -1,14 +1,16 @@
 package smalltalk.backend.apply.infra.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.ExpectSpec
-import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.*
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.redis.RedisConfig
+import smalltalk.backend.infra.exception.room.situation.FullRoomException
 import smalltalk.backend.infra.repository.room.RedisRoomRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
@@ -53,6 +55,22 @@ class RoomRepositoryTest(
     }
 
     context("채팅방 멤버 추가") {
+        val roomId = roomRepository.save(NAME).id
+        expect("추가된 멤버의 id를 반환한다") {
+            val memberIds =
+                (2..10).map {
+                    roomRepository.addMember(roomId)
+                }.toList()
+            roomRepository.getById(roomId).run {
+                idQueue shouldNotContainAll memberIds
+                members shouldContainAll memberIds
+            }
+        }
+        expect("예외가 발생한다") {
+            shouldThrow<FullRoomException> {
+                roomRepository.addMember(roomId)
+            }
+        }
     }
 
     context("채팅방 멤버 삭제") {
