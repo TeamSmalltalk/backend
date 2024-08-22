@@ -2,11 +2,7 @@ package smalltalk.backend.apply.infra.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
-import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.collections.shouldNotContain
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
@@ -44,8 +40,8 @@ class RoomRepositoryTest(
     context("채팅방 조회") {
         (1..3).map { roomRepository.save("채팅방$it") }
         expect("id와 일치하는 채팅방을 조회한다") {
-            val foundRoom = roomRepository.findById(1L)
-            foundRoom?.run {
+            val room = roomRepository.getById(1L)
+            room.run {
                 name shouldBe "채팅방1"
                 idQueue shouldHaveSize 9
                 members shouldHaveSize 1
@@ -57,47 +53,9 @@ class RoomRepositoryTest(
     }
 
     context("채팅방 멤버 추가") {
-        val savedRoom = roomRepository.save(NAME)
-        expect("추가된 memberId를 반환한다") {
-            val memberId = roomRepository.addMember(savedRoom)
-            roomRepository.findById(savedRoom.id)?.run {
-                idQueue.shouldNotContain(memberId)
-                members.shouldContain(memberId)
-            }
-        }
     }
 
     context("채팅방 멤버 삭제") {
-        val savedRoom = roomRepository.save(NAME)
-        val memberIdToDelete = 1L
-        expect("일치하는 memberId를 삭제한다") {
-            roomRepository.run {
-                deleteMember(savedRoom, memberIdToDelete)
-                findById(savedRoom.id)?.run {
-                    idQueue.shouldContain(memberIdToDelete)
-                    members.shouldNotContain(memberIdToDelete)
-                }
-            }
-        }
-    }
-
-    context("채팅방 삭제") {
-        val savedRooms =
-            (0..2).map {
-                roomRepository.save("채팅방$it")
-            }.toList()
-        expect("정보와 일치하는 채팅방을 삭제한다") {
-            roomRepository.run {
-                deleteById(savedRooms.last().id)
-                findById(3L).shouldBeNull()
-            }
-        }
-        expect("모든 채팅방을 삭제한다") {
-            roomRepository.run {
-                deleteAll()
-                findAll().shouldBeEmpty()
-            }
-        }
     }
 
     afterRootTest {

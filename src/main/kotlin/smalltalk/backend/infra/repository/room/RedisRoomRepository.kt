@@ -3,8 +3,9 @@ package smalltalk.backend.infra.repository.room
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
-import smalltalk.backend.application.exception.room.situation.RoomIdNotGeneratedException
+import smalltalk.backend.infra.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.domain.room.Room
+import smalltalk.backend.infra.exception.room.situation.RoomNotFoundException
 
 @Repository
 class RedisRoomRepository(
@@ -33,7 +34,8 @@ class RedisRoomRepository(
         return room
     }
 
-    override fun findById(roomId: Long) = findByKey(ROOM_KEY_PREFIX + roomId)
+    override fun getById(roomId: Long) =
+        findByKey(ROOM_KEY_PREFIX + roomId) ?: throw RoomNotFoundException()
 
     override fun findAll() =
         findKeysByPattern().mapNotNull { findByKey(it) }
