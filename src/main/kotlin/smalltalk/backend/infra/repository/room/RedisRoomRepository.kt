@@ -31,7 +31,7 @@ class RedisRoomRepository(
                 (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
                 mutableListOf(MEMBERS_INITIAL_ID)
             )
-        template.opsForValue()[ROOM_KEY_PREFIX + generatedRoomId] = convertToStringValue(room)
+        template.opsForValue()[ROOM_KEY_PREFIX + generatedRoomId] = convertValueToString(room)
         return room
     }
 
@@ -90,7 +90,7 @@ class RedisRoomRepository(
     private fun findKeysByPattern() =
         template.keys(ROOM_KEY_PATTERN)
 
-    private fun convertToStringValue(value: Room) =
+    private fun convertValueToString(value: Room) =
         mapper.writeValueAsString(value)
 
     private fun convertValueToByteArray(value: Room) =
