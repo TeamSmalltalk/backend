@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.infrastructure.repository.room
+package smalltalk.backend.apply.infra.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
