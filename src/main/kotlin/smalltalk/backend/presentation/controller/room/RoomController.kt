@@ -3,7 +3,7 @@ package smalltalk.backend.presentation.controller.room
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.stereotype.Controller
-import smalltalk.backend.application.service.room.RoomService
+import smalltalk.backend.application.room.RoomService
 import smalltalk.backend.presentation.dto.message.Message
 
 @Controller

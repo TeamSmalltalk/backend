@@ -29,6 +29,7 @@ val coroutinesVersion = "1.8.0-RC2"
 val kotestRunnerVersion = "5.8.0"
 val kotestExtensionsVersion = "1.1.3"
 val mockkVersion = "4.0.2"
+//val redissonVersion = "3.34.1"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
@@ -38,6 +39,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 	implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
+//	implementation("org.redisson:redisson:$redissonVersion")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")

@@ -2,7 +2,6 @@ package smalltalk.backend.config.websocket
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
@@ -17,9 +16,8 @@ import org.springframework.web.socket.messaging.WebSocketStompClient
 @EnableWebSocketMessageBroker
 class WebSocketConfig (
     private val inboundChannelInterceptor: InboundChannelInterceptor,
-    private val outboundChannelInterceptor: OutboundChannelInterceptor,
+    private val outboundChannelInterceptor: OutboundChannelInterceptor
 ): WebSocketMessageBrokerConfigurer {
-
     companion object {
         const val SEND_DESTINATION_PREFIX = "/rooms/chat/"
         const val SUBSCRIBE_ROOM_DESTINATION_PREFIX = "/rooms/"

@@ -1,18 +1,16 @@
-package smalltalk.backend.application.service.room
+package smalltalk.backend.application.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
-import smalltalk.backend.application.implement.room.RoomManager
-import smalltalk.backend.application.implement.message.MessageBroker
+import smalltalk.backend.application.message.MessageBroker
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.presentation.dto.message.Message
 
 
 @Service
 class RoomService (
-    private val roomManager: RoomManager,
     private val messageBroker: MessageBroker
 ) {
 
