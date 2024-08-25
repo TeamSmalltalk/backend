@@ -1,9 +1,6 @@
 package smalltalk.backend.config.redis
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.redisson.Redisson
-import org.redisson.api.RedissonClient
-import org.redisson.config.Config
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -17,13 +14,13 @@ class RedisConfig {
     @Value("\${spring.data.redis.port}")
     private lateinit var port: String
 
-    @Bean
-    fun redissonClient(): RedissonClient =
-        Redisson.create(
-            Config().apply {
-                useSingleServer().setAddress("redis://$host:$port")
-            }
-        )
+//    @Bean
+//    fun redissonClient(): RedissonClient =
+//        Redisson.create(
+//            Config().apply {
+//                useSingleServer().setAddress("redis://$host:$port")
+//            }
+//        )
 
     @Bean
     fun objectMapper() = ObjectMapper()
