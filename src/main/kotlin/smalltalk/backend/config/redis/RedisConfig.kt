@@ -26,9 +26,9 @@ class RedisConfig {
     fun objectMapper() = ObjectMapper()
 
     @Bean
-    fun redisConnectFactory() = LettuceConnectionFactory(host, port.toInt())
+    fun redisConnectionFactory() = LettuceConnectionFactory(host, port.toInt())
 
     @Bean
     fun redisTemplate() =
-        StringRedisTemplate().apply { connectionFactory = redisConnectFactory() }
+        StringRedisTemplate().apply { connectionFactory = redisConnectionFactory() }
 }
