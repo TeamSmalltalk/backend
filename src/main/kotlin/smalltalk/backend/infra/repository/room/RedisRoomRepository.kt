@@ -49,7 +49,7 @@ class RedisRoomRepository(
     }
 
     override fun addMember(roomId: Long): Long {
-        val key = convertKeyToByteArray(ROOM_KEY_PREFIX + roomId)
+        val key = (ROOM_KEY_PREFIX + roomId).toByteArray()
         var memberId = 0L
         do {
             val transactionResults =
@@ -76,7 +76,7 @@ class RedisRoomRepository(
     }
 
     override fun deleteMember(roomId: Long, memberId: Long) {
-        val key = convertKeyToByteArray(ROOM_KEY_PREFIX + roomId)
+        val key = (ROOM_KEY_PREFIX + roomId).toByteArray()
         do {
             val transactionResults =
                 template.execute {
@@ -111,9 +111,6 @@ class RedisRoomRepository(
 
     private fun findKeysByPattern() =
         template.keys(ROOM_KEY_PATTERN)
-
-    private fun convertKeyToByteArray(key: String) =
-        key.toByteArray()
 
     private fun convertValueToString(value: Room) =
         mapper.writeValueAsString(value)
