@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.infra.exception.room.situation.FullRoomException
+import smalltalk.backend.infra.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.infra.repository.room.RedisRoomRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
@@ -74,6 +75,21 @@ class RoomRepositoryTest(
     }
 
     context("채팅방 멤버 삭제") {
+        val roomId = roomRepository.save(NAME).id
+        val memberId = roomRepository.addMember(roomId)
+        expect("2명 이상 존재하면 멤버를 삭제한다") {
+            roomRepository.deleteMember(roomId, memberId)
+            roomRepository.getById(roomId).run {
+                idQueue shouldContain memberId
+                members shouldNotContain memberId
+            }
+        }
+        expect("1명만 존재하면 채팅방을 삭제한다") {
+            roomRepository.deleteMember(roomId, 1L)
+            shouldThrow<RoomNotFoundException> {
+                roomRepository.getById(roomId)
+            }
+        }
     }
 
     afterRootTest {

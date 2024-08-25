@@ -41,9 +41,6 @@ class RedisRoomRepository(
     override fun findAll() =
         findKeysByPattern().mapNotNull { findByKey(it) }
 
-    override fun deleteById(roomId: Long) {
-    }
-
     override fun deleteAll() {
         template.run {
             delete(ROOM_COUNTER_KEY)
@@ -52,7 +49,7 @@ class RedisRoomRepository(
     }
 
     override fun addMember(roomId: Long): Long {
-        val key = (ROOM_KEY_PREFIX + roomId).toByteArray()
+        val key = convertKeyToByteArray(ROOM_KEY_PREFIX + roomId)
         var memberId = 0L
         do {
             val transactionResults =
@@ -78,7 +75,32 @@ class RedisRoomRepository(
         return memberId
     }
 
-    override fun deleteMember(room: Room, memberId: Long) {
+    override fun deleteMember(roomId: Long, memberId: Long) {
+        val key = convertKeyToByteArray(ROOM_KEY_PREFIX + roomId)
+        do {
+            val transactionResults =
+                template.execute {
+                    return@execute it.apply {
+                        watch(key)
+                        val room =
+                            stringCommands()[key]?.let { byteArrayRoom ->
+                                convertValueToRoom(byteArrayRoom)
+                            } ?: throw RoomNotFoundException()
+                        multi()
+                        if (checkLastMember(room))
+                            stringCommands().getDel(key)
+                        else {
+                            stringCommands()[key] =
+                                convertValueToByteArray(
+                                    room.apply {
+                                        members.remove(memberId)
+                                        idQueue.add(memberId)
+                                    }
+                                )
+                        }
+                    }.exec()
+                }
+        } while (transactionResults.isNullOrEmpty())
     }
 
     private fun generateRoomId() =
@@ -89,6 +111,9 @@ class RedisRoomRepository(
 
     private fun findKeysByPattern() =
         template.keys(ROOM_KEY_PATTERN)
+
+    private fun convertKeyToByteArray(key: String) =
+        key.toByteArray()
 
     private fun convertValueToString(value: Room) =
         mapper.writeValueAsString(value)
@@ -107,4 +132,7 @@ class RedisRoomRepository(
         if (room.members.size == 10)
             throw FullRoomException()
     }
+
+    private fun checkLastMember(room: Room) =
+        room.members.size == 1
 }
