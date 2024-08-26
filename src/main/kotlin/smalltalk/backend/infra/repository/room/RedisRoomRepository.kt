@@ -1,6 +1,7 @@
 package smalltalk.backend.infra.repository.room
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.data.redis.connection.RedisConnection
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
@@ -56,10 +57,7 @@ class RedisRoomRepository(
                 template.execute {
                     return@execute it.apply {
                         watch(key)
-                        val room =
-                            stringCommands()[key]?.let { byteArrayRoom ->
-                                convertValueToRoom(byteArrayRoom)
-                            } ?: throw RoomNotFoundException()
+                        val room = getByKey(key, it)
                         checkFull(room)
                         multi()
                         stringCommands()[key] =
@@ -82,10 +80,7 @@ class RedisRoomRepository(
                 template.execute {
                     return@execute it.apply {
                         watch(key)
-                        val room =
-                            stringCommands()[key]?.let { byteArrayRoom ->
-                                convertValueToRoom(byteArrayRoom)
-                            } ?: throw RoomNotFoundException()
+                        val room = getByKey(key, it)
                         multi()
                         if (checkLastMember(room))
                             stringCommands().getDel(key)
@@ -108,6 +103,9 @@ class RedisRoomRepository(
 
     private fun findByKey(key: String) =
         template.opsForValue()[key]?.let { convertValueToRoom(it) }
+
+    private fun getByKey(key: ByteArray, connection: RedisConnection) =
+        connection.stringCommands()[key]?.let { convertValueToRoom(it) } ?: throw RoomNotFoundException()
 
     private fun findKeysByPattern() =
         template.keys(ROOM_KEY_PATTERN)
