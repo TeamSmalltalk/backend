@@ -38,9 +38,6 @@ class WebSocketConfig (
         registry.apply {
             addEndpoint(STOMP_ENDPOINT)
                 .setAllowedOrigins("*")
-            addEndpoint(STOMP_ENDPOINT)
-                .setAllowedOrigins("*")
-                .withSockJS()
         }
     }
 

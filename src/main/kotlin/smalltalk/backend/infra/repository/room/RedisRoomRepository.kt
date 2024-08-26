@@ -1,6 +1,7 @@
 package smalltalk.backend.infra.repository.room
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.data.redis.connection.RedisConnection
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
@@ -41,9 +42,6 @@ class RedisRoomRepository(
     override fun findAll() =
         findKeysByPattern().mapNotNull { findByKey(it) }
 
-    override fun deleteById(roomId: Long) {
-    }
-
     override fun deleteAll() {
         template.run {
             delete(ROOM_COUNTER_KEY)
@@ -59,10 +57,7 @@ class RedisRoomRepository(
                 template.execute {
                     return@execute it.apply {
                         watch(key)
-                        val room =
-                            stringCommands()[key]?.let { byteArrayRoom ->
-                                convertValueToRoom(byteArrayRoom)
-                            } ?: throw RoomNotFoundException()
+                        val room = getByKey(key, it)
                         checkFull(room)
                         multi()
                         stringCommands()[key] =
@@ -78,7 +73,29 @@ class RedisRoomRepository(
         return memberId
     }
 
-    override fun deleteMember(room: Room, memberId: Long) {
+    override fun deleteMember(roomId: Long, memberId: Long) {
+        val key = (ROOM_KEY_PREFIX + roomId).toByteArray()
+        do {
+            val transactionResults =
+                template.execute {
+                    return@execute it.apply {
+                        watch(key)
+                        val room = getByKey(key, it)
+                        multi()
+                        if (checkLastMember(room))
+                            stringCommands().getDel(key)
+                        else {
+                            stringCommands()[key] =
+                                convertValueToByteArray(
+                                    room.apply {
+                                        members.remove(memberId)
+                                        idQueue.add(memberId)
+                                    }
+                                )
+                        }
+                    }.exec()
+                }
+        } while (transactionResults.isNullOrEmpty())
     }
 
     private fun generateRoomId() =
@@ -86,6 +103,9 @@ class RedisRoomRepository(
 
     private fun findByKey(key: String) =
         template.opsForValue()[key]?.let { convertValueToRoom(it) }
+
+    private fun getByKey(key: ByteArray, connection: RedisConnection) =
+        connection.stringCommands()[key]?.let { convertValueToRoom(it) } ?: throw RoomNotFoundException()
 
     private fun findKeysByPattern() =
         template.keys(ROOM_KEY_PATTERN)
@@ -107,4 +127,7 @@ class RedisRoomRepository(
         if (room.members.size == 10)
             throw FullRoomException()
     }
+
+    private fun checkLastMember(room: Room) =
+        room.members.size == 1
 }

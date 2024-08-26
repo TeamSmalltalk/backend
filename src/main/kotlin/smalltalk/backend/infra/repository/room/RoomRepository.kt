@@ -6,8 +6,7 @@ interface RoomRepository {
     fun save(roomName: String): Room
     fun getById(roomId: Long): Room
     fun findAll(): List<Room>
-    fun deleteById(roomId: Long)
     fun deleteAll()
     fun addMember(roomId: Long): Long
-    fun deleteMember(room: Room, memberId: Long)
+    fun deleteMember(roomId: Long, memberId: Long)
 }

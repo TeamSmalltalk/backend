@@ -1,4 +1,4 @@
-package smalltalk.backend.config.websocket
+package smalltalk.backend.application.websocket
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier

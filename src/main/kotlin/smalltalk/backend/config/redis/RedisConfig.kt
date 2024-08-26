@@ -1,6 +1,8 @@
 package smalltalk.backend.config.redis
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -23,12 +25,12 @@ class RedisConfig {
 //        )
 
     @Bean
-    fun objectMapper() = ObjectMapper()
+    fun objectMapper() = jacksonObjectMapper()
 
     @Bean
-    fun redisConnectFactory() = LettuceConnectionFactory(host, port.toInt())
+    fun redisConnectionFactory() = LettuceConnectionFactory(host, port.toInt())
 
     @Bean
     fun redisTemplate() =
-        StringRedisTemplate().apply { connectionFactory = redisConnectFactory() }
+        StringRedisTemplate().apply { connectionFactory = redisConnectionFactory() }
 }
