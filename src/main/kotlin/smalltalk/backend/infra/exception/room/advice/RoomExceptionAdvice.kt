@@ -18,8 +18,4 @@ class RoomExceptionAdvice {
     @ResponseStatus(value = NOT_FOUND, reason = "Room could not be found")
     @ExceptionHandler(RoomNotFoundException::class)
     fun roomNotFoundException() {}
-
-    @ResponseStatus(value = BAD_REQUEST, reason = "Room is full")
-    @ExceptionHandler(FullRoomException::class)
-    fun fullRoomException() {}
 }
