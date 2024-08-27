@@ -15,9 +15,8 @@ class RedisRoomRepository(
     private val mapper: ObjectMapper
 ) : RoomRepository {
     companion object {
-        private const val ID_QUEUE_INITIAL_ID = 2L
+        private const val ID_QUEUE_INITIAL_ID = 1L
         private const val ID_QUEUE_LIMIT_ID = 10L
-        private const val MEMBERS_INITIAL_ID = 1L
         private const val ROOM_COUNTER_KEY = "roomCounter"
         private const val ROOM_KEY_PREFIX = "room:"
         private const val ROOM_KEY_PATTERN = "$ROOM_KEY_PREFIX*"
@@ -30,7 +29,7 @@ class RedisRoomRepository(
                 generatedRoomId,
                 roomName,
                 (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
-                mutableListOf(MEMBERS_INITIAL_ID)
+                mutableListOf()
             )
         template.opsForValue()[ROOM_KEY_PREFIX + generatedRoomId] = convertValueToString(room)
         return room

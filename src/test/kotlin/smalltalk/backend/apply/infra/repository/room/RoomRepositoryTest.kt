@@ -34,8 +34,8 @@ class RoomRepositoryTest(
             savedRoom.run {
                 id shouldBe 1L
                 name shouldBe NAME
-                idQueue shouldHaveSize 9
-                members shouldHaveSize 1
+                idQueue shouldHaveSize 10
+                members shouldHaveSize 0
             }
         }
     }
@@ -46,8 +46,8 @@ class RoomRepositoryTest(
             val room = roomRepository.getById(1L)
             room.run {
                 name shouldBe "채팅방1"
-                idQueue shouldHaveSize 9
-                members shouldHaveSize 1
+                idQueue shouldHaveSize 10
+                members shouldHaveSize 0
             }
         }
         expect("모든 채팅방을 조회한다") {
@@ -59,7 +59,7 @@ class RoomRepositoryTest(
         val roomId = roomRepository.save(NAME).id
         expect("추가된 멤버의 id를 반환한다") {
             val memberIds =
-                (2..10).map {
+                (1..10).map {
                     roomRepository.addMember(roomId)
                 }.toList()
             roomRepository.getById(roomId).run {
@@ -76,12 +76,12 @@ class RoomRepositoryTest(
 
     context("채팅방 멤버 삭제") {
         val roomId = roomRepository.save(NAME).id
-        val memberId = roomRepository.addMember(roomId)
+        (1..2).map { roomRepository.addMember(roomId) }
         expect("2명 이상 존재하면 멤버를 삭제한다") {
-            roomRepository.deleteMember(roomId, memberId)
+            roomRepository.deleteMember(roomId, 2L)
             roomRepository.getById(roomId).run {
-                idQueue shouldContain memberId
-                members shouldNotContain memberId
+                idQueue shouldContain 2L
+                members shouldNotContain 2L
             }
         }
         expect("1명만 존재하면 채팅방을 삭제한다") {
