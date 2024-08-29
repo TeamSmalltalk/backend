@@ -1,6 +1,5 @@
 package smalltalk.backend.apply.websocket
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
 import io.mockk.mockk
 import org.springframework.boot.test.context.SpringBootTest
@@ -15,7 +14,6 @@ class StompMessagingTest(
     @LocalServerPort
     val port: Int
 ) : FunSpec({
-    val logger = KotlinLogging.logger { }
     val handler = mockk<StompSessionHandlerAdapter>(relaxed = true)
     val webSocketUrl = "ws://localhost:$port/ws-connect"
     val destinationToSubscribe = "/rooms/1"

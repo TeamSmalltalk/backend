@@ -20,8 +20,6 @@ class StompConnectionTests(
     private val client: WebSocketStompClient,
     @LocalServerPort private val port: Int = 0
 ) : FunSpec({
-
-    val logger = KotlinLogging.logger {}
     val webSocketUrl = "ws://localhost:$port/ws-connect"
 
     test("비동기로 20개의 Stomp 클라이언트 연결이 한번에 생성됐다면 id 가 다른 20개의 세션이 있어야 한다.") {

@@ -8,10 +8,12 @@ import org.testcontainers.containers.GenericContainer
 class RedisContainerConfig {
     companion object {
         private val logger = KotlinLogging.logger { }
+
         private const val REDIS_IMAGE = "redis:latest"
         private const val REDIS_CONTAINER_PORT = 6379
         private const val LOCAL_REDIS_HOST_PATH = "spring.data.redis.host"
         private const val LOCAL_REDIS_PORT_PATH = "spring.data.redis.port"
+
         init {
             GenericContainer<Nothing>(REDIS_IMAGE).apply {
                 withExposedPorts(REDIS_CONTAINER_PORT)
