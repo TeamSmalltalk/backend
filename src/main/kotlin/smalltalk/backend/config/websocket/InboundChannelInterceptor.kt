@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class InboundChannelInterceptor: ChannelInterceptor {
-
     private val logger = KotlinLogging.logger {}
 
     override fun preSend(message: Message<*>, channel: MessageChannel): Message<*>? {

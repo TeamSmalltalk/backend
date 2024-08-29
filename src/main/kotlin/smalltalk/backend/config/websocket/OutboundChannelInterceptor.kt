@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class OutboundChannelInterceptor: ChannelInterceptor {
-
     private val logger = KotlinLogging.logger {}
     companion object {
         private const val SIMP_MESSAGE_TYPE_KEY = "simpMessageType"
