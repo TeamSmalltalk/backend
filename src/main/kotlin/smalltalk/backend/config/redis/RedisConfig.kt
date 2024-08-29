@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.StringRedisTemplate
-import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.listener.RedisMessageListenerContainer
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter
+import smalltalk.backend.config.redis.sub.RedisSubscriber
 
 @Configuration
 class RedisConfig {
@@ -16,9 +16,6 @@ class RedisConfig {
     private lateinit var host: String
     @Value("\${spring.data.redis.port}")
     private lateinit var port: String
-    companion object {
-        const val SUBSCRIBE_CHANNEL = "room"
-    }
 
 //    @Bean
 //    fun redissonClient(): RedissonClient =
@@ -35,17 +32,14 @@ class RedisConfig {
     fun redisConnectionFactory() = LettuceConnectionFactory(host, port.toInt())
 
     @Bean
-    fun listener() = DefaultMessageDelegate()
+    fun listener() = RedisSubscriber()
 
     @Bean
     fun messageListenerAdapter() = MessageListenerAdapter(listener())
 
     @Bean
     fun redisMessageListenerContainer() =
-        RedisMessageListenerContainer().apply {
-            setConnectionFactory(redisConnectionFactory())
-            addMessageListener(messageListenerAdapter(), ChannelTopic.of(SUBSCRIBE_CHANNEL))
-        }
+        RedisMessageListenerContainer().apply { setConnectionFactory(redisConnectionFactory()) }
 
     @Bean
     fun redisTemplate() =

@@ -15,8 +15,6 @@ import org.springframework.web.socket.messaging.SessionSubscribeEvent
 class WebSocketEventListener (
     @Qualifier("clientOutboundChannel") private val outboundChannel: MessageChannel
 ){
-    private val logger = KotlinLogging.logger {  }
-
     @EventListener
     private fun handleSubscribe(event: SessionSubscribeEvent) {
         StompHeaderAccessor.create(StompCommand.RECEIPT).run {

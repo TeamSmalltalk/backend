@@ -1,11 +1,11 @@
 package smalltalk.backend.application.room
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
 import smalltalk.backend.application.message.MessageBroker
 import smalltalk.backend.config.websocket.WebSocketConfig
+import smalltalk.backend.logger
 import smalltalk.backend.presentation.dto.message.Message
 
 
@@ -13,8 +13,6 @@ import smalltalk.backend.presentation.dto.message.Message
 class RoomService (
     private val messageBroker: MessageBroker
 ) {
-
-    private val logger = KotlinLogging.logger {}
     private val nicknamePrefix = "익명"
 
     fun send(roomId: String, message: Message) {
