@@ -9,7 +9,7 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.redis.RedisConfig
-import smalltalk.backend.presentation.exception.room.situation.RoomNotFoundException
+import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.infra.repository.room.RedisRoomRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig

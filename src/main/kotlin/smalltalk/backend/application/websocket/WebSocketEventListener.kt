@@ -8,16 +8,16 @@ import org.springframework.stereotype.Component
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.domain.room.Room
-import smalltalk.backend.presentation.exception.room.situation.DoesntExistRoomIdException
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.BotText
 import smalltalk.backend.presentation.dto.message.Entrance
+import smalltalk.backend.exception.room.situation.DoesntExistRoomIdException
 
 
 @Component
 class WebSocketEventListener(
     private val roomRepository: RoomRepository,
-    private val template: SimpMessagingTemplate,
+    private val template: SimpMessagingTemplate
 ) {
     private val logger = KotlinLogging.logger { }
     companion object {

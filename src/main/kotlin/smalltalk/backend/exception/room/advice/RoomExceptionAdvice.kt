@@ -1,12 +1,12 @@
-package smalltalk.backend.presentation.exception.room.advice
+package smalltalk.backend.exception.room.advice
 
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
-import smalltalk.backend.presentation.exception.room.situation.RoomIdNotGeneratedException
-import smalltalk.backend.presentation.exception.room.situation.RoomNotFoundException
+import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
+import smalltalk.backend.exception.room.situation.RoomNotFoundException
 
 
 @RestControllerAdvice
