@@ -6,9 +6,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.StringRedisTemplate
-import org.springframework.data.redis.listener.RedisMessageListenerContainer
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter
-import smalltalk.backend.config.redis.sub.RedisSubscriber
 
 @Configuration
 class RedisConfig {
@@ -30,16 +27,6 @@ class RedisConfig {
 
     @Bean
     fun redisConnectionFactory() = LettuceConnectionFactory(host, port.toInt())
-
-    @Bean
-    fun listener() = RedisSubscriber()
-
-    @Bean
-    fun messageListenerAdapter() = MessageListenerAdapter(listener())
-
-    @Bean
-    fun redisMessageListenerContainer() =
-        RedisMessageListenerContainer().apply { setConnectionFactory(redisConnectionFactory()) }
 
     @Bean
     fun redisTemplate() =
