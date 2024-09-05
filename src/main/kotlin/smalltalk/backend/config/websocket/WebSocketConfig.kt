@@ -41,7 +41,6 @@ class WebSocketConfig (
         registration.interceptors(inboundChannelInterceptor)
     }
 
-
     override fun configureClientOutboundChannel(registration: ChannelRegistration) {
         registration.interceptors(outboundChannelInterceptor)
     }

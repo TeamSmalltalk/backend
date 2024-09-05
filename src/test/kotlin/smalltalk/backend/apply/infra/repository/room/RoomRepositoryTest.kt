@@ -17,6 +17,7 @@ import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
 
+
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = [RoomRepository::class, RedisRoomRepository::class, RedisConfig::class, RedisContainerConfig::class]
@@ -25,6 +26,8 @@ import smalltalk.backend.support.spec.afterRootTest
 class RoomRepositoryTest(
     private val roomRepository: RoomRepository
 ) : ExpectSpec({
+    val logger = KotlinLogging.logger { }
+
     context("채팅방 저장") {
         val roomName = NAME
         expect("채팅방을 반환한다") {

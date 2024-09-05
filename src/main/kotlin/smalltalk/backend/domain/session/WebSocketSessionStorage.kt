@@ -8,14 +8,15 @@ import java.util.concurrent.ConcurrentMap
 
 @Component
 class WebSocketSessionStorage {
-
     private val map: ConcurrentMap<String, LocalDateTime> = ConcurrentHashMap()
 
-    fun addSession(sessionId: String) = map.put(sessionId, LocalDateTime.now())
+    fun addSession(sessionId: String) =
+        map.put(sessionId, LocalDateTime.now())
 
     fun removeSession(sessionId: String) = map.remove(sessionId)
 
-    fun getSessionEnterTime(sessionId: String) = map[sessionId]?.let { throw Exception() }
+    fun getSessionEnterTime(sessionId: String) =
+        map[sessionId]?.let { throw Exception() }
 
     fun getSessionCount() = map.size
 }

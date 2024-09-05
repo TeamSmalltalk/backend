@@ -1,6 +1,5 @@
 package smalltalk.backend.application.websocket
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.event.EventListener
 import org.springframework.messaging.simp.SimpMessagingTemplate
@@ -19,7 +18,6 @@ import smalltalk.backend.presentation.dto.message.Entrance
 class WebSocketEventListener(
     private val roomRepository: RoomRepository,
     private val template: SimpMessagingTemplate,
-    private val mapper: ObjectMapper  // TODO ObjectMapper 기능을 모아둔 클래스 만들기
 ) {
     private val logger = KotlinLogging.logger { }
     companion object {

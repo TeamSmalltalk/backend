@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.StringRedisTemplate
 
+
 @Configuration
 class RedisConfig {
     @Value("\${spring.data.redis.host}")

@@ -1,6 +1,7 @@
 package smalltalk.backend.infra.repository.room
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.connection.RedisConnection
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
@@ -9,11 +10,13 @@ import smalltalk.backend.infra.exception.room.situation.FullRoomException
 import smalltalk.backend.infra.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.infra.exception.room.situation.RoomNotFoundException
 
+
 @Repository
 class RedisRoomRepository(
     private val template: StringRedisTemplate,
     private val mapper: ObjectMapper
 ) : RoomRepository {
+    private val logger = KotlinLogging.logger { }
     companion object {
         private const val ID_QUEUE_INITIAL_ID = 1L
         private const val ID_QUEUE_LIMIT_ID = 10L

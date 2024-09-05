@@ -16,6 +16,7 @@ import smalltalk.backend.support.redis.RedisContainerConfig
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
+
 @ActiveProfiles("test")
 @SpringBootTest(
     classes = [RoomRepository::class, RedisRoomRepository::class, RedisConfig::class, RedisContainerConfig::class]
@@ -24,6 +25,8 @@ import java.util.concurrent.Executors
 class ConcurrencyTest(
     private val roomRepository: RoomRepository
 ) : FunSpec({
+    val logger = KotlinLogging.logger { }
+
     test("채팅방에 10명의 멤버를 동시에 추가하면 정원이 10명이어야 한다") {
         // Given
         val numberOfThread = 10
