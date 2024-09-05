@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.domain.room.Room
-import smalltalk.backend.infra.exception.room.situation.DoesntExistRoomIdException
+import smalltalk.backend.presentation.exception.room.situation.DoesntExistRoomIdException
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.BotText
 import smalltalk.backend.presentation.dto.message.Entrance

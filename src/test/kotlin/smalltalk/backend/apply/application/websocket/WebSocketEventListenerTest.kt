@@ -19,6 +19,7 @@ import smalltalk.backend.presentation.dto.message.Entrance
 import smalltalk.backend.support.redis.RedisContainerConfig
 import java.util.concurrent.CountDownLatch
 
+
 @ActiveProfiles("test")
 @Import(RedisContainerConfig::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
