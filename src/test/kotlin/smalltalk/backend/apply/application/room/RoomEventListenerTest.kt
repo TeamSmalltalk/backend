@@ -56,12 +56,13 @@ class RoomEventListenerTest(
         val message = handler.awaitMessage()
 
         // Then
-        val members = roomRepository.getById(roomId).members
+        val room = roomRepository.getById(roomId)
         message.run {
-            members.let {
+            room.let {
                 shouldNotBeNull()
-                numberOfMember shouldBe it.size
-                nickname shouldBe "익명${it.last()}"
+                numberOfMember shouldBe it.members.size
+                nickname shouldBe "익명${it.members.last()}"
+                text shouldBeEqual (it.name + BotText.OPEN)
             }
         }
     }
