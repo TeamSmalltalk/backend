@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.application.websocket
+package smalltalk.backend.apply.application.room
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -28,7 +28,7 @@ import java.util.concurrent.CountDownLatch
 @Import(RedisContainerConfig::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-class WebSocketEventListenerTest(
+class RoomEventListenerTest(
     @LocalServerPort
     private val port: Int,
     private val roomRepository: RoomRepository,

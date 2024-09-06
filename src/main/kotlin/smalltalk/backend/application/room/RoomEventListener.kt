@@ -1,4 +1,4 @@
-package smalltalk.backend.application.websocket
+package smalltalk.backend.application.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.event.EventListener
@@ -15,7 +15,7 @@ import smalltalk.backend.exception.room.situation.DoesntExistRoomIdException
 
 
 @Component
-class WebSocketEventListener(
+class RoomEventListener(
     private val roomRepository: RoomRepository,
     private val template: SimpMessagingTemplate
 ) {
