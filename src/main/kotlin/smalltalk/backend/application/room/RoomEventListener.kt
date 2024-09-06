@@ -2,22 +2,22 @@ package smalltalk.backend.application.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.event.EventListener
-import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
+import smalltalk.backend.application.message.MessageBroker
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.domain.room.Room
+import smalltalk.backend.exception.room.situation.DoesntExistRoomIdException
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.BotText
 import smalltalk.backend.presentation.dto.message.Entrance
-import smalltalk.backend.exception.room.situation.DoesntExistRoomIdException
 
 
 @Component
 class RoomEventListener(
     private val roomRepository: RoomRepository,
-    private val template: SimpMessagingTemplate
+    private val broker: MessageBroker
 ) {
     private val logger = KotlinLogging.logger { }
     companion object {
@@ -36,7 +36,7 @@ class RoomEventListener(
     private fun handleSubscribe(event: SessionSubscribeEvent) {
         val destination = validateDestination(StompHeaderAccessor.wrap(event.message).destination)
         val roomId = getRoomId(destination)
-        template.convertAndSend(
+        broker.send(
             destination,
             roomRepository.run {
                 createEntranceMessageByCase(

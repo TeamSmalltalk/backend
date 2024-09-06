@@ -3,6 +3,7 @@ package smalltalk.backend.apply.application.room
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
@@ -17,6 +18,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.presentation.dto.message.BotText
 import smalltalk.backend.presentation.dto.message.Entrance
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
@@ -60,6 +62,31 @@ class RoomEventListenerTest(
                 shouldNotBeNull()
                 numberOfMember shouldBe it.size
                 nickname shouldBe "익명${it.last()}"
+            }
+        }
+    }
+
+    test("채팅방에 입장하면 메시지를 수신해야 한다") {
+        // Given
+        val roomId = roomRepository.save(NAME).id
+        roomRepository.addMember(roomId)
+        val handler = TestHandler(
+            WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId,
+            Entrance::class.java
+        )
+        stompSession = stompClient.connectAsync(url, handler)
+
+        // When
+        val message = handler.awaitMessage()
+
+        // Then
+        val members = roomRepository.getById(roomId).members
+        message.run {
+            members.let {
+                shouldNotBeNull()
+                numberOfMember shouldBe it.size
+                nickname shouldBe "익명${it.last()}"
+                text shouldBeEqual (nickname + BotText.ENTRANCE)
             }
         }
     }
