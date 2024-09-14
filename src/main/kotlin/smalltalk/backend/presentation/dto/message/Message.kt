@@ -1,12 +1,6 @@
 package smalltalk.backend.presentation.dto.message
 
-data class Entrance(
-    val numberOfMember: Int,
-    val nickname: String,
-    val text: String
-)
-
-data class Exit(
+data class Bot(
     val numberOfMember: Int,
     val text: String
 )

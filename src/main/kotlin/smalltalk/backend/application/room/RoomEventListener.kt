@@ -11,7 +11,7 @@ import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.DoesntExistRoomIdException
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.BotText
-import smalltalk.backend.presentation.dto.message.Entrance
+import smalltalk.backend.presentation.dto.message.Bot
 
 
 @Component
@@ -26,24 +26,16 @@ class RoomEventListener(
         private const val OPENED_ROOM = 1
         private const val ENTERED_ROOM_MIN = 2
         private const val ENTERED_ROOM_MAX = 10
-        private const val NICKNAME_PREFIX = "익명"
+        const val NICKNAME_PREFIX = "익명"
     }
 
-    /**
-     * TODO 예외 발생 -> Error message (code 포함) 전송
-     */
     @EventListener
     private fun handleSubscribe(event: SessionSubscribeEvent) {
-        val destination = validateDestination(StompHeaderAccessor.wrap(event.message).destination)
-        val roomId = getRoomId(destination)
-        broker.send(
-            destination,
-            roomRepository.run {
-                createEntranceMessageByCase(
-                    addMember(roomId),
-                    getById(roomId)
-                )
-            }
+        val validatedDestination = validateDestination(StompHeaderAccessor.wrap(event.message).destination)
+        val roomId = getRoomId(validatedDestination)
+        sendBotMessage(
+            validatedDestination,
+            createEntranceMessageByCase(roomRepository.getById(roomId))
         )
     }
 
@@ -55,25 +47,24 @@ class RoomEventListener(
     private fun getRoomId(destination: String) =
         destination.substring(ROOM_ID_START_INDEX).toLong()
 
-    private fun createEntranceMessageByCase(enteredMemberId: Long, room: Room): Entrance {
-        val numberOfMember = room.members.size
-        val nickname = NICKNAME_PREFIX + enteredMemberId
-        when (numberOfMember) {
+    private fun sendBotMessage(topic: String, message: Any) {
+        broker.send(topic, message)
+    }
+
+    private fun createEntranceMessageByCase(room: Room) =
+        when (val numberOfMember = room.members.size) {
             OPENED_ROOM -> {
-                return Entrance(
+                Bot(
                     numberOfMember,
-                    nickname,
                     room.name + BotText.OPEN
                 )
             }
             in ENTERED_ROOM_MIN..ENTERED_ROOM_MAX -> {
-                return Entrance(
+                Bot(
                     numberOfMember,
-                    nickname,
-                    nickname + BotText.ENTRANCE
+                    NICKNAME_PREFIX + room.members.last() + BotText.ENTRANCE
                 )
             }
             else -> throw IllegalStateException("채팅방 인원수가 적절하지 않습니다")
         }
-    }
 }

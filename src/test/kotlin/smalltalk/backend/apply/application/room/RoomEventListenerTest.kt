@@ -15,11 +15,12 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.messaging.WebSocketStompClient
+import smalltalk.backend.application.room.RoomEventListener
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.BotText
-import smalltalk.backend.presentation.dto.message.Entrance
+import smalltalk.backend.presentation.dto.message.Bot
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
 import java.util.concurrent.CompletableFuture
@@ -38,6 +39,7 @@ class RoomEventListenerTest(
 ) : FunSpec({
     val logger = KotlinLogging.logger { }
     val url = "ws://localhost:$port${WebSocketConfig.STOMP_ENDPOINT}"
+    val destinationPrefix = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX
     val stompClient = WebSocketStompClient(StandardWebSocketClient()).apply {
         messageConverter = MappingJackson2MessageConverter(mapper)
     }
@@ -47,9 +49,9 @@ class RoomEventListenerTest(
         // Given
         val roomId = roomRepository.save(NAME).id
         val handler = TestHandler(
-            WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId,
-            Entrance::class.java
-            )
+            destinationPrefix + roomId,
+            Bot::class.java
+        )
         stompSession = stompClient.connectAsync(url, handler)
 
         // When
@@ -61,7 +63,6 @@ class RoomEventListenerTest(
             room.let {
                 shouldNotBeNull()
                 numberOfMember shouldBe it.members.size
-                nickname shouldBe "익명${it.members.last()}"
                 text shouldBeEqual (it.name + BotText.OPEN)
             }
         }
@@ -72,8 +73,8 @@ class RoomEventListenerTest(
         val roomId = roomRepository.save(NAME).id
         roomRepository.addMember(roomId)
         val handler = TestHandler(
-            WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId,
-            Entrance::class.java
+            destinationPrefix + roomId,
+            Bot::class.java
         )
         stompSession = stompClient.connectAsync(url, handler)
 
@@ -86,8 +87,7 @@ class RoomEventListenerTest(
             members.let {
                 shouldNotBeNull()
                 numberOfMember shouldBe it.size
-                nickname shouldBe "익명${it.last()}"
-                text shouldBeEqual (nickname + BotText.ENTRANCE)
+                text shouldBeEqual (RoomEventListener.NICKNAME_PREFIX + it.last() + BotText.ENTRANCE)
             }
         }
     }
@@ -108,7 +108,8 @@ class RoomEventListenerTest(
 
         override fun afterConnected(session: StompSession, connectedHeaders: StompHeaders) {
             session.subscribe(destination, object : StompFrameHandler {
-                override fun getPayloadType(headers: StompHeaders) = this@TestHandler.payloadType
+                override fun getPayloadType(headers: StompHeaders) =
+                    this@TestHandler.payloadType
 
                 override fun handleFrame(headers: StompHeaders, payload: Any?) {
                     message = payloadType.cast(payload)
