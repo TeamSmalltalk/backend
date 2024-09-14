@@ -4,8 +4,9 @@ import smalltalk.backend.domain.room.Room
 
 const val ID = 1L
 const val NAME = "room"
-const val ID_QUEUE_INITIAL_ID = 1L
+const val ID_QUEUE_INITIAL_ID =2L
 const val ID_QUEUE_LIMIT_ID = 10L
+const val MEMBERS_INITIAL_ID = 1L
 
 fun createRoom(
     id: Long = ID,

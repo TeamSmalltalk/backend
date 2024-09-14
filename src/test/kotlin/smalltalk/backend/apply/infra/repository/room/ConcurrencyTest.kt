@@ -27,9 +27,9 @@ class ConcurrencyTest(
 ) : FunSpec({
     val logger = KotlinLogging.logger { }
 
-    test("채팅방에 10명의 멤버를 동시에 추가하면 정원이 10명이어야 한다") {
+    test("채팅방에 9명의 멤버를 동시에 추가하면 정원이 10명이어야 한다") {
         // Given
-        val numberOfThread = 10
+        val numberOfThread = 9
         val threadPool = Executors.newFixedThreadPool(numberOfThread)
         val latch = CountDownLatch(numberOfThread)
         val roomId = roomRepository.save(NAME).id
@@ -60,7 +60,7 @@ class ConcurrencyTest(
         val threadPool = Executors.newFixedThreadPool(numberOfThread)
         val latch = CountDownLatch(numberOfThread)
         val roomId = roomRepository.save(NAME).id
-        repeat(numberOfThread) {
+        repeat(9) {
             roomRepository.addMember(roomId)
         }
 
