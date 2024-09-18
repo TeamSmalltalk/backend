@@ -51,6 +51,11 @@ class RoomRepositoryTest(
                 members shouldHaveSize 1
             }
         }
+        expect("예외가 발생한다") {
+            shouldThrow<RoomNotFoundException> {
+                roomRepository.getById(4L)
+            }
+        }
         expect("모든 채팅방을 조회한다") {
             roomRepository.findAll() shouldHaveSize 3
         }
