@@ -12,8 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.messaging.converter.MappingJackson2MessageConverter
-import org.springframework.messaging.simp.stomp.*
-import org.springframework.messaging.simp.stomp.StompSession.Subscription
+import org.springframework.messaging.simp.stomp.StompHeaders
+import org.springframework.messaging.simp.stomp.StompSession
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
@@ -22,13 +22,12 @@ import smalltalk.backend.application.room.RoomEventListener
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.infra.repository.room.RoomRepository
-import smalltalk.backend.presentation.dto.message.BotText
 import smalltalk.backend.presentation.dto.message.Bot
+import smalltalk.backend.presentation.dto.message.BotText
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
-import java.lang.reflect.Type
+import smalltalk.backend.support.websocket.TestHandler
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.CountDownLatch
 
 
 @ActiveProfiles("test")
@@ -52,7 +51,7 @@ class RoomEventListenerTest(
         // Given
         val roomId = roomRepository.save(NAME).id
         val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId
-        val handler = TestHandler(destination, Bot::class.java, 1)
+        val handler = TestHandler(destination, Bot::class.java)
         stompSession = stompClient.connectAsync(url, handler)
 
         // When
@@ -73,7 +72,7 @@ class RoomEventListenerTest(
         // Given
         val roomId = roomRepository.save(NAME).id
         val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId
-        val handler = TestHandler(destination, Bot::class.java, 1)
+        val handler = TestHandler(destination, Bot::class.java)
         roomRepository.addMember(roomId)
         stompSession = stompClient.connectAsync(url, handler)
 
@@ -96,7 +95,7 @@ class RoomEventListenerTest(
         val roomId = roomRepository.save(NAME).id
         val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId
         val memberIdToDelete = 2L
-        val handler = TestHandler(destination, Bot::class.java, 1)
+        val handler = TestHandler(destination, Bot::class.java)
         val handlerToDisconnect = handler.copy()
         stompSession = stompClient.connectAsync(url, handler)
         handler.awaitMessage()
@@ -132,40 +131,4 @@ class RoomEventListenerTest(
         stompSession.get().disconnect()
         stompClient.stop()
     }
-}) {
-    private class TestHandler<T>(
-        private val destination: String,
-        private val payloadType: Class<T>,
-        private val countOfMessageToReceive: Int
-    ) : StompSessionHandlerAdapter() {
-        private val logger = KotlinLogging.logger { }
-        private var messages = mutableListOf<T>()
-        private var receiver = CountDownLatch(countOfMessageToReceive)
-        private lateinit var subscription: Subscription
-
-        override fun afterConnected(session: StompSession, connectedHeaders: StompHeaders) {
-            subscription =
-                session.subscribe(destination, object : StompFrameHandler {
-                    override fun getPayloadType(headers: StompHeaders): Type {
-                        return payloadType
-                    }
-
-                    override fun handleFrame(headers: StompHeaders, payload: Any?) {
-                        logger.info { payload }
-                        messages.add(payloadType.cast(payload))
-                        receiver.countDown()
-                    }
-                })
-        }
-
-        fun awaitMessage(): MutableList<T> {
-            receiver.await()
-            receiver = CountDownLatch(countOfMessageToReceive)
-            return messages
-        }
-
-        fun unsubscribe(headers: StompHeaders) = subscription.unsubscribe(headers)
-
-        fun copy() = TestHandler(destination, payloadType, countOfMessageToReceive)
-    }
-}
+})
