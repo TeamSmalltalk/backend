@@ -61,6 +61,14 @@ class RoomRepositoryTest(
         }
     }
 
+    context("채팅방 삭제") {
+        (1..3).map { roomRepository.save("채팅방$it") }
+        expect("모든 채팅방을 삭제한다") {
+            roomRepository.deleteAll()
+            roomRepository.findAll().shouldBeEmpty()
+        }
+    }
+
     context("채팅방 멤버 추가") {
         val roomId = roomRepository.save(NAME).id
         expect("추가된 멤버의 id를 반환한다") {
