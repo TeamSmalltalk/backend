@@ -52,7 +52,7 @@ class MemberRepositoryTest(
         }
     }
 
-    expect("id와 일치하는 멤버를 삭제한다") {
+    expect("id와 일치하는 채팅방 멤버를 삭제한다") {
         memberRepository.run {
             deleteById(sessionId)
             findById(sessionId).shouldBeNull()
@@ -60,6 +60,6 @@ class MemberRepositoryTest(
     }
 
     afterRootTest {
-        memberRepository.deleteAll()
+        memberRepository.deleteById(sessionId)
     }
 })
