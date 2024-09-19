@@ -17,6 +17,7 @@ class RedisRoomRepository(
     private val mapper: ObjectMapper
 ) : RoomRepository {
     private val logger = KotlinLogging.logger { }
+    private val operations = template.opsForValue()
     companion object {
         private const val ID_QUEUE_INITIAL_ID = 2L
         private const val ID_QUEUE_LIMIT_ID = 10L
@@ -35,7 +36,7 @@ class RedisRoomRepository(
                 (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
                 mutableListOf(MEMBERS_INITIAL_ID)
             )
-        template.opsForValue()[createKey(generatedRoomId)] = convertValueToString(room)
+        operations[createKey(generatedRoomId)] = mapper.writeValueAsString(room)
         return room
     }
 
@@ -64,7 +65,7 @@ class RedisRoomRepository(
                         checkFull(room)
                         multi()
                         stringCommands()[key] =
-                            convertValueToByteArray(
+                            mapper.writeValueAsBytes(
                                 room.apply {
                                     memberId = idQueue.removeFirst()
                                     members.add(memberId)
@@ -89,7 +90,7 @@ class RedisRoomRepository(
                             stringCommands().getDel(key)
                         else {
                             stringCommands()[key] =
-                                convertValueToByteArray(
+                                mapper.writeValueAsBytes(
                                     room.apply {
                                         members.remove(memberId)
                                         idQueue.add(memberId)
@@ -101,27 +102,16 @@ class RedisRoomRepository(
         } while (transactionResults.isNullOrEmpty())
     }
 
-    private fun generateRoomId() = template.opsForValue().increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
+    private fun generateRoomId() = operations.increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
 
     private fun createKey(roomId: Long) = ROOM_KEY_PREFIX + roomId
 
-    private fun findByKey(key: String) = template.opsForValue()[key]?.let { convertValueToRoom(it) }
+    private fun findByKey(key: String) = operations[key]?.let { mapper.readValue(it, Room::class.java) }
 
     private fun getByKey(key: ByteArray, connection: RedisConnection) =
-        connection.stringCommands()[key]?.let { convertValueToRoom(it) } ?: throw RoomNotFoundException()
+        connection.stringCommands()[key]?.let { mapper.readValue(it, Room::class.java) } ?: throw RoomNotFoundException()
 
     private fun findKeysByPattern() = template.keys(ROOM_KEY_PATTERN)
-
-    private fun convertValueToString(value: Room) = mapper.writeValueAsString(value)
-
-    private fun convertValueToByteArray(value: Room) = mapper.writeValueAsBytes(value)
-
-    private fun convertValueToRoom(value: Any) =
-        when (value) {
-            is String -> mapper.readValue(value, Room::class.java)
-            is ByteArray -> mapper.readValue(value, Room::class.java)
-            else -> throw IllegalStateException("Not allowed type")
-        }
 
     private fun checkFull(room: Room) {
         if (room.members.size == 10)
