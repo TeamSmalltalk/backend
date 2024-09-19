@@ -1,15 +1,11 @@
 package smalltalk.backend.config.websocket
 
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.messaging.converter.MappingJackson2MessageConverter
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry
-import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer
-import org.springframework.web.socket.messaging.WebSocketStompClient
 
 
 @Configuration
@@ -45,14 +41,7 @@ class WebSocketConfig (
         registration.interceptors(inboundChannelInterceptor)
     }
 
-
     override fun configureClientOutboundChannel(registration: ChannelRegistration) {
         registration.interceptors(outboundChannelInterceptor)
     }
-
-    @Bean
-    fun webSocketClient() : WebSocketStompClient =
-        WebSocketStompClient(StandardWebSocketClient()).apply {
-            messageConverter = MappingJackson2MessageConverter()
-        }
 }

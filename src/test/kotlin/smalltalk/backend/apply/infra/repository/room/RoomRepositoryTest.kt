@@ -6,21 +6,22 @@ import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.collections.*
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.redis.RedisConfig
-import smalltalk.backend.infra.exception.room.situation.FullRoomException
-import smalltalk.backend.infra.exception.room.situation.RoomNotFoundException
+import smalltalk.backend.exception.room.situation.FullRoomException
+import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.infra.repository.room.RedisRoomRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
 
+
 @ActiveProfiles("test")
-@SpringBootTest(
-    classes = [RoomRepository::class, RedisRoomRepository::class, RedisConfig::class, RedisContainerConfig::class]
-)
+@Import(RedisConfig::class, RedisContainerConfig::class)
+@SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class])
 @DirtiesContext
 class RoomRepositoryTest(
     private val roomRepository: RoomRepository
@@ -50,6 +51,11 @@ class RoomRepositoryTest(
                 members shouldHaveSize 1
             }
         }
+        expect("예외가 발생한다") {
+            shouldThrow<RoomNotFoundException> {
+                roomRepository.getById(4L)
+            }
+        }
         expect("모든 채팅방을 조회한다") {
             roomRepository.findAll() shouldHaveSize 3
         }
@@ -76,12 +82,12 @@ class RoomRepositoryTest(
 
     context("채팅방 멤버 삭제") {
         val roomId = roomRepository.save(NAME).id
-        val memberId = roomRepository.addMember(roomId)
+        roomRepository.addMember(roomId)
         expect("2명 이상 존재하면 멤버를 삭제한다") {
-            roomRepository.deleteMember(roomId, memberId)
+            roomRepository.deleteMember(roomId, 2L)
             roomRepository.getById(roomId).run {
-                idQueue shouldContain memberId
-                members shouldNotContain memberId
+                idQueue shouldContain 2L
+                members shouldNotContain 2L
             }
         }
         expect("1명만 존재하면 채팅방을 삭제한다") {
