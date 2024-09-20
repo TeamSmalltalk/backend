@@ -8,14 +8,16 @@ import org.springframework.web.socket.messaging.SessionSubscribeEvent
 import org.springframework.web.socket.messaging.SessionUnsubscribeEvent
 import smalltalk.backend.application.message.MessageBroker
 import smalltalk.backend.domain.room.Room
+import smalltalk.backend.infra.repository.member.MemberRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.Bot
 import smalltalk.backend.presentation.dto.message.BotText
 
-// TODO Custom layer 추가해서 로직 단순화
+// TODO Implement layer 추가해서 로직 단순화
 @Component
 class RoomEventListener(
     private val roomRepository: RoomRepository,
+    private val memberRepository: MemberRepository,
     private val broker: MessageBroker
 ) {
     private val logger = KotlinLogging.logger { }
@@ -26,13 +28,19 @@ class RoomEventListener(
         private const val OPENED_ROOM = 1
     }
 
-    // TODO 예외 처리 고민
+    /**
+     * TODO (채팅방 생성, 입장) 케이스 분리
+     * TODO 예외 처리 -> ERROR 메시지 전송, 채팅방 멤버 저장x
+     */
     @EventListener
     private fun handleSubscribe(event: SessionSubscribeEvent) {
-        val destination = getDestination(StompHeaderAccessor.wrap(event.message))
-        sendBotMessage(destination, createEntranceMessageByCase(roomRepository.getById(getRoomId(destination))))
+        logger.info { event.message }
+
     }
 
+    /**
+     * TODO (예외 발생으로 연결 종료, 채팅방 퇴장) 케이스 분리
+     */
     @EventListener
     private fun handleUnsubscribe(event: SessionUnsubscribeEvent) =
         StompHeaderAccessor.wrap(event.message).let {
