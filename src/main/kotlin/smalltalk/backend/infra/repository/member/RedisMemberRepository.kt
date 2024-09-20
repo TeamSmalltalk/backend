@@ -24,15 +24,22 @@ class RedisMemberRepository(
         return memberToSave
     }
 
-    override fun findById(sessionId: String) = operations[createKey(sessionId)]?.let { mapper.readValue(it, Member::class.java) }
+    override fun findById(sessionId: String) = findByKey(createKey(sessionId))
+
+    override fun findAll() = findKeys().mapNotNull { findByKey(it) }
 
     override fun deleteById(sessionId: String) {
         template.delete(createKey(sessionId))
     }
 
     override fun deleteAll() {
-        template.run { delete(keys(MEMBER_KEY_PATTERN)) }
+        template.run { delete(findKeys()) }
     }
 
     private fun createKey(sessionId: String) = MEMBER_KEY_PREFIX + sessionId
+
+    private fun findByKey(key: String) =
+        operations[key]?.let { mapper.readValue(it, Member::class.java) }
+
+    private fun findKeys() = template.keys(MEMBER_KEY_PATTERN)
 }

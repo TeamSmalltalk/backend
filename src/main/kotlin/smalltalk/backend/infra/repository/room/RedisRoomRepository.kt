@@ -44,12 +44,12 @@ class RedisRoomRepository(
 
     override fun getById(roomId: Long) = findByKey(createKey(roomId)) ?: throw RoomNotFoundException()
 
-    override fun findAll() = findKeysByPattern().mapNotNull { findByKey(it) }
+    override fun findAll() = findKeys().mapNotNull { findByKey(it) }
 
     override fun deleteAll() {
         template.run {
             delete(ROOM_COUNTER_KEY)
-            delete(findKeysByPattern())
+            delete(findKeys())
         }
     }
 
@@ -111,7 +111,7 @@ class RedisRoomRepository(
     private fun getByKey(key: ByteArray, connection: RedisConnection) =
         connection.stringCommands()[key]?.let { mapper.readValue(it, Room::class.java) } ?: throw RoomNotFoundException()
 
-    private fun findKeysByPattern() = template.keys(ROOM_KEY_PATTERN)
+    private fun findKeys() = template.keys(ROOM_KEY_PATTERN)
 
     private fun checkFull(room: Room) {
         if (room.members.size == 10)
