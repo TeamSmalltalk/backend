@@ -5,6 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.4"
 	kotlin("jvm") version "1.9.21"
 	kotlin("plugin.spring") version "1.9.21"
+	kotlin("plugin.serialization") version "2.0.20"
 }
 
 group = "smalltalk"
@@ -42,7 +43,8 @@ dependencies {
 	implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
 	implementation("org.hildan.krossbow:krossbow-stomp-core:$krossbowVersion")
 	implementation("org.hildan.krossbow:krossbow-websocket-builtin:$krossbowVersion")
-	implementation("org.hildan.krossbow:krossbow-stomp-jackson:$krossbowVersion")
+	implementation("org.hildan.krossbow:krossbow-stomp-kxserialization:$krossbowVersion")
+	implementation("org.hildan.krossbow:krossbow-stomp-kxserialization-json:$krossbowVersion")
 	implementation("org.hildan.krossbow:krossbow-websocket-spring:$krossbowVersion")
 	implementation("org.glassfish.tyrus.bundles:tyrus-standalone-client-jdk:$standaloneClientVersion")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
