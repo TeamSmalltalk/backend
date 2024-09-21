@@ -1,11 +1,12 @@
 package smalltalk.backend.apply.websocket
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.websocket.spring.asKrossbowWebSocketClient
@@ -31,7 +32,7 @@ import smalltalk.backend.support.spec.afterRootTest
 @Import(RedisContainerConfig::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-class WebSocketClientIntegrationTest(
+class StompClientIntegrationTest(
     @LocalServerPort
     private val port: Int,
     private val roomRepository: RoomRepository,
@@ -41,43 +42,46 @@ class WebSocketClientIntegrationTest(
     val url = "ws://localhost:$port${WebSocketConfig.STOMP_ENDPOINT}"
     val client = StompClient(StandardWebSocketClient().asKrossbowWebSocketClient())
 
-    test("채팅방을 생성하면 메시지를 수신해야 한다") {
+    test("채팅방을 입장 및 퇴장하면 메시지를 수신해야 한다") {
         // Given
+        val messageChannel = Channel<Bot>()
         val room = roomRepository.save(NAME)
         val roomId = room.id
         val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId
         val session = client.connect(url).withJsonConversions()
+        launch {
+            session.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()), Bot.serializer())
+                .take(3)
+                .collect { messageChannel.send(it) }
+        }
+        val receivedMessageWhenOpenRoom = messageChannel.receive()
+        val memberIdToDelete = roomRepository.addMember(roomId)
 
         // When
-        val message = session.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()), Bot.serializer()).first()
+        val receivedMessagesWhenEnterAndExitRoom = mutableListOf<Bot>()
+        val sessionToReceiveExitMessage = client.connect(url).withJsonConversions()
+        sessionToReceiveExitMessage.subscribe(createHeaders(destination, ENTER.name, memberIdToDelete.toString()), Bot.serializer()).first()
+        repeat(2) {
+            receivedMessagesWhenEnterAndExitRoom.add(messageChannel.receive())
+        }
 
         // Then
-        message.run {
-            roomRepository.getById(roomId).let { room ->
-                numberOfMember shouldBe room.members.size
-                text shouldBe (room.name + BotText.OPEN)
+        val latestNumberOfMember = room.members.size
+        receivedMessageWhenOpenRoom.run {
+            numberOfMember shouldBe latestNumberOfMember
+            text shouldBe (room.name + BotText.OPEN)
+        }
+        receivedMessagesWhenEnterAndExitRoom.run {
+            first().run {
+                numberOfMember shouldBe (latestNumberOfMember + 1)
+                text shouldBe (RoomEventListener.NICKNAME_PREFIX + memberIdToDelete + BotText.ENTRANCE)
+            }
+            last().run {
+                numberOfMember shouldBe latestNumberOfMember
+                text shouldBe (RoomEventListener.NICKNAME_PREFIX + memberIdToDelete + BotText.EXIT)
             }
         }
-        memberRepository.findAll() shouldHaveSize 1
-        session.disconnect()
-    }
-
-    test("채팅방에 입장하면 모든 멤버가 메시지를 수신해야 한다") {
-        // Given
-        val roomId = roomRepository.save(NAME).id
-        val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId
-        val enteredMemberId = roomRepository.addMember(roomId)
-
-        // When
-        val session = client.connect(url).withJsonConversions()
-        val message = session.subscribe(createHeaders(destination, ENTER.name, enteredMemberId.toString()), Bot.serializer()).first()
-
-        // Then
-        message.run {
-            numberOfMember shouldBe roomRepository.getById(roomId).members.size
-            text shouldBe (RoomEventListener.NICKNAME_PREFIX + enteredMemberId + BotText.ENTRANCE)
-        }
-        memberRepository.findAll() shouldHaveSize 1
+        sessionToReceiveExitMessage.disconnect()
         session.disconnect()
     }
 

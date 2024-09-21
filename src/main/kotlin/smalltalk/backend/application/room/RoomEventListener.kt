@@ -12,6 +12,7 @@ import org.springframework.web.socket.messaging.SessionSubscribeEvent
 import org.springframework.web.socket.messaging.SessionUnsubscribeEvent
 import smalltalk.backend.application.message.MessageBroker
 import smalltalk.backend.application.room.Type.*
+import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.infra.repository.member.MemberRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.Bot
@@ -58,7 +59,7 @@ class RoomEventListener(
                     else -> throw IllegalStateException("Not allowed type")
                 }
                 memberRepository.save(
-                    sessionId ?: throw IllegalStateException("Doesnt exist session id"),
+                    sessionId ?: throw IllegalStateException("Doesnt exist session-id"),
                     memberId,
                     roomId
                 )
@@ -76,6 +77,21 @@ class RoomEventListener(
     // TODO (예외 발생으로 연결 종료, 채팅방 퇴장) 케이스 분리
     @EventListener
     private fun handleUnsubscribe(event: SessionUnsubscribeEvent) {
+        StompHeaderAccessor.wrap(event.message).let {
+            val sessionId = it.sessionId ?: throw IllegalStateException("Not valid session-id")
+            memberRepository.findById(sessionId)?.let { member ->
+                val roomId = member.roomId
+                val memberIdToDelete = member.id
+                memberRepository.deleteById(sessionId)
+                roomRepository.deleteMember(roomId, memberIdToDelete)
+                roomRepository.findById(roomId)?.let { room ->
+                    broker.send(
+                        WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId,
+                        createBotMessage(room.members.size, NICKNAME_PREFIX + memberIdToDelete + BotText.EXIT)
+                    )
+                }
+            }
+        }
     }
 
     private fun createBotMessage(numberOfMember: Int, message: String) = Bot(numberOfMember, message)
