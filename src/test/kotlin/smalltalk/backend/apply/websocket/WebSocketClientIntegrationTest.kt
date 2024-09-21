@@ -3,6 +3,7 @@ package smalltalk.backend.apply.websocket
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.first
 import org.hildan.krossbow.stomp.StompClient
@@ -34,8 +35,7 @@ class WebSocketClientIntegrationTest(
     @LocalServerPort
     private val port: Int,
     private val roomRepository: RoomRepository,
-    private val memberRepository: MemberRepository,
-    private val mapper: ObjectMapper
+    private val memberRepository: MemberRepository
 ) : FunSpec({
     val logger = KotlinLogging.logger { }
     val url = "ws://localhost:$port${WebSocketConfig.STOMP_ENDPOINT}"
@@ -58,6 +58,7 @@ class WebSocketClientIntegrationTest(
                 text shouldBe (room.name + BotText.OPEN)
             }
         }
+        memberRepository.findAll() shouldHaveSize 1
         session.disconnect()
     }
 
@@ -76,6 +77,7 @@ class WebSocketClientIntegrationTest(
             numberOfMember shouldBe roomRepository.getById(roomId).members.size
             text shouldBe (RoomEventListener.NICKNAME_PREFIX + enteredMemberId + BotText.ENTRANCE)
         }
+        memberRepository.findAll() shouldHaveSize 1
         session.disconnect()
     }
 
