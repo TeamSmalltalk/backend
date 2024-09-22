@@ -1,5 +1,6 @@
 package smalltalk.backend.apply.websocket
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
@@ -36,7 +37,8 @@ class StompClientIntegrationTest(
     @LocalServerPort
     private val port: Int,
     private val roomRepository: RoomRepository,
-    private val memberRepository: MemberRepository
+    private val memberRepository: MemberRepository,
+    private val mapper: ObjectMapper
 ) : FunSpec({
     val logger = KotlinLogging.logger { }
     val url = "ws://localhost:$port${WebSocketConfig.STOMP_ENDPOINT}"
@@ -52,7 +54,9 @@ class StompClientIntegrationTest(
         launch {
             session.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()), Bot.serializer())
                 .take(3)
-                .collect { messageChannel.send(it) }
+                .collect {
+                    messageChannel.send(it)
+                }
         }
         val receivedMessageWhenOpenRoom = messageChannel.receive()
         val memberIdToDelete = roomRepository.addMember(roomId)
@@ -82,6 +86,25 @@ class StompClientIntegrationTest(
             }
         }
         sessionToReceiveExitMessage.disconnect()
+        session.disconnect()
+    }
+
+    test("채팅방 입장 시 예외가 발생하면 메시지를 수신해야 한다") {
+        // Given
+        val room = roomRepository.save(NAME)
+        val roomId = room.id
+        val destination = "${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}abc"
+        val enteredMemberId = roomRepository.addMember(roomId)
+
+        // When
+        val session = client.connect(url).withJsonConversions()
+        val receivedMessage = session.subscribe(createHeaders(destination, ENTER.name, enteredMemberId.toString())).first()
+
+        // Then
+        receivedMessage.run {
+            headers[RoomEventListener.TYPE_HEADER] shouldBe "ERROR"
+            bodyAsText shouldBe "600"
+        }
         session.disconnect()
     }
 
