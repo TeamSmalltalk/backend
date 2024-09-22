@@ -9,6 +9,6 @@ class SimpleMessageBroker(
     private val template: SimpMessagingTemplate
 ): MessageBroker {
     override fun send(topic: String, message: Any, headers: Map<String, Any>?) {
-        template.convertAndSend(topic, message, headers);
+        template.convertAndSend(topic, message, headers)
     }
 }
