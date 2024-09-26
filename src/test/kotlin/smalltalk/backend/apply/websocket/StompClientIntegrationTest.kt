@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
@@ -17,15 +18,16 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
-import smalltalk.backend.application.room.RoomEventListener
-import smalltalk.backend.application.room.Type.ENTER
-import smalltalk.backend.application.room.Type.OPEN
+import smalltalk.backend.application.room.MessageHeader.*
+import smalltalk.backend.application.room.SystemType.ENTER
+import smalltalk.backend.application.room.SystemType.OPEN
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.apply.createHeaders
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.infra.repository.member.MemberRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
-import smalltalk.backend.presentation.dto.message.BotText
+import smalltalk.backend.presentation.dto.message.Error
+import smalltalk.backend.presentation.dto.message.SystemTextPostfix
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
 
@@ -54,9 +56,7 @@ class StompClientIntegrationTest(
         launch {
             session.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()), Bot.serializer())
                 .take(3)
-                .collect {
-                    messageChannel.send(it)
-                }
+                .collect { messageChannel.send(it) }
         }
         val receivedMessageWhenOpenRoom = messageChannel.receive()
         val memberIdToDelete = roomRepository.addMember(roomId)
@@ -71,18 +71,18 @@ class StompClientIntegrationTest(
 
         // Then
         val latestNumberOfMember = room.members.size
-        receivedMessageWhenOpenRoom.run {
-            numberOfMember shouldBe latestNumberOfMember
-            text shouldBe (room.name + BotText.OPEN)
+        receivedMessageWhenOpenRoom.let { openMessage ->
+            openMessage.numberOfMember shouldBe latestNumberOfMember
+            openMessage.text shouldBe (room.name + SystemTextPostfix.OPEN)
         }
         receivedMessagesWhenEnterAndExitRoom.run {
-            first().run {
-                numberOfMember shouldBe (latestNumberOfMember + 1)
-                text shouldBe (RoomEventListener.NICKNAME_PREFIX + memberIdToDelete + BotText.ENTRANCE)
+            first().let { enterMessage ->
+                enterMessage.numberOfMember shouldBe (latestNumberOfMember + 1)
+                enterMessage.text shouldBe ("익명" + memberIdToDelete + SystemTextPostfix.ENTRANCE)
             }
-            last().run {
-                numberOfMember shouldBe latestNumberOfMember
-                text shouldBe (RoomEventListener.NICKNAME_PREFIX + memberIdToDelete + BotText.EXIT)
+            last().let { exitMessage ->
+                exitMessage.numberOfMember shouldBe latestNumberOfMember
+                exitMessage.text shouldBe ("익명" + memberIdToDelete + SystemTextPostfix.EXIT)
             }
         }
         sessionToReceiveExitMessage.disconnect()
@@ -93,18 +93,23 @@ class StompClientIntegrationTest(
         // Given
         val room = roomRepository.save(NAME)
         val roomId = room.id
-        val destination = "${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}abc"
+        val invalidDestination = "${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}abc"
         val enteredMemberId = roomRepository.addMember(roomId)
 
         // When
         val session = client.connect(url).withJsonConversions()
-        val receivedMessage = session.subscribe(createHeaders(destination, ENTER.name, enteredMemberId.toString())).first()
+        launch {
+            session.subscribe(createHeaders(invalidDestination, ENTER.name, enteredMemberId.toString()))
+                .collect {
+                    when (mapper.readValue(it.bodyAsText, Error::class.java).code) {
+                        ROOM.code -> {
+                            cancel()
+                        }
+                    }
+                }
+        }.join()
 
         // Then
-        receivedMessage.run {
-            headers[RoomEventListener.TYPE_HEADER] shouldBe "ERROR"
-            bodyAsText shouldBe "600"
-        }
         session.disconnect()
     }
 

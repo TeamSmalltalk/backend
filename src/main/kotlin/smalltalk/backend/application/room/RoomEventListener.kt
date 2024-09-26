@@ -1,107 +1,79 @@
 package smalltalk.backend.application.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.event.EventListener
-import org.springframework.messaging.MessageChannel
-import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
-import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
 import org.springframework.web.socket.messaging.SessionUnsubscribeEvent
-import smalltalk.backend.application.message.MessageBroker
-import smalltalk.backend.application.room.Type.ENTER
-import smalltalk.backend.application.room.Type.OPEN
+import smalltalk.backend.application.room.MessageHeader.*
+import smalltalk.backend.application.room.SystemType.*
 import smalltalk.backend.config.websocket.WebSocketConfig
-import smalltalk.backend.infra.repository.member.MemberRepository
-import smalltalk.backend.infra.repository.room.RoomRepository
-import smalltalk.backend.presentation.dto.message.Bot
-import smalltalk.backend.presentation.dto.message.BotText
+import smalltalk.backend.exception.room.situation.DOESNT_EXIST_HEADER_MESSAGE_PREFIX
+import smalltalk.backend.exception.room.situation.DoesntExistHeaderException
 
-// TODO Implement layer 추가해서 로직 단순화
 @Component
-class RoomEventListener(
-    @Qualifier("clientOutboundChannel")
-    private val outboundChannel: MessageChannel,
-    private val roomRepository: RoomRepository,
-    private val memberRepository: MemberRepository,
-    private val broker: MessageBroker,
-) {
+class RoomEventListener(private val roomImplement: RoomImplement) {
     private val logger = KotlinLogging.logger { }
     companion object {
-        const val NICKNAME_PREFIX = "익명"
-        const val TYPE_HEADER = "type"
-        const val MEMBER_ID_HEADER = "memberId"
+        private const val DESTINATION_PATTERN = "^${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}[0-9]+$"
         private const val ROOM_ID_START_INDEX = 7
     }
 
     @EventListener
     private fun handleSubscribe(event: SessionSubscribeEvent) {
-        logger.info { event.message }
-        val sessionId = StompHeaderAccessor.wrap(event.message).sessionId ?: throw IllegalStateException("Doesnt exist session-id")
-        val subscriptionId = StompHeaderAccessor.wrap(event.message).subscriptionId ?: throw IllegalStateException("Doesnt exist subscription-id")
-        StompHeaderAccessor.wrap(event.message).run {
-            try {
-                val topic = destination?.takeIf {
-                    Regex("^${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}[0-9]+$").matches(it)
-                } ?: throw IllegalStateException("Doesnt exist room id")
-                val roomId = topic.substring(ROOM_ID_START_INDEX).toLong()
-                val memberId = getFirstNativeHeader(MEMBER_ID_HEADER)?.toLong()
-                    ?: throw IllegalStateException("Doesnt exist member id")
-                val room = roomRepository.getById(roomId)
-                when (getFirstNativeHeader(TYPE_HEADER) ?: throw IllegalStateException("Doesnt exist type")) {
-                    OPEN.name -> broker.send(
-                        topic,
-                        createBotMessage(room.members.size, room.name + BotText.OPEN)
-                    )
-                    ENTER.name ->
-                        broker.send(
-                            topic,
-                            createBotMessage(room.members.size, NICKNAME_PREFIX + memberId + BotText.ENTRANCE)
-                        )
-                    else -> throw IllegalStateException("Not allowed type")
-                }
-                memberRepository.save(
-                    sessionId,
-                    memberId,
-                    roomId
-                )
+        val accessor = StompHeaderAccessor.wrap(event.message)
+        val sessionId = getValue(accessor.sessionId, SESSION.key)
+        val subscriptionId = getValue(accessor.subscriptionId, SUBSCRIPTION.key)
+        try {
+            val destination = getDestination(accessor.destination, ROOM.key)
+            val id = getRoomId(destination).toLong()
+            val memberId = getNativeHeaderValue(accessor, MEMBER.key).toLong()
+            val room = roomImplement.getById(id)
+            when (getNativeHeaderValue(accessor, TYPE.key)) {
+                OPEN.name -> roomImplement.sendSystemMessage(destination, OPEN, room.members.size, room.name, memberId)
+                ENTER.name -> roomImplement.sendSystemMessage(destination, ENTER, room.members.size, room.name, memberId)
+                else -> throw DoesntExistHeaderException(TYPE.key)
             }
-            catch (exceptionToHandle: Exception) {
-                outboundChannel.send(
-                    MessageBuilder.createMessage(
-                        "600".toByteArray(),
-                        StompHeaderAccessor.create(StompCommand.MESSAGE).apply {
-                            this.sessionId = sessionId
-                            this.subscriptionId = subscriptionId
-                            addNativeHeader(TYPE_HEADER, "ERROR")
-                        }.messageHeaders
-                    )
-                )
+            roomImplement.saveMember(sessionId, memberId, id)
+        }
+        catch (exceptionToHandle: Exception) {
+            var message = exceptionToHandle.message
+            message?.let {
+                if (checkExceptionMessagePrefix(it))
+                    message = getExceptionCause(it)
             }
+            roomImplement.sendErrorMessage(message, sessionId, subscriptionId)
         }
     }
 
     @EventListener
     private fun handleUnsubscribe(event: SessionUnsubscribeEvent) {
-        logger.info { event.message }
-        StompHeaderAccessor.wrap(event.message).let {
-            val sessionId = it.sessionId ?: throw IllegalStateException("Not valid session-id")
-            memberRepository.findById(sessionId)?.let { member ->
-                val roomId = member.roomId
-                val memberIdToDelete = member.id
-                memberRepository.deleteById(sessionId)
-                roomRepository.deleteMember(roomId, memberIdToDelete)
-                roomRepository.findById(roomId)?.let { room ->
-                    broker.send(
-                        WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId,
-                        createBotMessage(room.members.size, NICKNAME_PREFIX + memberIdToDelete + BotText.EXIT)
-                    )
-                }
+        val accessor = StompHeaderAccessor.wrap(event.message)
+        val sessionId = getValue(accessor.sessionId, SESSION.key)
+        roomImplement.findMember(sessionId)?.let { member ->
+            val id = member.roomId
+            val memberIdToDelete = member.id
+            roomImplement.deleteMember(sessionId, id, memberIdToDelete)?.let { room ->
+                roomImplement.sendSystemMessage(getDestination(id), EXIT, room.members.size, room.name, memberIdToDelete)
             }
         }
     }
 
-    private fun createBotMessage(numberOfMember: Int, message: String) = Bot(numberOfMember, message)
+    private fun getValue(valueToCheck: String?, nameIfCauseException: String) =
+        valueToCheck ?: throw DoesntExistHeaderException(nameIfCauseException)
+
+    private fun getDestination(destination: String?, nameIfCauseException: String) =
+        destination?.takeIf { Regex(DESTINATION_PATTERN).matches(it) } ?: throw DoesntExistHeaderException(nameIfCauseException)
+
+    private fun getDestination(id: Long) = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + id
+
+    private fun getRoomId(destination: String) = destination.substring(ROOM_ID_START_INDEX)
+
+    private fun getNativeHeaderValue(accessor: StompHeaderAccessor, key: String) =
+        accessor.getFirstNativeHeader(key) ?: throw DoesntExistHeaderException(key)
+
+    private fun checkExceptionMessagePrefix(message: String) = message.startsWith(DOESNT_EXIST_HEADER_MESSAGE_PREFIX)
+
+    private fun getExceptionCause(message: String) = message.substringAfter(DOESNT_EXIST_HEADER_MESSAGE_PREFIX)
 }

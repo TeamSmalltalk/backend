@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class SimpleMessageBroker(
     private val template: SimpMessagingTemplate
 ): MessageBroker {
-    override fun send(topic: String, message: Any, headers: Map<String, Any>?) {
-        template.convertAndSend(topic, message, headers)
+    override fun send(topic: String, message: Any) {
+        template.convertAndSend(topic, message)
     }
 }

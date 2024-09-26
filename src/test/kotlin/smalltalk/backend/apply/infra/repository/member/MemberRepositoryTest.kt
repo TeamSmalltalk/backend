@@ -15,7 +15,7 @@ import smalltalk.backend.apply.ID
 import smalltalk.backend.apply.MEMBERS_INITIAL_ID
 import smalltalk.backend.apply.MEMBER_SESSION_ID
 import smalltalk.backend.config.redis.RedisConfig
-import smalltalk.backend.exception.member.situation.MemberNotFoundException
+import smalltalk.backend.exception.room.situation.MemberNotFoundException
 import smalltalk.backend.infra.repository.member.MemberRepository
 import smalltalk.backend.infra.repository.member.RedisMemberRepository
 import smalltalk.backend.infra.repository.member.getById

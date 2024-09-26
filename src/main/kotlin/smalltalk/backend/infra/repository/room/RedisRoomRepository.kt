@@ -27,12 +27,12 @@ class RedisRoomRepository(
         private const val ROOM_KEY_PATTERN = "$ROOM_KEY_PREFIX*"
     }
 
-    override fun save(roomName: String): Room {
+    override fun save(name: String): Room {
         val generatedRoomId = generateRoomId()
         val room =
             Room(
                 generatedRoomId,
-                roomName,
+                name,
                 (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
                 mutableListOf(MEMBERS_INITIAL_ID)
             )
@@ -40,9 +40,9 @@ class RedisRoomRepository(
         return room
     }
 
-    override fun findById(roomId: Long) = findByKey(createKey(roomId))
+    override fun findById(id: Long) = findByKey(createKey(id))
 
-    override fun getById(roomId: Long) = findByKey(createKey(roomId)) ?: throw RoomNotFoundException()
+    override fun getById(id: Long) = findByKey(createKey(id)) ?: throw RoomNotFoundException()
 
     override fun findAll() = findKeys().mapNotNull { findByKey(it) }
 
@@ -53,8 +53,8 @@ class RedisRoomRepository(
         }
     }
 
-    override fun addMember(roomId: Long): Long {
-        val key = createKey(roomId).toByteArray()
+    override fun addMember(id: Long): Long {
+        val key = createKey(id).toByteArray()
         var memberId = 0L
         do {
             val transactionResults =
@@ -77,34 +77,36 @@ class RedisRoomRepository(
         return memberId
     }
 
-    override fun deleteMember(roomId: Long, memberId: Long) {
-        val key = createKey(roomId).toByteArray()
+    override fun deleteMember(id: Long, memberId: Long): Room? {
+        var room: Room? = null
+        val key = createKey(id).toByteArray()
         do {
             val transactionResults =
                 template.execute {
                     return@execute it.apply {
                         watch(key)
-                        val room = getByKey(key, it)
+                        val roomToCheck = getByKey(key, it)
                         multi()
-                        if (checkLastMember(room))
+                        if (checkLastMember(roomToCheck)) {
+                            room = null
                             stringCommands().getDel(key)
+                        }
                         else {
-                            stringCommands()[key] =
-                                mapper.writeValueAsBytes(
-                                    room.apply {
-                                        members.remove(memberId)
-                                        idQueue.add(memberId)
-                                    }
-                                )
+                            room = roomToCheck.apply {
+                                members.remove(memberId)
+                                idQueue.add(memberId)
+                            }
+                            stringCommands()[key] = mapper.writeValueAsBytes(room)
                         }
                     }.exec()
                 }
         } while (transactionResults.isNullOrEmpty())
+        return room
     }
 
     private fun generateRoomId() = operations.increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
 
-    private fun createKey(roomId: Long) = ROOM_KEY_PREFIX + roomId
+    private fun createKey(id: Long) = ROOM_KEY_PREFIX + id
 
     private fun findByKey(key: String) = operations[key]?.let { mapper.readValue(it, Room::class.java) }
 

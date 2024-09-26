@@ -1,6 +1,7 @@
 package smalltalk.backend.application.room
 
-enum class Type {
+enum class SystemType {
     OPEN,
-    ENTER
+    ENTER,
+    EXIT
 }
