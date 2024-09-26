@@ -43,8 +43,6 @@ dependencies {
 	implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
 	implementation("org.hildan.krossbow:krossbow-stomp-core:$krossbowVersion")
 	implementation("org.hildan.krossbow:krossbow-websocket-builtin:$krossbowVersion")
-	implementation("org.hildan.krossbow:krossbow-stomp-kxserialization:$krossbowVersion")
-	implementation("org.hildan.krossbow:krossbow-stomp-kxserialization-json:$krossbowVersion")
 	implementation("org.hildan.krossbow:krossbow-websocket-spring:$krossbowVersion")
 	implementation("org.glassfish.tyrus.bundles:tyrus-standalone-client-jdk:$standaloneClientVersion")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")

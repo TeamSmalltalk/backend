@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import org.hildan.krossbow.stomp.StompClient
-import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.websocket.spring.asKrossbowWebSocketClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -27,6 +26,7 @@ import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.infra.repository.member.MemberRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.Error
+import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
@@ -48,23 +48,23 @@ class StompClientIntegrationTest(
 
     test("채팅방을 입장 및 퇴장하면 메시지를 수신해야 한다") {
         // Given
-        val messageChannel = Channel<Bot>()
+        val messageChannel = Channel<System>()
         val room = roomRepository.save(NAME)
         val roomId = room.id
         val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId
-        val session = client.connect(url).withJsonConversions()
+        val session = client.connect(url)
         launch {
-            session.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()), Bot.serializer())
+            session.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()))
                 .take(3)
-                .collect { messageChannel.send(it) }
+                .collect { messageChannel.send(mapper.readValue(it.bodyAsText, System::class.java)) }
         }
         val receivedMessageWhenOpenRoom = messageChannel.receive()
         val memberIdToDelete = roomRepository.addMember(roomId)
 
         // When
-        val receivedMessagesWhenEnterAndExitRoom = mutableListOf<Bot>()
-        val sessionToReceiveExitMessage = client.connect(url).withJsonConversions()
-        sessionToReceiveExitMessage.subscribe(createHeaders(destination, ENTER.name, memberIdToDelete.toString()), Bot.serializer()).first()
+        val receivedMessagesWhenEnterAndExitRoom = mutableListOf<System>()
+        val sessionToReceiveExitMessage = client.connect(url)
+        sessionToReceiveExitMessage.subscribe(createHeaders(destination, ENTER.name, memberIdToDelete.toString())).first()
         repeat(2) {
             receivedMessagesWhenEnterAndExitRoom.add(messageChannel.receive())
         }
@@ -97,7 +97,7 @@ class StompClientIntegrationTest(
         val enteredMemberId = roomRepository.addMember(roomId)
 
         // When
-        val session = client.connect(url).withJsonConversions()
+        val session = client.connect(url)
         launch {
             session.subscribe(createHeaders(invalidDestination, ENTER.name, enteredMemberId.toString()))
                 .collect {
