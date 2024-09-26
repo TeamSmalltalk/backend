@@ -1,4 +1,4 @@
-package smalltalk.backend.application.util.message
+package smalltalk.backend.util.message
 
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Component
