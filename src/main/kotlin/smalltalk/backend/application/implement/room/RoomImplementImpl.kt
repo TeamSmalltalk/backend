@@ -68,7 +68,7 @@ class RoomImplementImpl(
     private fun getSystemMessage(type: SystemType, numberOfMember: Int, name: String, memberId: Long) =
         when (type) {
             OPEN -> createSystemMessage(numberOfMember, name + SystemTextPostfix.OPEN)
-            ENTER -> createSystemMessage(numberOfMember, NICKNAME_PREFIX + memberId + SystemTextPostfix.ENTRANCE)
+            ENTER -> createSystemMessage(numberOfMember, NICKNAME_PREFIX + memberId + SystemTextPostfix.ENTER)
             EXIT -> createSystemMessage(numberOfMember, NICKNAME_PREFIX + memberId + SystemTextPostfix.EXIT)
         }
 

@@ -1,17 +1,10 @@
 package smalltalk.backend.apply.application.websocket
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.core.spec.style.ExpectSpec
-import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.launch
 import org.hildan.krossbow.stomp.StompClient
-import org.hildan.krossbow.stomp.StompSession
 import org.hildan.krossbow.websocket.spring.asKrossbowWebSocketClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
@@ -52,7 +45,7 @@ class StompClientIntegrationTest(
     context("채팅방 생성") {
         val room = roomRepository.save(NAME)
         val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + room.id
-        expect("입장하면 메시지를 수신한다") {
+        expect("메시지를 수신한다") {
             val session = client.connect(url)
             val message = mapperClient.getExpectedValue(
                 session.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString())).first().bodyAsText,
@@ -62,6 +55,57 @@ class StompClientIntegrationTest(
                 numberOfMember shouldBe 1
                 text shouldBe (NAME + SystemTextPostfix.OPEN)
             }
+            session.disconnect()
+        }
+    }
+
+    context("채팅방 입장") {
+        val room = roomRepository.save(NAME)
+        val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + room.id
+        val enteredMemberId = roomRepository.addMember(room.id)
+        expect("입장 메시지를 수신한다") {
+            val session = client.connect(url)
+            val message = mapperClient.getExpectedValue(
+                session.subscribe(createHeaders(destination, ENTER.name, enteredMemberId.toString())).first().bodyAsText,
+                System::class.java
+            )
+            message.run {
+                numberOfMember shouldBe 2
+                text shouldBe ("익명" + enteredMemberId + SystemTextPostfix.ENTER)
+            }
+            session.disconnect()
+        }
+        expect("주소가 존재하지 않는다면 에러 메시지를 수신한다") {
+            val session = client.connect(url)
+            val message = mapperClient.getExpectedValue(
+                session.subscribe(
+                    createHeaders(
+                        "${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}abc",
+                        ENTER.name,
+                        enteredMemberId.toString()
+                    )
+                ).first().bodyAsText,
+                Error::class.java
+            )
+            message.code shouldBe ROOM.code
+            session.disconnect()
+        }
+        expect("입장한 멤버가 존재하지 않는다면 에러 메시지를 수신한다") {
+            val session = client.connect(url)
+            val message = mapperClient.getExpectedValue(
+                session.subscribe(createHeaders(destination, ENTER.name, null)).first().bodyAsText,
+                Error::class.java
+            )
+            message.code shouldBe MEMBER.code
+            session.disconnect()
+        }
+        expect("생성 또는 입장을 구분하는 타입이 존재하지 않는다면 에러 메시지를 수신한다") {
+            val session = client.connect(url)
+            val message = mapperClient.getExpectedValue(
+                session.subscribe(createHeaders(destination, null, enteredMemberId.toString())).first().bodyAsText,
+                Error::class.java
+            )
+            message.code shouldBe TYPE.code
             session.disconnect()
         }
     }
