@@ -1,6 +1,5 @@
 package smalltalk.backend.apply.application.websocket
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
@@ -30,6 +29,7 @@ import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
+import smalltalk.backend.util.jackson.ObjectMapperClient
 
 @ActiveProfiles("test")
 @Import(RedisContainerConfig::class)
@@ -40,7 +40,7 @@ class StompClientIntegrationTest(
     private val port: Int,
     private val roomRepository: RoomRepository,
     private val memberRepository: MemberRepository,
-    private val mapper: ObjectMapper
+    private val mapperClient: ObjectMapperClient
 ) : FunSpec({
     val logger = KotlinLogging.logger { }
     val url = "ws://localhost:$port${WebSocketConfig.STOMP_ENDPOINT}"
@@ -56,7 +56,7 @@ class StompClientIntegrationTest(
         launch {
             session.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()))
                 .take(3)
-                .collect { messageChannel.send(mapper.readValue(it.bodyAsText, System::class.java)) }
+                .collect { messageChannel.send(mapperClient.getExpectedValue(it.bodyAsText, System::class.java)) }
         }
         val receivedMessageWhenOpenRoom = messageChannel.receive()
         val memberIdToDelete = roomRepository.addMember(roomId)
@@ -101,7 +101,7 @@ class StompClientIntegrationTest(
         launch {
             session.subscribe(createHeaders(invalidDestination, ENTER.name, enteredMemberId.toString()))
                 .collect {
-                    when (mapper.readValue(it.bodyAsText, Error::class.java).code) {
+                    when (mapperClient.getExpectedValue(it.bodyAsText, Error::class.java).code) {
                         ROOM.code -> {
                             cancel()
                         }

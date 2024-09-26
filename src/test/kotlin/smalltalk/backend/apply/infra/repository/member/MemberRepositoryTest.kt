@@ -21,9 +21,10 @@ import smalltalk.backend.infra.repository.member.RedisMemberRepository
 import smalltalk.backend.infra.repository.member.getById
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
+import smalltalk.backend.util.jackson.ObjectMapperClient
 
 @ActiveProfiles("test")
-@Import(RedisConfig::class, RedisContainerConfig::class)
+@Import(RedisConfig::class, RedisContainerConfig::class, ObjectMapperClient::class)
 @SpringBootTest(classes = [MemberRepository::class, RedisMemberRepository::class])
 @DirtiesContext
 class MemberRepositoryTest(

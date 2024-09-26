@@ -1,6 +1,5 @@
 package smalltalk.backend.application.implement.room
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.messaging.MessageChannel
@@ -20,6 +19,7 @@ import smalltalk.backend.presentation.dto.message.SystemTextPostfix
 import smalltalk.backend.presentation.dto.room.response.Enter
 import smalltalk.backend.presentation.dto.room.response.Open
 import smalltalk.backend.presentation.dto.room.response.SimpleInfo
+import smalltalk.backend.util.jackson.ObjectMapperClient
 
 @Implement
 class RoomImplementImpl(
@@ -28,7 +28,7 @@ class RoomImplementImpl(
     private val roomRepository: RoomRepository,
     private val memberRepository: MemberRepository,
     private val broker: MessageBroker,
-    private val mapper: ObjectMapper
+    private val client: ObjectMapperClient
 ) : RoomImplement {
     private val logger = KotlinLogging.logger { }
     companion object {
@@ -76,7 +76,7 @@ class RoomImplementImpl(
 
     private fun createErrorMessage(payload: Error, sessionId: String, subscriptionId: String) =
         MessageBuilder.createMessage(
-            mapper.writeValueAsBytes(payload),
+            client.getByteArrayValue(payload),
             StompHeaderAccessor.create(StompCommand.MESSAGE).apply {
                 this.sessionId = sessionId
                 this.subscriptionId = subscriptionId

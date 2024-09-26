@@ -1,6 +1,5 @@
 package smalltalk.backend.infra.repository.room
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.connection.RedisConnection
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -9,12 +8,13 @@ import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
+import smalltalk.backend.util.jackson.ObjectMapperClient
 
 
 @Repository
 class RedisRoomRepository(
     private val template: StringRedisTemplate,
-    private val mapper: ObjectMapper
+    private val client: ObjectMapperClient
 ) : RoomRepository {
     private val logger = KotlinLogging.logger { }
     private val operations = template.opsForValue()
@@ -36,7 +36,7 @@ class RedisRoomRepository(
                 (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
                 mutableListOf(MEMBERS_INITIAL_ID)
             )
-        operations[createKey(generatedRoomId)] = mapper.writeValueAsString(room)
+        operations[createKey(generatedRoomId)] = client.getStringValue(room)
         return room
     }
 
@@ -64,13 +64,12 @@ class RedisRoomRepository(
                         val room = getByKey(key, it)
                         checkFull(room)
                         multi()
-                        stringCommands()[key] =
-                            mapper.writeValueAsBytes(
-                                room.apply {
-                                    memberId = idQueue.removeFirst()
-                                    members.add(memberId)
-                                }
-                            )
+                        stringCommands()[key] = client.getByteArrayValue(
+                            room.apply {
+                                memberId = idQueue.removeFirst()
+                                members.add(memberId)
+                            }
+                        )
                     }.exec()
                 }
         } while (transactionResults.isNullOrEmpty())
@@ -92,11 +91,13 @@ class RedisRoomRepository(
                             stringCommands().getDel(key)
                         }
                         else {
-                            room = roomToCheck.apply {
+                            roomToCheck.apply {
                                 members.remove(memberId)
                                 idQueue.add(memberId)
+                            }.let { updatedRoom ->
+                                room = updatedRoom
+                                stringCommands()[key] = client.getByteArrayValue(updatedRoom)
                             }
-                            stringCommands()[key] = mapper.writeValueAsBytes(room)
                         }
                     }.exec()
                 }
@@ -108,10 +109,10 @@ class RedisRoomRepository(
 
     private fun createKey(id: Long) = ROOM_KEY_PREFIX + id
 
-    private fun findByKey(key: String) = operations[key]?.let { mapper.readValue(it, Room::class.java) }
+    private fun findByKey(key: String) = operations[key]?.let { client.getExpectedValue(it, Room::class.java) }
 
     private fun getByKey(key: ByteArray, connection: RedisConnection) =
-        connection.stringCommands()[key]?.let { mapper.readValue(it, Room::class.java) } ?: throw RoomNotFoundException()
+        connection.stringCommands()[key]?.let { client.getExpectedValue(it, Room::class.java) } ?: throw RoomNotFoundException()
 
     private fun findKeys() = template.keys(ROOM_KEY_PATTERN)
 
