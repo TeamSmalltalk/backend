@@ -3,7 +3,10 @@ package smalltalk.backend.apply.application.websocket
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.websocket.spring.asKrossbowWebSocketClient
 import org.springframework.boot.test.context.SpringBootTest
@@ -110,72 +113,37 @@ class StompClientIntegrationTest(
         }
     }
 
-//    test("채팅방을 입장 및 퇴장하면 메시지를 수신해야 한다") {
-//        // Given
-//        val messageChannel = Channel<System>()
-//        val room = roomRepository.save(NAME)
-//        val roomId = room.id
-//        val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId
-//        val session = client.connect(url)
-//        launch {
-//            session.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()))
-//                .take(3)
-//                .collect { messageChannel.send(mapperClient.getExpectedValue(it.bodyAsText, System::class.java)) }
-//        }
-//        val receivedMessageWhenOpenRoom = messageChannel.receive()
-//        val memberIdToDelete = roomRepository.addMember(roomId)
-//
-//        // When
-//        val receivedMessagesWhenEnterAndExitRoom = mutableListOf<System>()
-//        val sessionToReceiveExitMessage = client.connect(url)
-//        sessionToReceiveExitMessage.subscribe(createHeaders(destination, ENTER.name, memberIdToDelete.toString())).first()
-//        repeat(2) {
-//            receivedMessagesWhenEnterAndExitRoom.add(messageChannel.receive())
-//        }
-//
-//        // Then
-//        val latestNumberOfMember = room.members.size
-//        receivedMessageWhenOpenRoom.let { openMessage ->
-//            openMessage.numberOfMember shouldBe latestNumberOfMember
-//            openMessage.text shouldBe (room.name + SystemTextPostfix.OPEN)
-//        }
-//        receivedMessagesWhenEnterAndExitRoom.run {
-//            first().let { enterMessage ->
-//                enterMessage.numberOfMember shouldBe (latestNumberOfMember + 1)
-//                enterMessage.text shouldBe ("익명" + memberIdToDelete + SystemTextPostfix.ENTRANCE)
-//            }
-//            last().let { exitMessage ->
-//                exitMessage.numberOfMember shouldBe latestNumberOfMember
-//                exitMessage.text shouldBe ("익명" + memberIdToDelete + SystemTextPostfix.EXIT)
-//            }
-//        }
-//        sessionToReceiveExitMessage.disconnect()
-//        session.disconnect()
-//    }
-
-//    test("채팅방 입장 시 예외가 발생하면 메시지를 수신해야 한다") {
-//        // Given
-//        val room = roomRepository.save(NAME)
-//        val roomId = room.id
-//        val invalidDestination = "${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}abc"
-//        val enteredMemberId = roomRepository.addMember(roomId)
-//
-//        // When
-//        val session = client.connect(url)
-//        launch {
-//            session.subscribe(createHeaders(invalidDestination, ENTER.name, enteredMemberId.toString()))
-//                .collect {
-//                    when (mapperClient.getExpectedValue(it.bodyAsText, Error::class.java).code) {
-//                        ROOM.code -> {
-//                            cancel()
-//                        }
-//                    }
-//                }
-//        }.join()
-//
-//        // Then
-//        session.disconnect()
-//    }
+    context("채팅방 퇴장") {
+        val messageChannel = Channel<System>()
+        val messages = mutableListOf<System>()
+        val room = roomRepository.save(NAME)
+        val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + room.id
+        val sessionToOpenRoom = client.connect(url)
+        launch {
+            sessionToOpenRoom.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()))
+                .take(3)
+                .collect {
+                    val message = mapperClient.getExpectedValue(it.bodyAsText, System::class.java)
+                    messages.add(message)
+                    messageChannel.send(message)
+                }
+        }
+        messageChannel.receive()
+        val enteredMemberId = roomRepository.addMember(room.id)
+        expect("메시지를 수신한다") {
+            val sessionToEnterRoom = client.connect(url)
+            sessionToEnterRoom.subscribe(createHeaders(destination, ENTER.name, enteredMemberId.toString())).first()
+            repeat(2) {
+                messageChannel.receive()
+            }
+            messages.last().run {
+                numberOfMember shouldBe 1
+                text shouldBe ("익명" + enteredMemberId + SystemTextPostfix.EXIT)
+            }
+            sessionToEnterRoom.disconnect()
+            sessionToOpenRoom.disconnect()
+        }
+    }
 
     afterRootTest {
         roomRepository.deleteAll()
