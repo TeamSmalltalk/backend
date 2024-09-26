@@ -1,4 +1,4 @@
-package smalltalk.backend.application.room
+package smalltalk.backend.application.websocket
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.event.EventListener
@@ -6,8 +6,9 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
 import org.springframework.web.socket.messaging.SessionUnsubscribeEvent
-import smalltalk.backend.application.room.MessageHeader.*
-import smalltalk.backend.application.room.SystemType.*
+import smalltalk.backend.application.implement.room.RoomImplement
+import smalltalk.backend.application.websocket.MessageHeader.*
+import smalltalk.backend.application.websocket.SystemType.*
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.exception.room.situation.DOESNT_EXIST_HEADER_MESSAGE_PREFIX
 import smalltalk.backend.exception.room.situation.DoesntExistHeaderException

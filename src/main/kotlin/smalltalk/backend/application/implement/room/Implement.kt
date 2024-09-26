@@ -1,4 +1,4 @@
-package smalltalk.backend.application.room
+package smalltalk.backend.application.implement.room
 
 import org.springframework.stereotype.Component
 

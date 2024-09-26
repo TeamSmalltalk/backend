@@ -1,5 +1,6 @@
-package smalltalk.backend.application.room
+package smalltalk.backend.application.implement.room
 
+import smalltalk.backend.application.websocket.SystemType
 import smalltalk.backend.domain.member.Member
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.presentation.dto.room.response.Enter

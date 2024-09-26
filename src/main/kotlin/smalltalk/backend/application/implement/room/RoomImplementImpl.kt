@@ -1,4 +1,4 @@
-package smalltalk.backend.application.room
+package smalltalk.backend.application.implement.room
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -7,9 +7,10 @@ import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.simp.stomp.StompCommand
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor
 import org.springframework.messaging.support.MessageBuilder
-import smalltalk.backend.application.message.MessageBroker
-import smalltalk.backend.application.room.MessageHeader.*
-import smalltalk.backend.application.room.SystemType.*
+import smalltalk.backend.application.util.message.MessageBroker
+import smalltalk.backend.application.websocket.MessageHeader.*
+import smalltalk.backend.application.websocket.SystemType
+import smalltalk.backend.application.websocket.SystemType.*
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.infra.repository.member.MemberRepository
 import smalltalk.backend.infra.repository.room.RoomRepository

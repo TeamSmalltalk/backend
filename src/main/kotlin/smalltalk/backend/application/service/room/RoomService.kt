@@ -1,8 +1,8 @@
-package smalltalk.backend.application.room
+package smalltalk.backend.application.service.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
-import smalltalk.backend.application.message.MessageBroker
+import smalltalk.backend.application.util.message.MessageBroker
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.presentation.dto.message.Chat
 

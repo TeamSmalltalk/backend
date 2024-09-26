@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.websocket
+package smalltalk.backend.apply.application.websocket
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -18,9 +18,9 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
-import smalltalk.backend.application.room.MessageHeader.*
-import smalltalk.backend.application.room.SystemType.ENTER
-import smalltalk.backend.application.room.SystemType.OPEN
+import smalltalk.backend.application.websocket.MessageHeader.*
+import smalltalk.backend.application.websocket.SystemType.ENTER
+import smalltalk.backend.application.websocket.SystemType.OPEN
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.apply.createHeaders
 import smalltalk.backend.config.websocket.WebSocketConfig

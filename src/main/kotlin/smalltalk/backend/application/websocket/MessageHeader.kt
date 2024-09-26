@@ -1,4 +1,4 @@
-package smalltalk.backend.application.room
+package smalltalk.backend.application.websocket
 
 enum class MessageHeader(val key: String, val code: String) {
     SESSION("sessionId", "600"),
