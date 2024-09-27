@@ -8,16 +8,10 @@ import smalltalk.backend.presentation.dto.message.Chat
 
 
 @Service
-class RoomService (
-    private val messageBroker: MessageBroker
-) {
+class RoomService(private val messageBroker: MessageBroker) {
     private val logger = KotlinLogging.logger { }
 
-    fun open() {
-    }
-
-    fun send(roomId: String, message: Chat) {
-        logger.debug { "call send method in service" }
-        messageBroker.send(WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + roomId, message)
+    fun send(id: String, message: Chat) {
+        messageBroker.send(WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + id, message)
     }
 }
