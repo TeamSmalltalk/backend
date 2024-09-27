@@ -32,7 +32,7 @@ class RoomImplementImpl(
 ) : RoomImplement {
     private val logger = KotlinLogging.logger { }
     companion object {
-        private const val NICKNAME_PREFIX = "익명"
+        private const val MEMBER_NICKNAME_PREFIX = "익명"
         private const val SUBSCRIBE_COMMON_EXCEPTION_CODE = "600"
     }
 
@@ -68,8 +68,8 @@ class RoomImplementImpl(
     private fun getSystemMessage(type: SystemType, numberOfMember: Int, name: String, memberId: Long) =
         when (type) {
             OPEN -> createSystemMessage(numberOfMember, name + SystemTextPostfix.OPEN)
-            ENTER -> createSystemMessage(numberOfMember, NICKNAME_PREFIX + memberId + SystemTextPostfix.ENTER)
-            EXIT -> createSystemMessage(numberOfMember, NICKNAME_PREFIX + memberId + SystemTextPostfix.EXIT)
+            ENTER -> createSystemMessage(numberOfMember, MEMBER_NICKNAME_PREFIX + memberId + SystemTextPostfix.ENTER)
+            EXIT -> createSystemMessage(numberOfMember, MEMBER_NICKNAME_PREFIX + memberId + SystemTextPostfix.EXIT)
         }
 
     private fun createSystemMessage(numberOfMember: Int, text: String) = System(numberOfMember, text)

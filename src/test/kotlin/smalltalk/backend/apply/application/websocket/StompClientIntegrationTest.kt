@@ -20,6 +20,7 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import smalltalk.backend.application.websocket.MessageHeader.*
 import smalltalk.backend.application.websocket.SystemType.ENTER
 import smalltalk.backend.application.websocket.SystemType.OPEN
+import smalltalk.backend.apply.MEMBER_NICKNAME_PREFIX
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.apply.createHeaders
 import smalltalk.backend.config.websocket.WebSocketConfig
@@ -77,7 +78,7 @@ class StompClientIntegrationTest(
             )
             message.run {
                 numberOfMember shouldBe 2
-                text shouldBe ("익명" + enteredMemberId + SystemTextPostfix.ENTER)
+                text shouldBe (MEMBER_NICKNAME_PREFIX + enteredMemberId + SystemTextPostfix.ENTER)
             }
             session.disconnect()
         }
@@ -141,7 +142,7 @@ class StompClientIntegrationTest(
             }
             messages.last().run {
                 numberOfMember shouldBe 1
-                text shouldBe ("익명" + enteredMemberId + SystemTextPostfix.EXIT)
+                text shouldBe (MEMBER_NICKNAME_PREFIX + enteredMemberId + SystemTextPostfix.EXIT)
             }
             sessionToEnterRoom.disconnect()
             sessionToOpenRoom.disconnect()
@@ -162,7 +163,7 @@ class StompClientIntegrationTest(
         messageChannel.receive()
         expect("메시지를 수신한다") {
             val destinationToSendChatMessage = WebSocketConfig.SEND_DESTINATION_PREFIX + room.id
-            val sender = "익명$enteredMemberId"
+            val sender = MEMBER_NICKNAME_PREFIX + enteredMemberId
             val text = "안녕하세요!"
             session.convertAndSend(destinationToSendChatMessage, TestChat(sender, text), TestChat.serializer())
             val message = mapperClient.getExpectedValue(messageChannel.receive(), Chat::class.java)
