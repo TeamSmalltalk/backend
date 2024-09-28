@@ -2,6 +2,7 @@ package smalltalk.backend.apply.service.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.BehaviorSpec
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -26,6 +27,17 @@ class RoomServiceTest : BehaviorSpec({
                     id shouldBe room.id
                     memberId shouldBe room.members.last()
                 }
+            }
+        }
+    }
+
+    Given("채팅방이 여러개 존재하는 경우") {
+        val rooms = (1L..3L).map { create(it, "room$it") }
+        every { roomRepository.findAll() } returns rooms
+        When("채팅방 목록을 조회하면") {
+            val simpleInfos = roomService.getSimpleInfos()
+            Then("모든 채팅방을 반환한다") {
+                simpleInfos shouldHaveSize 3
             }
         }
     }
