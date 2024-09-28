@@ -16,6 +16,8 @@ const val MEMBER_NICKNAME_PREFIX = "익명"
 fun create(id: Long = ID, name: String = NAME) =
     Room(id, name, (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(), mutableListOf(MEMBERS_INITIAL_ID))
 
+fun createRooms() = (1L..3L).map { create(it, NAME + it) }
+
 fun createOpenRequest() = OpenRequest(NAME)
 
 fun createOpenResponse() = OpenResponse(ID, MEMBERS_INITIAL_ID)

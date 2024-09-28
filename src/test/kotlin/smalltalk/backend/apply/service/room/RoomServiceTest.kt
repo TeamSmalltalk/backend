@@ -9,6 +9,7 @@ import io.mockk.mockk
 import smalltalk.backend.application.service.room.RoomService
 import smalltalk.backend.apply.create
 import smalltalk.backend.apply.createOpenRequest
+import smalltalk.backend.apply.createRooms
 import smalltalk.backend.infra.repository.room.RoomRepository
 
 class RoomServiceTest : BehaviorSpec({
@@ -32,7 +33,7 @@ class RoomServiceTest : BehaviorSpec({
     }
 
     Given("채팅방이 여러개 존재하는 경우") {
-        val rooms = (1L..3L).map { create(it, "room$it") }
+        val rooms = createRooms()
         every { roomRepository.findAll() } returns rooms
         When("채팅방 목록을 조회하면") {
             val simpleInfos = roomService.getSimpleInfos()
