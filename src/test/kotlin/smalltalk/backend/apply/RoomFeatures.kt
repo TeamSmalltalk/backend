@@ -10,5 +10,5 @@ const val MEMBERS_INITIAL_ID = 1L
 const val MEMBER_SESSION_ID = "session-id"
 const val MEMBER_NICKNAME_PREFIX = "익명"
 
-fun createRoom(id: Long = ID, name: String = NAME) =
+fun create(id: Long = ID, name: String = NAME) =
     Room(id, name, (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(), mutableListOf(MEMBERS_INITIAL_ID))
