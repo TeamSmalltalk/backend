@@ -48,7 +48,7 @@ class RoomServiceTest : BehaviorSpec({
         val enteredMemberId = room.members.last()
         every { roomRepository.addMember(any()) } returns enteredMemberId
         When("채팅방에 입장하면") {
-            val response = roomService.enter(room.id)
+            val response = roomService.enter(room.id.toString())
             Then("채팅방 멤버 정보를 반환한다") {
                 response.memberId shouldBe enteredMemberId
             }

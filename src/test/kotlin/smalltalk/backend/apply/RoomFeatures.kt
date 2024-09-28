@@ -1,7 +1,9 @@
 package smalltalk.backend.apply
 
 import smalltalk.backend.domain.room.Room
+import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.room.request.OpenRequest
+import smalltalk.backend.presentation.dto.room.response.EnterResponse
 import smalltalk.backend.presentation.dto.room.response.OpenResponse
 import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
 
@@ -23,3 +25,7 @@ fun createOpenRequest() = OpenRequest(NAME)
 fun createOpenResponse() = OpenResponse(ID, MEMBERS_INITIAL_ID)
 
 fun createSimpleInfoResponse() = (1L..3L).map { SimpleInfoResponse(it, NAME + it, MEMBERS_INITIAL_ID.toInt()) }
+
+fun createEnterResponse() = EnterResponse(MEMBERS_INITIAL_ID)
+
+fun createErrorResponseWhenEnter(code: String) = Error(code)

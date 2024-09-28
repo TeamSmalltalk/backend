@@ -16,5 +16,5 @@ class RoomService(private val roomRepository: RoomRepository) {
 
     fun getSimpleInfos() = roomRepository.findAll().map { SimpleInfoResponse(it.id, it.name, it.members.size) }
 
-    fun enter(id: Long) = EnterResponse(roomRepository.addMember(id))
+    fun enter(id: String) = EnterResponse(roomRepository.addMember(id.toLong()))
 }
