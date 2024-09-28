@@ -6,6 +6,4 @@ import org.springframework.stereotype.Component
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
 @Component
-annotation class Implement(
-    val value: String = ""
-)
+annotation class Implement(val value: String = "")

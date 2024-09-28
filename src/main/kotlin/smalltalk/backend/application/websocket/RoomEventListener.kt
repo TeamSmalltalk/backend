@@ -52,7 +52,7 @@ class RoomEventListener(private val roomImplement: RoomImplement) {
     private fun handleUnsubscribe(event: SessionUnsubscribeEvent) {
         val accessor = StompHeaderAccessor.wrap(event.message)
         val sessionId = getValue(accessor.sessionId, SESSION.key)
-        roomImplement.findMember(sessionId)?.let { member ->
+        roomImplement.findMemberById(sessionId)?.let { member ->
             val id = member.roomId
             val memberIdToDelete = member.id
             roomImplement.deleteMember(sessionId, id, memberIdToDelete)?.let { room ->

@@ -13,9 +13,9 @@ interface RoomImplement {
     fun findAll(): List<SimpleInfo>
     fun addMember(id: Long): Enter
     fun deleteMember(sessionId: String, id: Long, memberId: Long): Room?
+    fun saveMember(sessionId: String, memberId: Long, id: Long): Member
+    fun findMemberById(sessionId: String): Member?
     fun sendSystemMessage(topic: String, type: SystemType, numberOfMember: Int, name: String, memberId: Long)
     fun sendChatMessage(topic: String, message: Any)
     fun sendErrorMessage(causedExceptionMessage: String?, sessionId: String, subscriptionId: String)
-    fun saveMember(sessionId: String, memberId: Long, id: Long): Member
-    fun findMember(sessionId: String): Member?
 }

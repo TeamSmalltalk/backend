@@ -49,6 +49,10 @@ class RoomImplementImpl(
         return roomRepository.deleteMember(id, memberId)
     }
 
+    override fun saveMember(sessionId: String, memberId: Long, id: Long) = memberRepository.save(sessionId, memberId, id)
+
+    override fun findMemberById(sessionId: String) = memberRepository.findById(sessionId)
+
     override fun sendSystemMessage(topic: String, type: SystemType, numberOfMember: Int, name: String, memberId: Long) {
         send(topic, getSystemMessage(type, numberOfMember, name, memberId))
     }
@@ -60,10 +64,6 @@ class RoomImplementImpl(
     override fun sendErrorMessage(causedExceptionMessage: String?, sessionId: String, subscriptionId: String) {
         outboundChannel.send(createErrorMessage(createErrorMessagePayloadByCase(causedExceptionMessage), sessionId, subscriptionId))
     }
-
-    override fun saveMember(sessionId: String, memberId: Long, id: Long) = memberRepository.save(sessionId, memberId, id)
-
-    override fun findMember(sessionId: String) = memberRepository.findById(sessionId)
 
     private fun getSystemMessage(type: SystemType, numberOfMember: Int, name: String, memberId: Long) =
         when (type) {
