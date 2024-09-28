@@ -1,14 +1,14 @@
 package smalltalk.backend.presentation.dto.room.response
 
-data class Open(
+data class OpenResponse(
     val id: Long,
     val memberId: Long
 )
 
-data class SimpleInfo(
+data class SimpleInfoResponse(
     val id: Long,
     val name: String,
     val numberOfMember: Int
 )
 
-data class Enter(val memberId: Long)
+data class EnterResponse(val memberId: Long)
