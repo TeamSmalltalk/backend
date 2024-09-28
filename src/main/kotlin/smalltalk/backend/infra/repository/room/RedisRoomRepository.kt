@@ -1,6 +1,5 @@
 package smalltalk.backend.infra.repository.room
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.connection.RedisConnection
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -9,12 +8,13 @@ import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
+import smalltalk.backend.util.jackson.ObjectMapperClient
 
 
 @Repository
 class RedisRoomRepository(
     private val template: StringRedisTemplate,
-    private val mapper: ObjectMapper
+    private val client: ObjectMapperClient
 ) : RoomRepository {
     private val logger = KotlinLogging.logger { }
     private val operations = template.opsForValue()
@@ -27,34 +27,34 @@ class RedisRoomRepository(
         private const val ROOM_KEY_PATTERN = "$ROOM_KEY_PREFIX*"
     }
 
-    override fun save(roomName: String): Room {
+    override fun save(name: String): Room {
         val generatedRoomId = generateRoomId()
         val room =
             Room(
                 generatedRoomId,
-                roomName,
+                name,
                 (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
                 mutableListOf(MEMBERS_INITIAL_ID)
             )
-        operations[createKey(generatedRoomId)] = mapper.writeValueAsString(room)
+        operations[createKey(generatedRoomId)] = client.getStringValue(room)
         return room
     }
 
-    override fun findById(roomId: Long) = findByKey(createKey(roomId))
+    override fun findById(id: Long) = findByKey(createKey(id))
 
-    override fun getById(roomId: Long) = findByKey(createKey(roomId)) ?: throw RoomNotFoundException()
+    override fun getById(id: Long) = findByKey(createKey(id)) ?: throw RoomNotFoundException()
 
-    override fun findAll() = findKeysByPattern().mapNotNull { findByKey(it) }
+    override fun findAll() = findKeys().mapNotNull { findByKey(it) }
 
     override fun deleteAll() {
         template.run {
             delete(ROOM_COUNTER_KEY)
-            delete(findKeysByPattern())
+            delete(findKeys())
         }
     }
 
-    override fun addMember(roomId: Long): Long {
-        val key = createKey(roomId).toByteArray()
+    override fun addMember(id: Long): Long {
+        val key = createKey(id).toByteArray()
         var memberId = 0L
         do {
             val transactionResults =
@@ -64,54 +64,57 @@ class RedisRoomRepository(
                         val room = getByKey(key, it)
                         checkFull(room)
                         multi()
-                        stringCommands()[key] =
-                            mapper.writeValueAsBytes(
-                                room.apply {
-                                    memberId = idQueue.removeFirst()
-                                    members.add(memberId)
-                                }
-                            )
+                        stringCommands()[key] = client.getByteArrayValue(
+                            room.apply {
+                                memberId = idQueue.removeFirst()
+                                members.add(memberId)
+                            }
+                        )
                     }.exec()
                 }
         } while (transactionResults.isNullOrEmpty())
         return memberId
     }
 
-    override fun deleteMember(roomId: Long, memberId: Long) {
-        val key = createKey(roomId).toByteArray()
+    override fun deleteMember(id: Long, memberId: Long): Room? {
+        var room: Room? = null
+        val key = createKey(id).toByteArray()
         do {
             val transactionResults =
                 template.execute {
                     return@execute it.apply {
                         watch(key)
-                        val room = getByKey(key, it)
+                        val roomToCheck = getByKey(key, it)
                         multi()
-                        if (checkLastMember(room))
+                        if (checkLastMember(roomToCheck)) {
+                            room = null
                             stringCommands().getDel(key)
+                        }
                         else {
-                            stringCommands()[key] =
-                                mapper.writeValueAsBytes(
-                                    room.apply {
-                                        members.remove(memberId)
-                                        idQueue.add(memberId)
-                                    }
-                                )
+                            roomToCheck.apply {
+                                members.remove(memberId)
+                                idQueue.add(memberId)
+                            }.let { updatedRoom ->
+                                room = updatedRoom
+                                stringCommands()[key] = client.getByteArrayValue(updatedRoom)
+                            }
                         }
                     }.exec()
                 }
         } while (transactionResults.isNullOrEmpty())
+        return room
     }
 
     private fun generateRoomId() = operations.increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
 
-    private fun createKey(roomId: Long) = ROOM_KEY_PREFIX + roomId
+    private fun createKey(id: Long) = ROOM_KEY_PREFIX + id
 
-    private fun findByKey(key: String) = operations[key]?.let { mapper.readValue(it, Room::class.java) }
+    private fun findByKey(key: String) = operations[key]?.let { client.getExpectedValue(it, Room::class.java) }
 
     private fun getByKey(key: ByteArray, connection: RedisConnection) =
-        connection.stringCommands()[key]?.let { mapper.readValue(it, Room::class.java) } ?: throw RoomNotFoundException()
+        connection.stringCommands()[key]?.let { client.getExpectedValue(it, Room::class.java) } ?: throw RoomNotFoundException()
 
-    private fun findKeysByPattern() = template.keys(ROOM_KEY_PATTERN)
+    private fun findKeys() = template.keys(ROOM_KEY_PATTERN)
 
     private fun checkFull(room: Room) {
         if (room.members.size == 10)

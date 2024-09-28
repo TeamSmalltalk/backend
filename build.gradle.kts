@@ -5,6 +5,7 @@ plugins {
 	id("io.spring.dependency-management") version "1.1.4"
 	kotlin("jvm") version "1.9.21"
 	kotlin("plugin.spring") version "1.9.21"
+	kotlin("plugin.serialization") version "2.0.20"
 }
 
 group = "smalltalk"
@@ -29,7 +30,8 @@ val coroutinesVersion = "1.8.0-RC2"
 val kotestRunnerVersion = "5.8.0"
 val kotestExtensionsVersion = "1.1.3"
 val mockkVersion = "4.0.2"
-//val redissonVersion = "3.34.1"
+val krossbowVersion = "7.0.0"
+val standaloneClientVersion = "2.1.5"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
@@ -39,7 +41,10 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
 	implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
-//	implementation("org.redisson:redisson:$redissonVersion")
+	implementation("org.hildan.krossbow:krossbow-stomp-kxserialization:$krossbowVersion")
+	implementation("org.hildan.krossbow:krossbow-stomp-kxserialization-json:$krossbowVersion")
+	implementation("org.hildan.krossbow:krossbow-websocket-spring:$krossbowVersion")
+	implementation("org.glassfish.tyrus.bundles:tyrus-standalone-client-jdk:$standaloneClientVersion")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")

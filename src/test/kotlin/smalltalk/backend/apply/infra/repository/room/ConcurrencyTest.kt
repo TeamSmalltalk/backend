@@ -1,26 +1,27 @@
 package smalltalk.backend.apply.infra.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.redis.RedisConfig
-import smalltalk.backend.exception.room.situation.RoomNotFoundException
+import smalltalk.backend.domain.room.Room
 import smalltalk.backend.infra.repository.room.RedisRoomRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
+import smalltalk.backend.util.jackson.ObjectMapperClient
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
 
 @ActiveProfiles("test")
-@SpringBootTest(
-    classes = [RoomRepository::class, RedisRoomRepository::class, RedisConfig::class, RedisContainerConfig::class]
-)
+@Import(RedisConfig::class, RedisContainerConfig::class, ObjectMapperClient::class)
+@SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class])
 @DirtiesContext
 class ConcurrencyTest(
     private val roomRepository: RoomRepository
@@ -56,6 +57,7 @@ class ConcurrencyTest(
 
     test("가득찬 채팅방에서 동시에 모든 멤버를 삭제하면 채팅방이 삭제되어야 한다") {
         // Given
+        var room: Room? = null
         val numberOfThread = 10
         val threadPool = Executors.newFixedThreadPool(numberOfThread)
         val latch = CountDownLatch(numberOfThread)
@@ -68,7 +70,7 @@ class ConcurrencyTest(
         (1L..10L).map {
             threadPool.submit {
                 try {
-                    roomRepository.deleteMember(roomId, it)
+                    room = roomRepository.deleteMember(roomId, it)
                 }
                 finally {
                     latch.countDown()
@@ -78,9 +80,7 @@ class ConcurrencyTest(
         latch.await()
 
         // Then
-        shouldThrow<RoomNotFoundException> {
-            roomRepository.getById(roomId)
-        }
+        room.shouldBeNull()
     }
 
     afterTest {

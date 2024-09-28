@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.collections.*
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -17,10 +18,11 @@ import smalltalk.backend.infra.repository.room.RedisRoomRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
+import smalltalk.backend.util.jackson.ObjectMapperClient
 
 
 @ActiveProfiles("test")
-@Import(RedisConfig::class, RedisContainerConfig::class)
+@Import(RedisConfig::class, RedisContainerConfig::class, ObjectMapperClient::class)
 @SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class])
 @DirtiesContext
 class RoomRepositoryTest(
@@ -90,19 +92,17 @@ class RoomRepositoryTest(
 
     context("채팅방 멤버 삭제") {
         val roomId = roomRepository.save(NAME).id
-        roomRepository.addMember(roomId)
+        val memberIdToDelete = roomRepository.addMember(roomId)
         expect("2명 이상 존재하면 멤버를 삭제한다") {
-            roomRepository.deleteMember(roomId, 2L)
-            roomRepository.getById(roomId).run {
-                idQueue shouldContain 2L
-                members shouldNotContain 2L
+            val room = roomRepository.deleteMember(roomId, memberIdToDelete)
+            room?.run {
+                idQueue shouldContain memberIdToDelete
+                members shouldNotContain memberIdToDelete
             }
         }
         expect("1명만 존재하면 채팅방을 삭제한다") {
-            roomRepository.deleteMember(roomId, 1L)
-            shouldThrow<RoomNotFoundException> {
-                roomRepository.getById(roomId)
-            }
+            val room = roomRepository.deleteMember(roomId, 1L)
+            room.shouldBeNull()
         }
     }
 

@@ -4,11 +4,11 @@ import smalltalk.backend.domain.room.Room
 
 
 interface RoomRepository {
-    fun save(roomName: String): Room
-    fun findById(roomId: Long): Room?
-    fun getById(roomId: Long): Room
+    fun save(name: String): Room
+    fun findById(id: Long): Room?
+    fun getById(id: Long): Room
     fun findAll(): List<Room>
     fun deleteAll()
-    fun addMember(roomId: Long): Long
-    fun deleteMember(roomId: Long, memberId: Long)
+    fun addMember(id: Long): Long
+    fun deleteMember(id: Long, memberId: Long): Room?
 }
