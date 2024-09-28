@@ -3,6 +3,7 @@ package smalltalk.backend.apply
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.presentation.dto.room.request.OpenRequest
 import smalltalk.backend.presentation.dto.room.response.OpenResponse
+import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
 
 const val ID = 1L
 const val NAME = "room"
@@ -18,3 +19,5 @@ fun create(id: Long = ID, name: String = NAME) =
 fun createOpenRequest() = OpenRequest(NAME)
 
 fun createOpenResponse() = OpenResponse(ID, MEMBERS_INITIAL_ID)
+
+fun createSimpleInfoResponse() = (1L..3L).map { SimpleInfoResponse(it, NAME + it, MEMBERS_INITIAL_ID.toInt()) }

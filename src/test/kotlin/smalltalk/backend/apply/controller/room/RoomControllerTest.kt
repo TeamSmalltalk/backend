@@ -9,10 +9,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import smalltalk.backend.application.service.room.RoomService
 import smalltalk.backend.apply.createOpenRequest
 import smalltalk.backend.apply.createOpenResponse
+import smalltalk.backend.apply.createSimpleInfoResponse
 import smalltalk.backend.presentation.controller.room.RoomController
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
@@ -35,6 +37,16 @@ class RoomControllerTest {
         }.andExpect {
             status { isCreated() }
             content { json(getStringValue(response), true) }
+        }
+    }
+
+    @Test
+    fun `모든 채팅방을 조회한다`() {
+        val response = createSimpleInfoResponse()
+        every { roomService.getSimpleInfos() } returns response
+        mockMvc.get("/api/rooms").andExpect {
+            status { isOk() }
+            content { getStringValue(response) }
         }
     }
 
