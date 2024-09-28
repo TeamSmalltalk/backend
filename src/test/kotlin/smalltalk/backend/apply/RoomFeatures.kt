@@ -1,6 +1,7 @@
 package smalltalk.backend.apply
 
 import smalltalk.backend.domain.room.Room
+import smalltalk.backend.presentation.dto.room.request.OpenRequest
 
 const val ID = 1L
 const val NAME = "room"
@@ -12,3 +13,5 @@ const val MEMBER_NICKNAME_PREFIX = "익명"
 
 fun create(id: Long = ID, name: String = NAME) =
     Room(id, name, (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(), mutableListOf(MEMBERS_INITIAL_ID))
+
+fun createOpenRequest() = OpenRequest(NAME)
