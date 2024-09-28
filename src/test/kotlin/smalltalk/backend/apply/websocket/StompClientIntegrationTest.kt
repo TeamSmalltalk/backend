@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.application.websocket
+package smalltalk.backend.apply.websocket
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
