@@ -1,21 +1,24 @@
 package smalltalk.backend.exception.room.advice
 
-import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
-import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus.*
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.*
+import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
+import smalltalk.backend.presentation.dto.message.Error
 
 
 @RestControllerAdvice
 class RoomExceptionAdvice {
-    @ResponseStatus(value = INTERNAL_SERVER_ERROR, reason = "Could not generate room id")
     @ExceptionHandler(RoomIdNotGeneratedException::class)
-    fun roomIdNotGeneratedException() {}
+    fun roomIdNotGeneratedException() = ResponseEntity.status(INTERNAL_SERVER_ERROR).body(Error(COMMON.code))
 
-    @ResponseStatus(value = NOT_FOUND, reason = "Room could not be found")
     @ExceptionHandler(RoomNotFoundException::class)
-    fun roomNotFoundException() {}
+    fun roomNotFoundException() = ResponseEntity.status(NOT_FOUND).body(Error(DELETED.code))
+
+    @ExceptionHandler(FullRoomException::class)
+    fun fullRoomException() = ResponseEntity.status(BAD_REQUEST).body(Error(FULL.code))
 }
