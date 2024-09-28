@@ -165,7 +165,7 @@ class StompClientIntegrationTest(
             val destinationToSendChatMessage = WebSocketConfig.SEND_DESTINATION_PREFIX + room.id
             val sender = MEMBER_NICKNAME_PREFIX + enteredMemberId
             val text = "안녕하세요!"
-            session.convertAndSend(destinationToSendChatMessage, TestChat(sender, text), TestChat.serializer())
+            session.convertAndSend(destinationToSendChatMessage, TestChatMessage(sender, text), TestChatMessage.serializer())
             val message = mapperClient.getExpectedValue(messageChannel.receive(), Chat::class.java)
             message.let {
                 it.sender shouldBe sender
