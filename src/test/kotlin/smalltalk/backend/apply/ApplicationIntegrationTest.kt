@@ -1,18 +1,23 @@
 package smalltalk.backend.apply
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
+import org.springframework.boot.test.web.client.getForEntity
 import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.context.annotation.Import
-import org.springframework.http.HttpStatus.CREATED
+import org.springframework.http.HttpStatus.*
 import org.springframework.test.annotation.DirtiesContext
 import smalltalk.backend.BackendApplication
+import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.room.request.OpenRequest
 import smalltalk.backend.presentation.dto.room.response.OpenResponse
+import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
 import smalltalk.backend.support.redis.RedisContainerConfig
 
 @SpringBootTest(
@@ -24,6 +29,8 @@ import smalltalk.backend.support.redis.RedisContainerConfig
 class ApplicationIntegrationTest {
     @Autowired
     lateinit var template: TestRestTemplate
+    @Autowired
+    lateinit var roomRepository: RoomRepository
     val logger = KotlinLogging.logger { }
 
     @Test
@@ -36,5 +43,20 @@ class ApplicationIntegrationTest {
                 memberId shouldBe MEMBERS_INITIAL_ID
             }
         }
+    }
+
+    @Test
+    fun `모든 채팅방을 조회한다`() {
+        (1..3).map { roomRepository.save(NAME + it) }
+        val response = template.getForEntity<List<SimpleInfoResponse>>("/api/rooms")
+        response.run {
+            statusCode shouldBe OK
+            body?.shouldHaveSize(3)
+        }
+    }
+
+    @AfterEach
+    fun tearDown() {
+        roomRepository.deleteAll()
     }
 }
