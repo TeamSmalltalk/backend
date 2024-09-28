@@ -51,7 +51,7 @@ class RoomControllerTest {
         every { roomService.getSimpleInfos() } returns response
         mockMvc.get("/api/rooms").andExpect {
             status { isOk() }
-            content { getStringValue(response) }
+            content { json(getStringValue(response), true) }
         }
     }
 
@@ -61,7 +61,7 @@ class RoomControllerTest {
         every { roomService.enter(any()) } returns response
         mockMvc.patch("/api/rooms/$ID").andExpect {
             status { isOk() }
-            content { getStringValue(response) }
+            content { json(getStringValue(response), true) }
         }
     }
 
@@ -70,7 +70,7 @@ class RoomControllerTest {
         every { roomService.enter(any()) } throws RoomNotFoundException()
         mockMvc.patch("/api/rooms/$ID").andExpect {
             status { isNotFound() }
-            content { getStringValue(createErrorResponseWhenEnter(DELETED.code)) }
+            content { json(getStringValue(createErrorResponseWhenEnter(DELETED.code)), true) }
         }
     }
 
@@ -79,7 +79,7 @@ class RoomControllerTest {
         every { roomService.enter(any()) } throws FullRoomException()
         mockMvc.patch("/api/rooms/$ID").andExpect {
             status { isBadRequest() }
-            content { getStringValue(createErrorResponseWhenEnter(FULL.code)) }
+            content { json(getStringValue(createErrorResponseWhenEnter(FULL.code)), true) }
         }
     }
 
