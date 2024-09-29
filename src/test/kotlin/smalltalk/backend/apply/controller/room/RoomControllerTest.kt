@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
-import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
 import smalltalk.backend.application.service.room.RoomService
 import smalltalk.backend.apply.*
@@ -31,7 +30,7 @@ class RoomControllerTest(
 ) : FunSpec({
     val logger = KotlinLogging.logger { }
 
-    test("채팅방 생성 요청에 대하여 응답으로 생성된 채팅방과 멤버의 정보가 반환된다") {
+    test("채팅방 생성 요청에 대하여 응답으로 생성된 채팅방과 멤버 정보가 반환된다") {
         val response = createOpenResponse()
         every { roomService.open(any()) } returns response
         mockMvc.post("/api/rooms") {
@@ -52,10 +51,10 @@ class RoomControllerTest(
         }
     }
 
-    test("채팅방 입장 요청에 대하여 응답으로 멤버의 정보가 반환된다") {
+    test("채팅방 입장 요청에 대하여 응답으로 생성된 멤버 정보가 반환된다") {
         val response = createEnterResponse()
         every { roomService.enter(any()) } returns response
-        mockMvc.patch("/api/rooms/$ID").andExpect {
+        mockMvc.post("/api/rooms/$ID").andExpect {
             status { isOk() }
             content { json(getStringValue(client, response), true) }
         }
@@ -63,7 +62,7 @@ class RoomControllerTest(
 
     test("이미 삭제된 채팅방 입장 요청에 대하여 응답으로 에러 코드 601이 반환된다") {
         every { roomService.enter(any()) } throws RoomNotFoundException()
-        mockMvc.patch("/api/rooms/$ID").andExpect {
+        mockMvc.post("/api/rooms/$ID").andExpect {
             status { isNotFound() }
             content { json(getStringValue(client, createErrorResponseWhenEnter(DELETED.code)), true) }
         }
@@ -71,7 +70,7 @@ class RoomControllerTest(
 
     test("가득찬 채팅방 입장 요청에 대하여 응답으로 에러 코드 602가 반환된다") {
         every { roomService.enter(any()) } throws FullRoomException()
-        mockMvc.patch("/api/rooms/$ID").andExpect {
+        mockMvc.post("/api/rooms/$ID").andExpect {
             status { isBadRequest() }
             content { json(getStringValue(client, createErrorResponseWhenEnter(FULL.code)), true) }
         }

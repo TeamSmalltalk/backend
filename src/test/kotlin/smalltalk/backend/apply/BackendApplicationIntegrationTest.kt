@@ -15,6 +15,7 @@ import org.springframework.test.annotation.DirtiesContext
 import smalltalk.backend.BackendApplication
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.room.request.OpenRequest
+import smalltalk.backend.presentation.dto.room.response.EnterResponse
 import smalltalk.backend.presentation.dto.room.response.OpenResponse
 import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
 import smalltalk.backend.support.redis.RedisContainerConfig
@@ -46,6 +47,13 @@ class BackendApplicationIntegrationTest(
         response.run {
             statusCode shouldBe OK
             body?.shouldHaveSize(3)
+        }
+    }
+
+    test("채팅방 입장 요청에 대하여 응답으로 생성된 멤버 정보가 반환된다") {
+        template.postForEntity<EnterResponse>("/api/rooms/${roomRepository.save(NAME).id}").run {
+            statusCode shouldBe OK
+            body?.memberId shouldBe ID_QUEUE_INITIAL_ID
         }
     }
 

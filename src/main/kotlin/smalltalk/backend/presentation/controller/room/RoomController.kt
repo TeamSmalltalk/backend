@@ -4,7 +4,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -25,6 +24,6 @@ class RoomController(private val roomService: RoomService) {
     @GetMapping
     fun getSimpleInfos() = ResponseEntity.ok(roomService.getSimpleInfos())
 
-    @PatchMapping("/{id}")
+    @PostMapping("/{id}")
     fun enter(@PathVariable("id") id: String) = ResponseEntity.ok(roomService.enter(id))
 }
