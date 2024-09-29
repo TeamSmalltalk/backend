@@ -60,7 +60,7 @@ class RoomControllerTest(
         }
     }
 
-    test("이미 삭제된 채팅방 입장 요청에 대하여 응답으로 에러 코드 601이 반환된다") {
+    test("이미 삭제된 채팅방 입장 요청에 대하여 응답으로 에러 정보가 반환된다") {
         every { roomService.enter(any()) } throws RoomNotFoundException()
         mockMvc.post("/api/rooms/$ID").andExpect {
             status { isNotFound() }
@@ -68,7 +68,7 @@ class RoomControllerTest(
         }
     }
 
-    test("가득찬 채팅방 입장 요청에 대하여 응답으로 에러 코드 602가 반환된다") {
+    test("가득찬 채팅방 입장 요청에 대하여 응답으로 에러 정보가 반환된다") {
         every { roomService.enter(any()) } throws FullRoomException()
         mockMvc.post("/api/rooms/$ID").andExpect {
             status { isBadRequest() }
