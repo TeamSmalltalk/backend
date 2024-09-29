@@ -20,9 +20,7 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import smalltalk.backend.application.websocket.MessageHeader.*
 import smalltalk.backend.application.websocket.SystemType.ENTER
 import smalltalk.backend.application.websocket.SystemType.OPEN
-import smalltalk.backend.apply.MEMBER_NICKNAME_PREFIX
-import smalltalk.backend.apply.NAME
-import smalltalk.backend.apply.createHeaders
+import smalltalk.backend.apply.*
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.infra.repository.member.MemberRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
@@ -33,13 +31,6 @@ import smalltalk.backend.presentation.dto.message.SystemTextPostfix
 import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
-
-private fun getDestination(id: Long) = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + id
-
-private fun <T> getExpectedValue(mapperClient: ObjectMapperClient, value: Any, expectedType: Class<T>) =
-    mapperClient.getExpectedValue(value, expectedType)
-
-private fun getNickname(memberId: Long) = MEMBER_NICKNAME_PREFIX + memberId
 
 /**
  * 테스트 이름 주의!!

@@ -1,11 +1,13 @@
 package smalltalk.backend.apply
 
+import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.room.request.OpenRequest
 import smalltalk.backend.presentation.dto.room.response.EnterResponse
 import smalltalk.backend.presentation.dto.room.response.OpenResponse
 import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
+import smalltalk.backend.util.jackson.ObjectMapperClient
 
 const val ID = 1L
 const val NAME = "room"
@@ -29,3 +31,12 @@ fun createSimpleInfoResponse() = (1L..3L).map { SimpleInfoResponse(it, NAME + it
 fun createEnterResponse() = EnterResponse(MEMBERS_INITIAL_ID)
 
 fun createErrorResponseWhenEnter(code: String) = Error(code)
+
+fun getDestination(id: Long) = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + id
+
+fun getNickname(memberId: Long) = MEMBER_NICKNAME_PREFIX + memberId
+
+fun getStringValue(client: ObjectMapperClient, value: Any) = client.getStringValue(value)
+
+fun <T> getExpectedValue(client: ObjectMapperClient, value: Any, expectedType: Class<T>) =
+    client.getExpectedValue(value, expectedType)

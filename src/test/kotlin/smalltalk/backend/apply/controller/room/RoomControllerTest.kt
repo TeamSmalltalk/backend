@@ -22,8 +22,6 @@ import smalltalk.backend.presentation.controller.room.RoomController
 import smalltalk.backend.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-private fun getStringValue(client: ObjectMapperClient, value: Any) = client.getStringValue(value)
-
 @WebMvcTest(RoomController::class)
 @Import(ObjectMapperClient::class)
 class RoomControllerTest(
