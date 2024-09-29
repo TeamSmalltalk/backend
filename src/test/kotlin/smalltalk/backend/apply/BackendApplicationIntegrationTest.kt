@@ -26,7 +26,7 @@ import smalltalk.backend.support.redis.RedisContainerConfig
 )
 @Import(RedisContainerConfig::class)
 @DirtiesContext
-class ApplicationIntegrationTest {
+class BackendApplicationIntegrationTest {
     @Autowired
     lateinit var template: TestRestTemplate
     @Autowired
