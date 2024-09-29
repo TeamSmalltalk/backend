@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import smalltalk.backend.application.service.room.RoomService
@@ -11,6 +12,7 @@ import smalltalk.backend.apply.create
 import smalltalk.backend.apply.createOpenRequest
 import smalltalk.backend.apply.createRooms
 import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.support.spec.afterRootTest
 
 class RoomServiceTest : BehaviorSpec({
     val roomRepository = mockk<RoomRepository>()
@@ -53,5 +55,9 @@ class RoomServiceTest : BehaviorSpec({
                 response.memberId shouldBe enteredMemberId
             }
         }
+    }
+
+    afterRootTest {
+        clearAllMocks()
     }
 })
