@@ -1,7 +1,7 @@
 package smalltalk.backend.apply.websocket
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.kotest.core.spec.style.ExpectSpec
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
@@ -34,145 +34,122 @@ import smalltalk.backend.support.redis.RedisContainerConfig
 import smalltalk.backend.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
+private fun getDestination(id: Long) = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + id
+
+private fun <T> getExpectedValue(mapperClient: ObjectMapperClient, value: Any, expectedType: Class<T>) =
+    mapperClient.getExpectedValue(value, expectedType)
+
+private fun getNickname(memberId: Long) = MEMBER_NICKNAME_PREFIX + memberId
+
+/**
+ * 테스트 이름 주의!!
+ * 채팅방 구독 -> 채팅방 생성 & 입장
+ * 채팅방 구독 취소 -> 채팅방 퇴장
+ */
 @ActiveProfiles("test")
 @Import(RedisContainerConfig::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
 class StompClientIntegrationTest(
-    @LocalServerPort
-    private val port: Int,
+    @LocalServerPort private val port: Int,
     private val roomRepository: RoomRepository,
     private val memberRepository: MemberRepository,
     private val mapperClient: ObjectMapperClient
-) : ExpectSpec({
+) : FunSpec({
     val logger = KotlinLogging.logger { }
     val url = "ws://localhost:$port${WebSocketConfig.STOMP_ENDPOINT}"
     val client = StompClient(StandardWebSocketClient().asKrossbowWebSocketClient())
 
-    context("채팅방 생성") {
+    test("올바른 정보를 포함하고 채팅방을 구독하거나 취소하면 멤버들이 메시지를 수신한다") {
         val room = roomRepository.save(NAME)
-        val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + room.id
-        expect("메시지를 수신한다") {
-            val session = client.connect(url)
-            val message = mapperClient.getExpectedValue(
-                session.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString())).first().bodyAsText,
-                System::class.java
-            )
-            message.run {
-                numberOfMember shouldBe 1
-                text shouldBe (NAME + SystemTextPostfix.OPEN)
-            }
-            session.disconnect()
-        }
-    }
-
-    context("채팅방 입장") {
-        val room = roomRepository.save(NAME)
-        val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + room.id
-        val enteredMemberId = roomRepository.addMember(room.id)
-        expect("입장 메시지를 수신한다") {
-            val session = client.connect(url)
-            val message = mapperClient.getExpectedValue(
-                session.subscribe(createHeaders(destination, ENTER.name, enteredMemberId.toString())).first().bodyAsText,
-                System::class.java
-            )
-            message.run {
-                numberOfMember shouldBe 2
-                text shouldBe (MEMBER_NICKNAME_PREFIX + enteredMemberId + SystemTextPostfix.ENTER)
-            }
-            session.disconnect()
-        }
-        expect("주소가 존재하지 않는다면 에러 메시지를 수신한다") {
-            val session = client.connect(url)
-            val message = mapperClient.getExpectedValue(
-                session.subscribe(
-                    createHeaders(
-                        "${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}abc",
-                        ENTER.name,
-                        enteredMemberId.toString()
-                    )
-                ).first().bodyAsText,
-                Error::class.java
-            )
-            message.code shouldBe ROOM.code
-            session.disconnect()
-        }
-        expect("입장한 멤버가 존재하지 않는다면 에러 메시지를 수신한다") {
-            val session = client.connect(url)
-            val message = mapperClient.getExpectedValue(
-                session.subscribe(createHeaders(destination, ENTER.name, null)).first().bodyAsText,
-                Error::class.java
-            )
-            message.code shouldBe MEMBER.code
-            session.disconnect()
-        }
-        expect("생성 또는 입장을 구분하는 타입이 존재하지 않는다면 에러 메시지를 수신한다") {
-            val session = client.connect(url)
-            val message = mapperClient.getExpectedValue(
-                session.subscribe(createHeaders(destination, null, enteredMemberId.toString())).first().bodyAsText,
-                Error::class.java
-            )
-            message.code shouldBe TYPE.code
-            session.disconnect()
-        }
-    }
-
-    context("채팅방 퇴장") {
-        val room = roomRepository.save(NAME)
-        val destination = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + room.id
+        val destination = getDestination(room.id)
         val messageChannel = Channel<System>()
-        val messages = mutableListOf<System>()
-        val sessionToOpenRoom = client.connect(url)
+        val sessionToOpenRoom = client.connect(url).withJsonConversions()
         launch {
             sessionToOpenRoom.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()))
                 .take(3)
-                .collect {
-                    val message = mapperClient.getExpectedValue(it.bodyAsText, System::class.java)
-                    messages.add(message)
-                    messageChannel.send(message)
-                }
+                .collect { messageChannel.send(getExpectedValue(mapperClient, it.bodyAsText, System::class.java)) }
         }
-        messageChannel.receive()
+        val openRoomMessage = messageChannel.receive()
         val enteredMemberId = roomRepository.addMember(room.id)
-        expect("메시지를 수신한다") {
-            val sessionToEnterRoom = client.connect(url)
-            sessionToEnterRoom.subscribe(createHeaders(destination, ENTER.name, enteredMemberId.toString())).first()
-            repeat(2) {
-                messageChannel.receive()
-            }
-            messages.last().run {
-                numberOfMember shouldBe 1
-                text shouldBe (MEMBER_NICKNAME_PREFIX + enteredMemberId + SystemTextPostfix.EXIT)
-            }
-            sessionToEnterRoom.disconnect()
-            sessionToOpenRoom.disconnect()
+        val sessionToEnterRoom = client.connect(url)
+        sessionToEnterRoom.subscribe(createHeaders(destination, ENTER.name, enteredMemberId.toString())).first()
+        openRoomMessage.run {
+            numberOfMember shouldBe 1
+            text shouldBe (room.name + SystemTextPostfix.OPEN)
         }
+        messageChannel.receive().let { enterRoomMessage ->
+            enterRoomMessage.numberOfMember shouldBe 2
+            enterRoomMessage.text shouldBe (getNickname(enteredMemberId) + SystemTextPostfix.ENTER)
+        }
+        messageChannel.receive().let { exitRoomMessage ->
+            exitRoomMessage.numberOfMember shouldBe 1
+            exitRoomMessage.text shouldBe (getNickname(enteredMemberId) + SystemTextPostfix.EXIT)
+        }
+        sessionToEnterRoom.disconnect()
+        sessionToOpenRoom.disconnect()
     }
 
-    context("채팅방 메시지 전송") {
+    test("올바르지 않은 목적지로 채팅방을 구독하면 에러 메시지를 수신한다") {
         val room = roomRepository.save(NAME)
-        val destinationToSubscribeRoom = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + room.id
+        val session = client.connect(url).withJsonConversions()
+        getExpectedValue(
+            mapperClient,
+            session.subscribe(
+                createHeaders(
+                    "${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}abc",
+                    OPEN.name,
+                    room.members.last().toString()
+                )
+            ).first().bodyAsText,
+            Error::class.java
+        ).code shouldBe ROOM.code
+        session.disconnect()
+    }
+
+    test("입장한 멤버 정보를 포함하지 않고 채팅방을 구독하면 에러 메시지를 수신한다") {
+        val room = roomRepository.save(NAME)
+        val session = client.connect(url).withJsonConversions()
+        getExpectedValue(
+            mapperClient,
+            session.subscribe(createHeaders(getDestination(room.id), OPEN.name, null)).first().bodyAsText,
+            Error::class.java
+        ).code shouldBe MEMBER.code
+        session.disconnect()
+    }
+
+    test("생성 또는 입장을 구분하는 타입 정보를 포함하지 않고 채팅방을 구독하면 에러 메시지를 수신한다") {
+        val room = roomRepository.save(NAME)
+        val session = client.connect(url).withJsonConversions()
+        getExpectedValue(
+            mapperClient,
+            session.subscribe(createHeaders(getDestination(room.id), null, room.members.last().toString())).first().bodyAsText,
+            Error::class.java
+        ).code shouldBe TYPE.code
+        session.disconnect()
+    }
+
+    test("채팅방에 채팅 메시지를 전송하면 모든 멤버들이 수신한다") {
+        val room = roomRepository.save(NAME)
         val enteredMemberId = room.members.last()
         val messageChannel = Channel<String>()
         val session = client.connect(url).withJsonConversions()
         launch {
-            session.subscribe(createHeaders(destinationToSubscribeRoom, OPEN.name, enteredMemberId.toString()))
+            session.subscribe(createHeaders(getDestination(room.id), OPEN.name, enteredMemberId.toString()))
                 .take(2)
                 .collect { messageChannel.send(it.bodyAsText) }
         }
         messageChannel.receive()
-        expect("메시지를 수신한다") {
-            val destinationToSendChatMessage = WebSocketConfig.SEND_DESTINATION_PREFIX + room.id
-            val sender = MEMBER_NICKNAME_PREFIX + enteredMemberId
-            val text = "안녕하세요!"
-            session.convertAndSend(destinationToSendChatMessage, TestChatMessage(sender, text), TestChatMessage.serializer())
-            val message = mapperClient.getExpectedValue(messageChannel.receive(), Chat::class.java)
-            message.let {
-                it.sender shouldBe sender
-                it.text shouldBe text
-            }
-            session.disconnect()
+        val sender = getNickname(enteredMemberId)
+        val text = "안녕하세요!"
+        session.convertAndSend(
+            WebSocketConfig.SEND_DESTINATION_PREFIX + room.id, TestChatMessage(sender, text), TestChatMessage.serializer()
+        )
+        getExpectedValue(mapperClient, messageChannel.receive(), Chat::class.java).let {
+            it.sender shouldBe sender
+            it.text shouldBe text
         }
+        session.disconnect()
     }
 
     afterRootTest {
