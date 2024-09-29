@@ -35,7 +35,7 @@ class RoomControllerTest(
         every { roomService.open(any()) } returns response
         mockMvc.post("/api/rooms") {
             contentType = APPLICATION_JSON
-            content = client.getStringValue(createOpenRequest())
+            content = getStringValue(client, createOpenRequest())
         }.andExpect {
             status { isCreated() }
             content { json(getStringValue(client, response), true) }

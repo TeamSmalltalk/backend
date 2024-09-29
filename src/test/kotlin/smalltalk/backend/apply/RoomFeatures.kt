@@ -38,5 +38,5 @@ fun getNickname(memberId: Long) = MEMBER_NICKNAME_PREFIX + memberId
 
 fun getStringValue(client: ObjectMapperClient, value: Any) = client.getStringValue(value)
 
-fun <T> getExpectedValue(client: ObjectMapperClient, value: Any, expectedType: Class<T>) =
-    client.getExpectedValue(value, expectedType)
+inline fun <reified T : Any> getExpectedValue(client: ObjectMapperClient, value: Any) =
+    client.getExpectedValue(value, T::class.java)

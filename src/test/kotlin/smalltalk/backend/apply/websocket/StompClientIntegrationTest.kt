@@ -59,7 +59,7 @@ class StompClientIntegrationTest(
         launch {
             sessionToOpenRoom.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()))
                 .take(3)
-                .collect { messageChannel.send(getExpectedValue(mapperClient, it.bodyAsText, System::class.java)) }
+                .collect { messageChannel.send(getExpectedValue<System>(mapperClient, it.bodyAsText)) }
         }
         val openRoomMessage = messageChannel.receive()
         val enteredMemberId = roomRepository.addMember(room.id)
@@ -84,7 +84,7 @@ class StompClientIntegrationTest(
     test("올바르지 않은 목적지로 채팅방을 구독하면 에러 메시지를 수신한다") {
         val room = roomRepository.save(NAME)
         val session = client.connect(url).withJsonConversions()
-        getExpectedValue(
+        getExpectedValue<Error>(
             mapperClient,
             session.subscribe(
                 createHeaders(
@@ -92,8 +92,7 @@ class StompClientIntegrationTest(
                     OPEN.name,
                     room.members.last().toString()
                 )
-            ).first().bodyAsText,
-            Error::class.java
+            ).first().bodyAsText
         ).code shouldBe ROOM.code
         session.disconnect()
     }
@@ -101,10 +100,9 @@ class StompClientIntegrationTest(
     test("입장한 멤버 정보를 포함하지 않고 채팅방을 구독하면 에러 메시지를 수신한다") {
         val room = roomRepository.save(NAME)
         val session = client.connect(url).withJsonConversions()
-        getExpectedValue(
+        getExpectedValue<Error>(
             mapperClient,
-            session.subscribe(createHeaders(getDestination(room.id), OPEN.name, null)).first().bodyAsText,
-            Error::class.java
+            session.subscribe(createHeaders(getDestination(room.id), OPEN.name, null)).first().bodyAsText
         ).code shouldBe MEMBER.code
         session.disconnect()
     }
@@ -112,10 +110,9 @@ class StompClientIntegrationTest(
     test("생성 또는 입장을 구분하는 타입 정보를 포함하지 않고 채팅방을 구독하면 에러 메시지를 수신한다") {
         val room = roomRepository.save(NAME)
         val session = client.connect(url).withJsonConversions()
-        getExpectedValue(
+        getExpectedValue<Error>(
             mapperClient,
-            session.subscribe(createHeaders(getDestination(room.id), null, room.members.last().toString())).first().bodyAsText,
-            Error::class.java
+            session.subscribe(createHeaders(getDestination(room.id), null, room.members.last().toString())).first().bodyAsText
         ).code shouldBe TYPE.code
         session.disconnect()
     }
@@ -136,7 +133,7 @@ class StompClientIntegrationTest(
         session.convertAndSend(
             WebSocketConfig.SEND_DESTINATION_PREFIX + room.id, TestChatMessage(sender, text), TestChatMessage.serializer()
         )
-        getExpectedValue(mapperClient, messageChannel.receive(), Chat::class.java).let {
+        getExpectedValue<Chat>(mapperClient, messageChannel.receive()).let {
             it.sender shouldBe sender
             it.text shouldBe text
         }
