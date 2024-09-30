@@ -38,9 +38,9 @@ import smalltalk.backend.util.jackson.ObjectMapperClient
  * 채팅방 구독 -> 채팅방 생성 & 입장
  * 채팅방 구독 취소 -> 채팅방 퇴장
  */
-@ActiveProfiles("test")
-@Import(RedisContainerConfig::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(RedisContainerConfig::class)
+@ActiveProfiles("test")
 @DirtiesContext
 class WebSocketIntegrationTest(
     @LocalServerPort private val port: Int,

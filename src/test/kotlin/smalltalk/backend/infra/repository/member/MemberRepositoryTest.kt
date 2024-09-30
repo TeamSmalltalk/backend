@@ -11,23 +11,20 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import smalltalk.backend.*
+import smalltalk.backend.ID
+import smalltalk.backend.MEMBERS_INITIAL_ID
+import smalltalk.backend.MEMBER_SESSION_ID
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.MemberNotFoundException
-import smalltalk.backend.infra.repository.member.MemberRepository
-import smalltalk.backend.infra.repository.member.RedisMemberRepository
-import smalltalk.backend.infra.repository.member.getById
+import smalltalk.backend.util.jackson.ObjectMapperClient
 import smalltalk.support.redis.RedisContainerConfig
 import smalltalk.support.spec.afterRootTest
-import smalltalk.backend.util.jackson.ObjectMapperClient
 
+@SpringBootTest(classes = [RedisConfig::class, MemberRepository::class, RedisMemberRepository::class, ObjectMapperClient::class])
+@Import(RedisContainerConfig::class)
 @ActiveProfiles("test")
-@Import(RedisConfig::class, RedisContainerConfig::class, ObjectMapperClient::class)
-@SpringBootTest(classes = [MemberRepository::class, RedisMemberRepository::class])
 @DirtiesContext
-class MemberRepositoryTest(
-    private val memberRepository: MemberRepository
-) : ExpectSpec({
+class MemberRepositoryTest(private val memberRepository: MemberRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }
     val sessionId = MEMBER_SESSION_ID
     val id = MEMBERS_INITIAL_ID

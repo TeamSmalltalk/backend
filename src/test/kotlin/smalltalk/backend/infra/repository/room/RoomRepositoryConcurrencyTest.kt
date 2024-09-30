@@ -8,22 +8,19 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import smalltalk.backend.*
+import smalltalk.backend.NAME
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.domain.room.Room
-import smalltalk.backend.infra.repository.room.RedisRoomRepository
-import smalltalk.backend.infra.repository.room.RoomRepository
-import smalltalk.support.redis.RedisContainerConfig
 import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.support.redis.RedisContainerConfig
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
-
+@SpringBootTest(classes = [RedisConfig::class, RoomRepository::class, RedisRoomRepository::class, ObjectMapperClient::class])
+@Import(RedisContainerConfig::class)
 @ActiveProfiles("test")
-@Import(RedisConfig::class, RedisContainerConfig::class, ObjectMapperClient::class)
-@SpringBootTest(classes = [RoomRepository::class, RedisRoomRepository::class])
 @DirtiesContext
-class ConcurrencyTest(
+class RoomRepositoryConcurrencyTest(
     private val roomRepository: RoomRepository
 ) : FunSpec({
     val logger = KotlinLogging.logger { }

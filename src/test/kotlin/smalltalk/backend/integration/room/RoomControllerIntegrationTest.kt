@@ -11,6 +11,7 @@ import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus.*
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.*
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.*
 import smalltalk.backend.infra.repository.room.RoomRepository
@@ -22,7 +23,8 @@ import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
 import smalltalk.support.redis.RedisContainerConfig
 import smalltalk.support.spec.afterRootTest
 
-@SpringBootTest(classes = [BackendApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 @Import(RedisContainerConfig::class)
 @DirtiesContext
 class RoomControllerIntegrationTest(
