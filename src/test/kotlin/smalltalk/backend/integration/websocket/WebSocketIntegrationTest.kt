@@ -1,4 +1,4 @@
-package smalltalk.backend.websocket
+package smalltalk.backend.integration.websocket
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -7,6 +7,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.stomp.conversions.kxserialization.convertAndSend
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
@@ -17,10 +18,10 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
+import smalltalk.backend.*
 import smalltalk.backend.application.websocket.MessageHeader.*
 import smalltalk.backend.application.websocket.SystemType.ENTER
 import smalltalk.backend.application.websocket.SystemType.OPEN
-import smalltalk.backend.apply.*
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.infra.repository.member.MemberRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
@@ -41,7 +42,7 @@ import smalltalk.backend.util.jackson.ObjectMapperClient
 @Import(RedisContainerConfig::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext
-class StompClientIntegrationTest(
+class WebSocketIntegrationTest(
     @LocalServerPort private val port: Int,
     private val roomRepository: RoomRepository,
     private val memberRepository: MemberRepository,
@@ -144,4 +145,10 @@ class StompClientIntegrationTest(
         roomRepository.deleteAll()
         memberRepository.deleteAll()
     }
-})
+}) {
+    @Serializable
+    private data class TestChatMessage(
+        val sender: String,
+        val text: String
+    )
+}

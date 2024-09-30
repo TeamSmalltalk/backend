@@ -8,9 +8,7 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
 import smalltalk.backend.application.service.room.RoomService
-import smalltalk.backend.apply.create
-import smalltalk.backend.apply.createOpenRequest
-import smalltalk.backend.apply.createRooms
+import smalltalk.backend.*
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.support.spec.afterRootTest
 

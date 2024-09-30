@@ -1,4 +1,4 @@
-package smalltalk.backend
+package smalltalk.backend.integration.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -11,7 +11,7 @@ import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus.*
 import org.springframework.test.annotation.DirtiesContext
-import smalltalk.backend.BackendApplication
+import smalltalk.backend.*
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.*
 import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.Error
@@ -25,7 +25,7 @@ import smalltalk.support.spec.afterRootTest
 @SpringBootTest(classes = [BackendApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(RedisContainerConfig::class)
 @DirtiesContext
-class BackendApplicationIntegrationTest(
+class RoomControllerIntegrationTest(
     private val roomRepository: RoomRepository,
     private val template: TestRestTemplate
 ) : FunSpec({

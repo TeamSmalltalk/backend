@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
-import smalltalk.backend.apply.NAME
+import smalltalk.backend.*
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.infra.repository.room.RedisRoomRepository

@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import smalltalk.backend.application.service.room.RoomService
-import smalltalk.backend.apply.*
+import smalltalk.backend.*
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.DELETED
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.FULL
 import smalltalk.backend.exception.room.situation.FullRoomException
