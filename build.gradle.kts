@@ -28,7 +28,7 @@ repositories {
 val kotlinLoggingVersion = "6.0.3"
 val coroutinesVersion = "1.8.0-RC2"
 val kotestRunnerVersion = "5.8.0"
-val kotestExtensionsVersion = "1.1.3"
+val kotestExtensionsVersion = "1.3.0"
 val mockkVersion = "4.0.2"
 val krossbowVersion = "7.0.0"
 val standaloneClientVersion = "2.1.5"
@@ -51,6 +51,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("io.kotest:kotest-runner-junit5:$kotestRunnerVersion")
 	testImplementation("io.kotest.extensions:kotest-extensions-spring:$kotestExtensionsVersion")
+	testImplementation("io.kotest.extensions:kotest-extensions-testcontainers:$kotestExtensionsVersion")
 	testImplementation("com.ninja-squad:springmockk:$mockkVersion")
 }
 
