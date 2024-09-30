@@ -1,4 +1,4 @@
-package smalltalk.backend.apply
+package smalltalk.backend
 
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.domain.room.Room

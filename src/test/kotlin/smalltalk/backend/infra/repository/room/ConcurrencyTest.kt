@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.infra.repository.room
+package smalltalk.backend.infra.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -13,7 +13,7 @@ import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.infra.repository.room.RedisRoomRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
-import smalltalk.backend.support.redis.RedisContainerConfig
+import smalltalk.support.redis.RedisContainerConfig
 import smalltalk.backend.util.jackson.ObjectMapperClient
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors

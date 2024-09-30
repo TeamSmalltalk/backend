@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.websocket
+package smalltalk.backend.websocket
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -28,8 +28,8 @@ import smalltalk.backend.presentation.dto.message.Chat
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
-import smalltalk.backend.support.redis.RedisContainerConfig
-import smalltalk.backend.support.spec.afterRootTest
+import smalltalk.support.redis.RedisContainerConfig
+import smalltalk.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
 /**

@@ -1,4 +1,4 @@
-package smalltalk.backend.support.redis
+package smalltalk.support.redis
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.boot.test.context.TestConfiguration

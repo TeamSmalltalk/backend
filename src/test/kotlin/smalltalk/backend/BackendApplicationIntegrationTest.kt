@@ -1,4 +1,4 @@
-package smalltalk.backend.apply
+package smalltalk.backend
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -19,8 +19,8 @@ import smalltalk.backend.presentation.dto.room.request.OpenRequest
 import smalltalk.backend.presentation.dto.room.response.EnterResponse
 import smalltalk.backend.presentation.dto.room.response.OpenResponse
 import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
-import smalltalk.backend.support.redis.RedisContainerConfig
-import smalltalk.backend.support.spec.afterRootTest
+import smalltalk.support.redis.RedisContainerConfig
+import smalltalk.support.spec.afterRootTest
 
 @SpringBootTest(classes = [BackendApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(RedisContainerConfig::class)

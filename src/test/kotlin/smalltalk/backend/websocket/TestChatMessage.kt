@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.websocket
+package smalltalk.backend.websocket
 
 import kotlinx.serialization.Serializable
 

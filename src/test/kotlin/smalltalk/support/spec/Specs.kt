@@ -1,4 +1,4 @@
-package smalltalk.backend.support.spec
+package smalltalk.support.spec
 
 import io.kotest.core.spec.AfterTest
 import io.kotest.core.spec.BeforeTest
