@@ -16,10 +16,8 @@ class RedisContainerConfig {
             GenericContainer<Nothing>(REDIS_IMAGE).apply {
                 withExposedPorts(REDIS_CONTAINER_PORT)
                 start()
-                logger.info { "Redis container start" }
                 System.setProperty(LOCAL_REDIS_HOST_PATH, host)
                 System.setProperty(LOCAL_REDIS_PORT_PATH, getMappedPort(REDIS_CONTAINER_PORT).toString())
-                logger.info { "Redis container info = $containerInfo" }
             }
         }
     }
