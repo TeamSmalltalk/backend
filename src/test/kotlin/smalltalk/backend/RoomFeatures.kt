@@ -1,5 +1,6 @@
 package smalltalk.backend
 
+import smalltalk.backend.application.websocket.RoomEventListener
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.presentation.dto.message.Error
@@ -15,7 +16,7 @@ const val ID_QUEUE_INITIAL_ID = 2L
 const val ID_QUEUE_LIMIT_ID = 10L
 const val MEMBERS_INITIAL_ID = 1L
 const val MEMBER_SESSION_ID = "session-id"
-const val MEMBER_NICKNAME_PREFIX = "익명"
+const val API_PREFIX = "/api/rooms"
 
 fun create(id: Long = ID, name: String = NAME) =
     Room(id, name, (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(), mutableListOf(MEMBERS_INITIAL_ID))
@@ -34,7 +35,7 @@ fun createErrorResponseWhenEnter(code: String) = Error(code)
 
 fun getDestination(id: Long) = WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX + id
 
-fun getNickname(memberId: Long) = MEMBER_NICKNAME_PREFIX + memberId
+fun getNickname(memberId: Long) = RoomEventListener.MEMBER_NICKNAME_PREFIX + memberId
 
 fun getStringValue(client: ObjectMapperClient, value: Any) = client.getStringValue(value)
 

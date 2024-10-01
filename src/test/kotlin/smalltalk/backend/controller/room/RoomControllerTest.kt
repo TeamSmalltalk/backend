@@ -33,7 +33,7 @@ class RoomControllerTest(
     test("채팅방 생성 요청에 대하여 응답으로 생성된 채팅방과 멤버 정보가 반환된다") {
         val response = createOpenResponse()
         every { roomService.open(any()) } returns response
-        mockMvc.post("/api/rooms") {
+        mockMvc.post(API_PREFIX) {
             contentType = APPLICATION_JSON
             content = getStringValue(client, createOpenRequest())
         }.andExpect {
@@ -45,7 +45,7 @@ class RoomControllerTest(
     test("모든 채팅방을 조회한다") {
         val response = createSimpleInfoResponse()
         every { roomService.getSimpleInfos() } returns response
-        mockMvc.get("/api/rooms").andExpect {
+        mockMvc.get(API_PREFIX).andExpect {
             status { isOk() }
             content { json(getStringValue(client, response), true) }
         }
@@ -54,7 +54,7 @@ class RoomControllerTest(
     test("채팅방 입장 요청에 대하여 응답으로 생성된 멤버 정보가 반환된다") {
         val response = createEnterResponse()
         every { roomService.enter(any()) } returns response
-        mockMvc.post("/api/rooms/$ID").andExpect {
+        mockMvc.post("$API_PREFIX/$ID").andExpect {
             status { isOk() }
             content { json(getStringValue(client, response), true) }
         }
@@ -62,7 +62,7 @@ class RoomControllerTest(
 
     test("이미 삭제된 채팅방 입장 요청에 대하여 응답으로 에러 정보가 반환된다") {
         every { roomService.enter(any()) } throws RoomNotFoundException()
-        mockMvc.post("/api/rooms/$ID").andExpect {
+        mockMvc.post("$API_PREFIX/$ID").andExpect {
             status { isNotFound() }
             content { json(getStringValue(client, createErrorResponseWhenEnter(DELETED.code)), true) }
         }
@@ -70,7 +70,7 @@ class RoomControllerTest(
 
     test("가득찬 채팅방 입장 요청에 대하여 응답으로 에러 정보가 반환된다") {
         every { roomService.enter(any()) } throws FullRoomException()
-        mockMvc.post("/api/rooms/$ID").andExpect {
+        mockMvc.post("$API_PREFIX/$ID").andExpect {
             status { isBadRequest() }
             content { json(getStringValue(client, createErrorResponseWhenEnter(FULL.code)), true) }
         }

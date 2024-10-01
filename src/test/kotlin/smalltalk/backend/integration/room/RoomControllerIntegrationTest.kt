@@ -24,7 +24,7 @@ import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
 import smalltalk.support.redis.RedisContainerConfig
 import smalltalk.support.spec.afterRootTest
 
-@SpringBootTest(classes = [BackendApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(RedisContainerConfig::class)
 @DirtiesContext
@@ -35,7 +35,7 @@ class RoomControllerIntegrationTest(
     val logger = KotlinLogging.logger { }
 
     test("채팅방 생성 요청에 대하여 응답으로 생성된 채팅방과 멤버 정보가 반환된다") {
-        val response = template.postForEntity<OpenResponse>("/api/rooms", OpenRequest(NAME))
+        val response = template.postForEntity<OpenResponse>(API_PREFIX, OpenRequest(NAME))
         response.run {
             statusCode shouldBe CREATED
             body?.run {
@@ -47,7 +47,7 @@ class RoomControllerIntegrationTest(
 
     test("모든 채팅방을 조회한다") {
         (1..3).map { roomRepository.save(NAME + it) }
-        val response = template.getForEntity<List<SimpleInfoResponse>>("/api/rooms")
+        val response = template.getForEntity<List<SimpleInfoResponse>>(API_PREFIX)
         response.run {
             statusCode shouldBe OK
             body?.shouldHaveSize(3)
@@ -55,14 +55,14 @@ class RoomControllerIntegrationTest(
     }
 
     test("채팅방 입장 요청에 대하여 응답으로 생성된 멤버 정보가 반환된다") {
-        template.postForEntity<EnterResponse>("/api/rooms/${roomRepository.save(NAME).id}").run {
+        template.postForEntity<EnterResponse>("$API_PREFIX/${roomRepository.save(NAME).id}").run {
             statusCode shouldBe OK
             body?.memberId shouldBe ID_QUEUE_INITIAL_ID
         }
     }
 
     test("이미 삭제된 채팅방 입장 요청에 대하여 응답으로 에러 정보가 반환된다") {
-        template.postForEntity<Error>("/api/rooms/$ID").run {
+        template.postForEntity<Error>("$API_PREFIX/$ID").run {
             statusCode shouldBe NOT_FOUND
             body?.code shouldBe DELETED.code
         }
@@ -73,7 +73,7 @@ class RoomControllerIntegrationTest(
         repeat(9) {
             roomRepository.addMember(savedRoom.id)
         }
-        template.postForEntity<Error>("/api/rooms/${savedRoom.id}").run {
+        template.postForEntity<Error>("$API_PREFIX/${savedRoom.id}").run {
             statusCode shouldBe BAD_REQUEST
             body?.code shouldBe FULL.code
         }
