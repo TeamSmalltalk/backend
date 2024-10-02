@@ -51,7 +51,6 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 	testImplementation("io.kotest:kotest-runner-junit5:$kotestRunnerVersion")
 	testImplementation("io.kotest.extensions:kotest-extensions-spring:$kotestExtensionsVersion")
-//	testImplementation("io.kotest.extensions:kotest-extensions-testcontainers:2.0.2")
 	testImplementation("com.ninja-squad:springmockk:$mockkVersion")
 }
 

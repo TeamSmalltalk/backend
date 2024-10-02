@@ -14,9 +14,6 @@ import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConver
 import org.hildan.krossbow.websocket.spring.asKrossbowWebSocketClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.context.annotation.Import
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
 import smalltalk.backend.*
 import smalltalk.backend.application.websocket.MessageHeader.*
@@ -29,9 +26,9 @@ import smalltalk.backend.presentation.dto.message.Chat
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
-import smalltalk.support.redis.RedisContainerConfig
-import smalltalk.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.support.EnableTestContainers
+import smalltalk.support.spec.afterRootTest
 
 /**
  * 테스트 이름 주의!!
@@ -39,9 +36,7 @@ import smalltalk.backend.util.jackson.ObjectMapperClient
  * 채팅방 구독 취소 -> 채팅방 퇴장
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(RedisContainerConfig::class)
-@ActiveProfiles("test")
-@DirtiesContext
+@EnableTestContainers
 class WebSocketIntegrationTest(
     @LocalServerPort private val port: Int,
     private val roomRepository: RoomRepository,

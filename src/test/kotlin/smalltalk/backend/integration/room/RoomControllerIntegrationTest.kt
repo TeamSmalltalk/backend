@@ -8,10 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.getForEntity
 import org.springframework.boot.test.web.client.postForEntity
-import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus.*
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
 import smalltalk.backend.*
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.DELETED
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.FULL
@@ -21,13 +18,11 @@ import smalltalk.backend.presentation.dto.room.request.OpenRequest
 import smalltalk.backend.presentation.dto.room.response.EnterResponse
 import smalltalk.backend.presentation.dto.room.response.OpenResponse
 import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
-import smalltalk.support.redis.RedisContainerConfig
+import smalltalk.support.EnableTestContainers
 import smalltalk.support.spec.afterRootTest
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-@Import(RedisContainerConfig::class)
-@DirtiesContext
+@EnableTestContainers
 class RoomControllerIntegrationTest(
     private val roomRepository: RoomRepository,
     private val template: TestRestTemplate

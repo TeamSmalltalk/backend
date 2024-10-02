@@ -1,4 +1,4 @@
-package smalltalk.support.test
+package smalltalk.support.extension
 
 import io.kotest.core.config.AbstractProjectConfig
 import io.kotest.extensions.spring.SpringAutowireConstructorExtension
