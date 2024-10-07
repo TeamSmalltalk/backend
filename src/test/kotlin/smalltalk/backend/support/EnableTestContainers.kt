@@ -1,9 +1,9 @@
-package smalltalk.support
+package smalltalk.backend.support
 
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import smalltalk.support.testcontainers.TestContainersInitializer
+import smalltalk.backend.support.testcontainers.TestContainersInitializer
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)

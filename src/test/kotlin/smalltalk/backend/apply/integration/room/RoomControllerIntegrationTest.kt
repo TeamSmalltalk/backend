@@ -1,4 +1,4 @@
-package smalltalk.backend.integration.room
+package smalltalk.backend.apply.integration.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -9,7 +9,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.getForEntity
 import org.springframework.boot.test.web.client.postForEntity
 import org.springframework.http.HttpStatus.*
-import smalltalk.backend.*
+import smalltalk.backend.apply.*
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.DELETED
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.FULL
 import smalltalk.backend.infra.repository.room.RoomRepository
@@ -18,8 +18,8 @@ import smalltalk.backend.presentation.dto.room.request.OpenRequest
 import smalltalk.backend.presentation.dto.room.response.EnterResponse
 import smalltalk.backend.presentation.dto.room.response.OpenResponse
 import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
-import smalltalk.support.EnableTestContainers
-import smalltalk.support.spec.afterRootTest
+import smalltalk.backend.support.EnableTestContainers
+import smalltalk.backend.support.spec.afterRootTest
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableTestContainers

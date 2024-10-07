@@ -1,4 +1,4 @@
-package smalltalk.support.testcontainers
+package smalltalk.backend.support.testcontainers
 
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer

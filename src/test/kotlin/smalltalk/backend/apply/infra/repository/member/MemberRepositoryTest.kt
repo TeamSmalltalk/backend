@@ -1,4 +1,4 @@
-package smalltalk.backend.infra.repository.member
+package smalltalk.backend.apply.infra.repository.member
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.assertions.throwables.shouldThrow
@@ -8,14 +8,15 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
-import smalltalk.backend.ID
-import smalltalk.backend.MEMBERS_INITIAL_ID
-import smalltalk.backend.MEMBER_SESSION_ID
+import smalltalk.backend.apply.*
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.MemberNotFoundException
+import smalltalk.backend.infra.repository.member.MemberRepository
+import smalltalk.backend.infra.repository.member.RedisMemberRepository
+import smalltalk.backend.infra.repository.member.getById
 import smalltalk.backend.util.jackson.ObjectMapperClient
-import smalltalk.support.EnableTestContainers
-import smalltalk.support.spec.afterRootTest
+import smalltalk.backend.support.EnableTestContainers
+import smalltalk.backend.support.spec.afterRootTest
 
 @SpringBootTest(classes = [RedisConfig::class, MemberRepository::class, RedisMemberRepository::class, ObjectMapperClient::class])
 @EnableTestContainers

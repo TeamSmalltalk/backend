@@ -1,15 +1,17 @@
-package smalltalk.backend.infra.repository.room
+package smalltalk.backend.apply.infra.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import org.springframework.boot.test.context.SpringBootTest
-import smalltalk.backend.NAME
+import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.domain.room.Room
+import smalltalk.backend.infra.repository.room.RedisRoomRepository
+import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.util.jackson.ObjectMapperClient
-import smalltalk.support.EnableTestContainers
+import smalltalk.backend.support.EnableTestContainers
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 

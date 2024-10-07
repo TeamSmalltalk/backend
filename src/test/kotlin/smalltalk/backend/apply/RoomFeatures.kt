@@ -1,4 +1,4 @@
-package smalltalk.backend
+package smalltalk.backend.apply
 
 import smalltalk.backend.application.websocket.RoomEventListener
 import smalltalk.backend.config.websocket.WebSocketConfig

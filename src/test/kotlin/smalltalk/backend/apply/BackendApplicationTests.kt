@@ -1,4 +1,4 @@
-package smalltalk.backend
+package smalltalk.backend.apply
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest

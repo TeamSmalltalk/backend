@@ -1,4 +1,4 @@
-package smalltalk.backend
+package smalltalk.backend.apply
 
 import org.hildan.krossbow.stomp.headers.StompSubscribeHeaders
 import smalltalk.backend.application.websocket.MessageHeader.*

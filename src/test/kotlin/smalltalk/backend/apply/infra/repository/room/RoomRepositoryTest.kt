@@ -1,4 +1,4 @@
-package smalltalk.backend.infra.repository.room
+package smalltalk.backend.apply.infra.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.assertions.throwables.shouldThrow
@@ -7,18 +7,19 @@ import io.kotest.matchers.collections.*
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
-import smalltalk.backend.ID
-import smalltalk.backend.NAME
+import smalltalk.backend.apply.*
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
+import smalltalk.backend.infra.repository.room.RedisRoomRepository
+import smalltalk.backend.infra.repository.room.RoomRepository
 import smalltalk.backend.util.jackson.ObjectMapperClient
-import smalltalk.support.EnableTestContainers
-import smalltalk.support.spec.afterRootTest
+import smalltalk.backend.support.EnableTestContainers
+import smalltalk.backend.support.spec.afterRootTest
 
 @SpringBootTest(classes = [RedisConfig::class, RoomRepository::class, RedisRoomRepository::class, ObjectMapperClient::class])
 @EnableTestContainers
-class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpec({
+class RoomRepositoryTest(private val roomRepository: smalltalk.backend.infra.repository.room.RoomRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }
 
     expect("채팅방을 저장한다") {

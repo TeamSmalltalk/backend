@@ -1,4 +1,4 @@
-package smalltalk.backend.integration.websocket
+package smalltalk.backend.apply.integration.websocket
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -15,7 +15,7 @@ import org.hildan.krossbow.websocket.spring.asKrossbowWebSocketClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
-import smalltalk.backend.*
+import smalltalk.backend.apply.*
 import smalltalk.backend.application.websocket.MessageHeader.*
 import smalltalk.backend.application.websocket.SystemType.ENTER
 import smalltalk.backend.application.websocket.SystemType.OPEN
@@ -27,8 +27,8 @@ import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
 import smalltalk.backend.util.jackson.ObjectMapperClient
-import smalltalk.support.EnableTestContainers
-import smalltalk.support.spec.afterRootTest
+import smalltalk.backend.support.EnableTestContainers
+import smalltalk.backend.support.spec.afterRootTest
 
 /**
  * 테스트 이름 주의!!

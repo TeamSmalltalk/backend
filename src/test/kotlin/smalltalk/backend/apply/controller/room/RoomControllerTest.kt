@@ -1,4 +1,4 @@
-package smalltalk.backend.controller.room
+package smalltalk.backend.apply.controller.room
 
 import com.ninjasquad.springmockk.MockkBean
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -11,15 +11,15 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
-import smalltalk.backend.*
 import smalltalk.backend.application.service.room.RoomService
+import smalltalk.backend.apply.*
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.DELETED
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.FULL
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.presentation.controller.room.RoomController
 import smalltalk.backend.util.jackson.ObjectMapperClient
-import smalltalk.support.spec.afterRootTest
+import smalltalk.backend.support.spec.afterRootTest
 
 @WebMvcTest(RoomController::class)
 @Import(ObjectMapperClient::class)
