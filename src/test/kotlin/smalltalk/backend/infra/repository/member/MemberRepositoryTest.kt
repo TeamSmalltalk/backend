@@ -21,24 +21,21 @@ import smalltalk.support.spec.afterRootTest
 @EnableTestContainers
 class MemberRepositoryTest(private val memberRepository: MemberRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }
-    val sessionId = MEMBER_SESSION_ID
-    val id = MEMBERS_INITIAL_ID
-    val roomId = ID
 
     expect("채팅방 멤버를 저장한다") {
-        val savedMember = memberRepository.save(sessionId, id, roomId)
-        memberRepository.getById(sessionId).run {
+        val savedMember = memberRepository.save(MEMBER_SESSION_ID, MEMBERS_INITIAL_ID, ID)
+        memberRepository.getById(MEMBER_SESSION_ID).run {
             savedMember.id shouldBe id
             savedMember.roomId shouldBe roomId
         }
     }
 
     context("채팅방 멤버 조회") {
-        (1L..3L).map { memberRepository.save("session-id$it", it, roomId) }
+        (1L..3L).map { memberRepository.save("session-id$it", it, ID) }
         expect("id와 일치하는 멤버를 반환한다") {
-            val member = memberRepository.getById(sessionId + 1L)
+            val member = memberRepository.getById(MEMBER_SESSION_ID + 1L)
             member.id shouldBe 1L
-            member.roomId shouldBe roomId
+            member.roomId shouldBe ID
         }
         expect("예외가 발생한다") {
             shouldThrow<MemberNotFoundException> {
@@ -51,9 +48,9 @@ class MemberRepositoryTest(private val memberRepository: MemberRepository) : Exp
     }
 
     context("채팅방 멤버 삭제") {
-        (1L..3L).map { memberRepository.save("session-id$it", it, roomId) }
+        (1L..3L).map { memberRepository.save("session-id$it", it, ID) }
         expect("id와 일치하는 멤버를 삭제한다") {
-            val idToDelete = sessionId + 3L
+            val idToDelete = MEMBER_SESSION_ID + 3L
             memberRepository.run {
                 deleteById(idToDelete)
                 findById(idToDelete).shouldBeNull()

@@ -7,6 +7,7 @@ import io.kotest.matchers.collections.*
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
+import smalltalk.backend.ID
 import smalltalk.backend.NAME
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.FullRoomException
@@ -20,25 +21,22 @@ import smalltalk.support.spec.afterRootTest
 class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }
 
-    context("채팅방 저장") {
-        val roomName = NAME
-        expect("채팅방을 반환한다") {
-            val savedRoom = roomRepository.save(roomName)
-            savedRoom.run {
-                id shouldBe 1L
-                name shouldBe NAME
-                idQueue shouldHaveSize 9
-                members shouldHaveSize 1
-            }
+    expect("채팅방을 저장한다") {
+        val savedRoom = roomRepository.save(NAME)
+        savedRoom.run {
+            id shouldBe ID
+            name shouldBe NAME
+            idQueue shouldHaveSize 9
+            members shouldHaveSize 1
         }
     }
 
     context("채팅방 조회") {
-        (1..3).map { roomRepository.save("채팅방$it") }
+        (1..3).map { roomRepository.save(NAME + it) }
         expect("id와 일치하는 채팅방을 조회한다") {
-            val room = roomRepository.getById(1L)
+            val room = roomRepository.getById(ID)
             room.run {
-                name shouldBe "채팅방1"
+                name shouldBe (NAME + 1)
                 idQueue shouldHaveSize 9
                 members shouldHaveSize 1
             }
@@ -54,7 +52,7 @@ class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpe
     }
 
     context("채팅방 삭제") {
-        (1..3).map { roomRepository.save("채팅방$it") }
+        (1..3).map { roomRepository.save(NAME + it) }
         expect("모든 채팅방을 삭제한다") {
             roomRepository.deleteAll()
             roomRepository.findAll().shouldBeEmpty()

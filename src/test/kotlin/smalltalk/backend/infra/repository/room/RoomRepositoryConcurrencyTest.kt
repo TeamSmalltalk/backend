@@ -15,9 +15,7 @@ import java.util.concurrent.Executors
 
 @SpringBootTest(classes = [RedisConfig::class, RoomRepository::class, RedisRoomRepository::class, ObjectMapperClient::class])
 @EnableTestContainers
-class RoomRepositoryConcurrencyTest(
-    private val roomRepository: RoomRepository
-) : FunSpec({
+class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) : FunSpec({
     val logger = KotlinLogging.logger { }
 
     test("채팅방에 9명의 멤버를 동시에 추가하면 정원이 10명이어야 한다") {
