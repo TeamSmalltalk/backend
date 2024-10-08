@@ -34,7 +34,7 @@ class RoomEventListener(
 ) {
     private val logger = KotlinLogging.logger { }
     companion object {
-        private const val MEMBER_NICKNAME_PREFIX = "익명"
+        const val MEMBER_NICKNAME_PREFIX = "익명"
         private const val DESTINATION_PATTERN = "^${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}[0-9]+$"
         private const val ROOM_ID_START_INDEX = 7
         private const val SUBSCRIBE_COMMON_EXCEPTION_CODE = "600"

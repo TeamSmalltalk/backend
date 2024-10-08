@@ -8,47 +8,36 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Import
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
-import smalltalk.backend.apply.ID
-import smalltalk.backend.apply.MEMBERS_INITIAL_ID
-import smalltalk.backend.apply.MEMBER_SESSION_ID
+import smalltalk.backend.apply.*
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.MemberNotFoundException
 import smalltalk.backend.infra.repository.member.MemberRepository
 import smalltalk.backend.infra.repository.member.RedisMemberRepository
 import smalltalk.backend.infra.repository.member.getById
-import smalltalk.backend.support.redis.RedisContainerConfig
-import smalltalk.backend.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.support.EnableTestContainers
+import smalltalk.backend.support.spec.afterRootTest
 
-@ActiveProfiles("test")
-@Import(RedisConfig::class, RedisContainerConfig::class, ObjectMapperClient::class)
-@SpringBootTest(classes = [MemberRepository::class, RedisMemberRepository::class])
-@DirtiesContext
-class MemberRepositoryTest(
-    private val memberRepository: MemberRepository
-) : ExpectSpec({
+@SpringBootTest(classes = [RedisConfig::class, MemberRepository::class, RedisMemberRepository::class, ObjectMapperClient::class])
+@EnableTestContainers
+class MemberRepositoryTest(private val memberRepository: MemberRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }
-    val sessionId = MEMBER_SESSION_ID
-    val id = MEMBERS_INITIAL_ID
-    val roomId = ID
 
     expect("채팅방 멤버를 저장한다") {
-        val savedMember = memberRepository.save(sessionId, id, roomId)
-        memberRepository.getById(sessionId).run {
+        val savedMember = memberRepository.save(MEMBER_SESSION_ID, MEMBERS_INITIAL_ID, ID)
+        memberRepository.getById(MEMBER_SESSION_ID).run {
             savedMember.id shouldBe id
             savedMember.roomId shouldBe roomId
         }
     }
 
     context("채팅방 멤버 조회") {
-        (1L..3L).map { memberRepository.save("session-id$it", it, roomId) }
+        (1L..3L).map { memberRepository.save("session-id$it", it, ID) }
         expect("id와 일치하는 멤버를 반환한다") {
-            val member = memberRepository.getById(sessionId + 1L)
-            member.id shouldBe 1L
-            member.roomId shouldBe roomId
+            memberRepository.getById(MEMBER_SESSION_ID + MEMBERS_INITIAL_ID).run {
+                id shouldBe MEMBERS_INITIAL_ID
+                roomId shouldBe ID
+            }
         }
         expect("예외가 발생한다") {
             shouldThrow<MemberNotFoundException> {
@@ -61,9 +50,9 @@ class MemberRepositoryTest(
     }
 
     context("채팅방 멤버 삭제") {
-        (1L..3L).map { memberRepository.save("session-id$it", it, roomId) }
+        (1L..3L).map { memberRepository.save("session-id$it", it, ID) }
         expect("id와 일치하는 멤버를 삭제한다") {
-            val idToDelete = sessionId + 3L
+            val idToDelete = MEMBER_SESSION_ID + MEMBERS_INITIAL_ID
             memberRepository.run {
                 deleteById(idToDelete)
                 findById(idToDelete).shouldBeNull()

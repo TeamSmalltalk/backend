@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.websocket
+package smalltalk.backend.apply.integration.websocket
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -7,20 +7,18 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.stomp.conversions.kxserialization.convertAndSend
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.websocket.spring.asKrossbowWebSocketClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.context.annotation.Import
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
+import smalltalk.backend.apply.*
 import smalltalk.backend.application.websocket.MessageHeader.*
 import smalltalk.backend.application.websocket.SystemType.ENTER
 import smalltalk.backend.application.websocket.SystemType.OPEN
-import smalltalk.backend.apply.*
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.infra.repository.member.MemberRepository
 import smalltalk.backend.infra.repository.room.RoomRepository
@@ -28,20 +26,18 @@ import smalltalk.backend.presentation.dto.message.Chat
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
-import smalltalk.backend.support.redis.RedisContainerConfig
-import smalltalk.backend.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.support.EnableTestContainers
+import smalltalk.backend.support.spec.afterRootTest
 
 /**
  * 테스트 이름 주의!!
  * 채팅방 구독 -> 채팅방 생성 & 입장
  * 채팅방 구독 취소 -> 채팅방 퇴장
  */
-@ActiveProfiles("test")
-@Import(RedisContainerConfig::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext
-class StompClientIntegrationTest(
+@EnableTestContainers
+class WebSocketIntegrationTest(
     @LocalServerPort private val port: Int,
     private val roomRepository: RoomRepository,
     private val memberRepository: MemberRepository,
@@ -144,4 +140,10 @@ class StompClientIntegrationTest(
         roomRepository.deleteAll()
         memberRepository.deleteAll()
     }
-})
+}) {
+    @Serializable
+    private data class TestChatMessage(
+        val sender: String,
+        val text: String
+    )
+}

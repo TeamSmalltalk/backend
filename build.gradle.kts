@@ -27,8 +27,8 @@ repositories {
 
 val kotlinLoggingVersion = "6.0.3"
 val coroutinesVersion = "1.8.0-RC2"
-val kotestRunnerVersion = "5.8.0"
-val kotestExtensionsVersion = "1.1.3"
+val kotestRunnerVersion = "5.9.1"
+val kotestExtensionsVersion = "1.3.0"
 val mockkVersion = "4.0.2"
 val krossbowVersion = "7.0.0"
 val standaloneClientVersion = "2.1.5"
