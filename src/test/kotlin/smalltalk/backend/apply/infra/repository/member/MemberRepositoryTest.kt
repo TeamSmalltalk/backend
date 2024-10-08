@@ -34,9 +34,10 @@ class MemberRepositoryTest(private val memberRepository: MemberRepository) : Exp
     context("채팅방 멤버 조회") {
         (1L..3L).map { memberRepository.save("session-id$it", it, ID) }
         expect("id와 일치하는 멤버를 반환한다") {
-            val member = memberRepository.getById(MEMBER_SESSION_ID + 1L)
-            member.id shouldBe 1L
-            member.roomId shouldBe ID
+            memberRepository.getById(MEMBER_SESSION_ID + MEMBERS_INITIAL_ID).run {
+                id shouldBe MEMBERS_INITIAL_ID
+                roomId shouldBe ID
+            }
         }
         expect("예외가 발생한다") {
             shouldThrow<MemberNotFoundException> {
@@ -51,7 +52,7 @@ class MemberRepositoryTest(private val memberRepository: MemberRepository) : Exp
     context("채팅방 멤버 삭제") {
         (1L..3L).map { memberRepository.save("session-id$it", it, ID) }
         expect("id와 일치하는 멤버를 삭제한다") {
-            val idToDelete = MEMBER_SESSION_ID + 3L
+            val idToDelete = MEMBER_SESSION_ID + MEMBERS_INITIAL_ID
             memberRepository.run {
                 deleteById(idToDelete)
                 findById(idToDelete).shouldBeNull()

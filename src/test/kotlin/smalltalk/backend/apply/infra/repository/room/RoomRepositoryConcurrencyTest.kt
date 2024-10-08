@@ -5,6 +5,8 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import org.springframework.boot.test.context.SpringBootTest
+import smalltalk.backend.apply.ID_QUEUE_LIMIT_ID
+import smalltalk.backend.apply.MEMBERS_INITIAL_ID
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.domain.room.Room
@@ -22,7 +24,7 @@ class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) 
 
     test("채팅방에 9명의 멤버를 동시에 추가하면 정원이 10명이어야 한다") {
         // Given
-        val numberOfThread = 9
+        val numberOfThread = ID_QUEUE_LIMIT_ID.toInt() - 1
         val threadPool = Executors.newFixedThreadPool(numberOfThread)
         val latch = CountDownLatch(numberOfThread)
         val roomId = roomRepository.save(NAME).id
@@ -50,7 +52,7 @@ class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) 
     test("가득찬 채팅방에서 동시에 모든 멤버를 삭제하면 채팅방이 삭제되어야 한다") {
         // Given
         var room: Room? = null
-        val numberOfThread = 10
+        val numberOfThread = ID_QUEUE_LIMIT_ID.toInt()
         val threadPool = Executors.newFixedThreadPool(numberOfThread)
         val latch = CountDownLatch(numberOfThread)
         val roomId = roomRepository.save(NAME).id
@@ -59,7 +61,7 @@ class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) 
         }
 
         // When
-        (1L..10L).map {
+        (MEMBERS_INITIAL_ID..ID_QUEUE_LIMIT_ID).map {
             threadPool.submit {
                 try {
                     room = roomRepository.deleteMember(roomId, it)

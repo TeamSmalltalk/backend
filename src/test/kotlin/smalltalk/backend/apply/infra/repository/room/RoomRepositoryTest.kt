@@ -19,12 +19,11 @@ import smalltalk.backend.support.spec.afterRootTest
 
 @SpringBootTest(classes = [RedisConfig::class, RoomRepository::class, RedisRoomRepository::class, ObjectMapperClient::class])
 @EnableTestContainers
-class RoomRepositoryTest(private val roomRepository: smalltalk.backend.infra.repository.room.RoomRepository) : ExpectSpec({
+class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }
 
     expect("채팅방을 저장한다") {
-        val savedRoom = roomRepository.save(NAME)
-        savedRoom.run {
+        roomRepository.save(NAME).run {
             id shouldBe ID
             name shouldBe NAME
             idQueue shouldHaveSize 9
@@ -35,8 +34,7 @@ class RoomRepositoryTest(private val roomRepository: smalltalk.backend.infra.rep
     context("채팅방 조회") {
         (1..3).map { roomRepository.save(NAME + it) }
         expect("id와 일치하는 채팅방을 조회한다") {
-            val room = roomRepository.getById(ID)
-            room.run {
+            roomRepository.getById(ID).run {
                 name shouldBe (NAME + 1)
                 idQueue shouldHaveSize 9
                 members shouldHaveSize 1
@@ -55,18 +53,17 @@ class RoomRepositoryTest(private val roomRepository: smalltalk.backend.infra.rep
     context("채팅방 삭제") {
         (1..3).map { roomRepository.save(NAME + it) }
         expect("모든 채팅방을 삭제한다") {
-            roomRepository.deleteAll()
-            roomRepository.findAll().shouldBeEmpty()
+            roomRepository.run {
+                deleteAll()
+                findAll().shouldBeEmpty()
+            }
         }
     }
 
     context("채팅방 멤버 추가") {
         val roomId = roomRepository.save(NAME).id
         expect("추가된 멤버의 id를 반환한다") {
-            val memberIds =
-                (2..10).map {
-                    roomRepository.addMember(roomId)
-                }.toList()
+            val memberIds = (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).map { roomRepository.addMember(roomId) }.toList()
             roomRepository.getById(roomId).run {
                 idQueue shouldNotContainAll memberIds
                 members shouldContainAll memberIds
@@ -83,15 +80,13 @@ class RoomRepositoryTest(private val roomRepository: smalltalk.backend.infra.rep
         val roomId = roomRepository.save(NAME).id
         val memberIdToDelete = roomRepository.addMember(roomId)
         expect("2명 이상 존재하면 멤버를 삭제한다") {
-            val room = roomRepository.deleteMember(roomId, memberIdToDelete)
-            room?.run {
+            roomRepository.deleteMember(roomId, memberIdToDelete)?.run {
                 idQueue shouldContain memberIdToDelete
                 members shouldNotContain memberIdToDelete
             }
         }
         expect("1명만 존재하면 채팅방을 삭제한다") {
-            val room = roomRepository.deleteMember(roomId, 1L)
-            room.shouldBeNull()
+            roomRepository.deleteMember(roomId, MEMBERS_INITIAL_ID).shouldBeNull()
         }
     }
 

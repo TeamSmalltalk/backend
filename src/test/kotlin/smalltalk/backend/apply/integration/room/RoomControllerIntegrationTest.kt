@@ -30,8 +30,7 @@ class RoomControllerIntegrationTest(
     val logger = KotlinLogging.logger { }
 
     test("채팅방 생성 요청에 대하여 응답으로 생성된 채팅방과 멤버 정보가 반환된다") {
-        val response = template.postForEntity<OpenResponse>(API_PREFIX, OpenRequest(NAME))
-        response.run {
+        template.postForEntity<OpenResponse>(API_PREFIX, OpenRequest(NAME)).run {
             statusCode shouldBe CREATED
             body?.run {
                 id shouldBe ID
@@ -42,8 +41,7 @@ class RoomControllerIntegrationTest(
 
     test("모든 채팅방을 조회한다") {
         (1..3).map { roomRepository.save(NAME + it) }
-        val response = template.getForEntity<List<SimpleInfoResponse>>(API_PREFIX)
-        response.run {
+        template.getForEntity<List<SimpleInfoResponse>>(API_PREFIX).run {
             statusCode shouldBe OK
             body?.shouldHaveSize(3)
         }
@@ -65,7 +63,7 @@ class RoomControllerIntegrationTest(
 
     test("가득찬 채팅방 입장 요청에 대하여 응답으로 에러 정보가 반환된다") {
         val savedRoom = roomRepository.save(NAME)
-        repeat(9) {
+        repeat((ID_QUEUE_LIMIT_ID - MEMBERS_INITIAL_ID).toInt()) {
             roomRepository.addMember(savedRoom.id)
         }
         template.postForEntity<Error>("$API_PREFIX/${savedRoom.id}").run {
