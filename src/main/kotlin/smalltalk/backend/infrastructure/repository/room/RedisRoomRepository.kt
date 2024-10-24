@@ -1,4 +1,4 @@
-package smalltalk.backend.infra.repository.room
+package smalltalk.backend.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.connection.RedisConnection

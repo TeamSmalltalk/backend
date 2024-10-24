@@ -1,4 +1,4 @@
-package smalltalk.backend.infra.repository.member
+package smalltalk.backend.infrastructure.repository.member
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.StringRedisTemplate

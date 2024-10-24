@@ -1,4 +1,4 @@
-package smalltalk.backend.infra.repository.room
+package smalltalk.backend.infrastructure.repository.room
 
 import smalltalk.backend.domain.room.Room
 

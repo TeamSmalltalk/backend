@@ -10,8 +10,8 @@ import smalltalk.backend.apply.MEMBERS_INITIAL_ID
 import smalltalk.backend.apply.NAME
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.domain.room.Room
-import smalltalk.backend.infra.repository.room.RedisRoomRepository
-import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.room.RedisRoomRepository
+import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.util.jackson.ObjectMapperClient
 import smalltalk.backend.support.EnableTestContainers
 import java.util.concurrent.CountDownLatch
