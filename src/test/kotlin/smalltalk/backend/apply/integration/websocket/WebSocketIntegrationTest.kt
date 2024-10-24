@@ -20,8 +20,8 @@ import smalltalk.backend.application.websocket.MessageHeader.*
 import smalltalk.backend.application.websocket.SystemType.ENTER
 import smalltalk.backend.application.websocket.SystemType.OPEN
 import smalltalk.backend.config.websocket.WebSocketConfig
-import smalltalk.backend.infra.repository.member.MemberRepository
-import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.member.MemberRepository
+import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.Chat
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System

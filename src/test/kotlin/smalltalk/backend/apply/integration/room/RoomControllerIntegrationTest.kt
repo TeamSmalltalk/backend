@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus.*
 import smalltalk.backend.apply.*
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.DELETED
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.FULL
-import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.room.request.OpenRequest
 import smalltalk.backend.presentation.dto.room.response.EnterResponse

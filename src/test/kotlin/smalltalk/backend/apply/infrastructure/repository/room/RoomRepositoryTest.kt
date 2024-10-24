@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.infra.repository.room
+package smalltalk.backend.apply.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.assertions.throwables.shouldThrow
@@ -11,8 +11,8 @@ import smalltalk.backend.apply.*
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
-import smalltalk.backend.infra.repository.room.RedisRoomRepository
-import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.room.RedisRoomRepository
+import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.util.jackson.ObjectMapperClient
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest

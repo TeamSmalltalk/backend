@@ -9,7 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import smalltalk.backend.application.service.room.RoomService
 import smalltalk.backend.apply.*
-import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.support.spec.afterRootTest
 
 class RoomServiceTest : BehaviorSpec({

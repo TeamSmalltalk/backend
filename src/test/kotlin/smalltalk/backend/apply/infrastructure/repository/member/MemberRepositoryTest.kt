@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.infra.repository.member
+package smalltalk.backend.apply.infrastructure.repository.member
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.assertions.throwables.shouldThrow
@@ -11,9 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import smalltalk.backend.apply.*
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.MemberNotFoundException
-import smalltalk.backend.infra.repository.member.MemberRepository
-import smalltalk.backend.infra.repository.member.RedisMemberRepository
-import smalltalk.backend.infra.repository.member.getById
+import smalltalk.backend.infrastructure.repository.member.MemberRepository
+import smalltalk.backend.infrastructure.repository.member.RedisMemberRepository
+import smalltalk.backend.infrastructure.repository.member.getById
 import smalltalk.backend.util.jackson.ObjectMapperClient
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
