@@ -25,8 +25,9 @@ repositories {
 	mavenCentral()
 }
 
-val kotlinLoggingVersion = "6.0.3"
 val coroutinesVersion = "1.8.0-RC2"
+val redissonVersion = "3.37.0"
+val kotlinLoggingVersion = "6.0.3"
 val kotestRunnerVersion = "5.9.1"
 val kotestExtensionsVersion = "1.3.0"
 val mockkVersion = "4.0.2"
@@ -40,6 +41,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+	implementation("org.redisson:redisson:$redissonVersion")
 	implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingVersion")
 	implementation("org.hildan.krossbow:krossbow-stomp-kxserialization:$krossbowVersion")
 	implementation("org.hildan.krossbow:krossbow-stomp-kxserialization-json:$krossbowVersion")
