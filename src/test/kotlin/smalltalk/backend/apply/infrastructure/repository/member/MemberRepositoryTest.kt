@@ -8,17 +8,18 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
-import smalltalk.backend.apply.*
+import smalltalk.backend.apply.ID
+import smalltalk.backend.apply.MEMBERS_INITIAL_ID
+import smalltalk.backend.apply.MEMBER_SESSION_ID
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.MemberNotFoundException
 import smalltalk.backend.infrastructure.repository.member.MemberRepository
-import smalltalk.backend.infrastructure.repository.member.RedisMemberRepository
+import smalltalk.backend.infrastructure.repository.member.RedissonMemberRepository
 import smalltalk.backend.infrastructure.repository.member.getById
-import smalltalk.backend.util.jackson.ObjectMapperClient
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
 
-@SpringBootTest(classes = [RedisConfig::class, MemberRepository::class, RedisMemberRepository::class, ObjectMapperClient::class])
+@SpringBootTest(classes = [RedisConfig::class, MemberRepository::class, RedissonMemberRepository::class])
 @EnableTestContainers
 class MemberRepositoryTest(private val memberRepository: MemberRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }
