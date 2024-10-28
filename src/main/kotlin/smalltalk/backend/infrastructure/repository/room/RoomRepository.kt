@@ -2,7 +2,6 @@ package smalltalk.backend.infrastructure.repository.room
 
 import smalltalk.backend.domain.room.Room
 
-
 interface RoomRepository {
     fun save(name: String): Room
     fun findById(id: Long): Room?

@@ -10,7 +10,6 @@ import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-
 @Repository
 class RedisRoomRepository(
     private val template: StringRedisTemplate,
@@ -28,21 +27,20 @@ class RedisRoomRepository(
     }
 
     override fun save(name: String): Room {
-        val generatedRoomId = generateRoomId()
-        val room =
-            Room(
-                generatedRoomId,
+        val generatedId = generateId()
+        val roomToSave = Room(
+                generatedId,
                 name,
                 (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
                 mutableListOf(MEMBERS_INITIAL_ID)
-            )
-        operations[createKey(generatedRoomId)] = client.getStringValue(room)
-        return room
+        )
+        operations[ROOM_KEY_PREFIX + generatedId] = client.getStringValue(roomToSave)
+        return roomToSave
     }
 
-    override fun findById(id: Long) = findByKey(createKey(id))
+    override fun findById(id: Long) = findByKey(ROOM_KEY_PREFIX + id)
 
-    override fun getById(id: Long) = findByKey(createKey(id)) ?: throw RoomNotFoundException()
+    override fun getById(id: Long) = findByKey(ROOM_KEY_PREFIX + id) ?: throw RoomNotFoundException()
 
     override fun findAll() = findKeys().mapNotNull { findByKey(it) }
 
@@ -54,7 +52,7 @@ class RedisRoomRepository(
     }
 
     override fun addMember(id: Long): Long {
-        val key = createKey(id).toByteArray()
+        val key = (ROOM_KEY_PREFIX + id).toByteArray()
         var memberId = 0L
         do {
             val transactionResults =
@@ -78,7 +76,7 @@ class RedisRoomRepository(
 
     override fun deleteMember(id: Long, memberId: Long): Room? {
         var room: Room? = null
-        val key = createKey(id).toByteArray()
+        val key = (ROOM_KEY_PREFIX + id).toByteArray()
         do {
             val transactionResults =
                 template.execute {
@@ -105,9 +103,7 @@ class RedisRoomRepository(
         return room
     }
 
-    private fun generateRoomId() = operations.increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
-
-    private fun createKey(id: Long) = ROOM_KEY_PREFIX + id
+    private fun generateId() = operations.increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
 
     private fun findByKey(key: String) = operations[key]?.let { client.getExpectedValue(it, Room::class.java) }
 
