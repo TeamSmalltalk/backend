@@ -3,15 +3,14 @@ package smalltalk.backend.infrastructure.repository.room
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.connection.RedisConnection
 import org.springframework.data.redis.core.StringRedisTemplate
-import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-@Repository
-class RedisRoomRepository(
+//@Repository
+class RedisTxRoomRepository(
     private val template: StringRedisTemplate,
     private val client: ObjectMapperClient
 ) : RoomRepository {
