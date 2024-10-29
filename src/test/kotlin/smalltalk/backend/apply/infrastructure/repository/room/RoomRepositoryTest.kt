@@ -12,11 +12,13 @@ import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.infrastructure.repository.room.RedisLuaRoomRepository
+import smalltalk.backend.infrastructure.repository.room.RedisTxRoomRepository
 import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
+import smalltalk.backend.util.jackson.ObjectMapperClient
 
-@SpringBootTest(classes = [RedisConfig::class, RoomRepository::class, RedisLuaRoomRepository::class])
+@SpringBootTest(classes = [RedisConfig::class, RoomRepository::class, RedisTxRoomRepository::class, ObjectMapperClient::class])
 @EnableTestContainers
 class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }
@@ -60,35 +62,32 @@ class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpe
         }
     }
 
-//    context("채팅방 멤버 추가") {
-//        val roomId = roomRepository.save(NAME).id
-//        expect("추가된 멤버의 id를 반환한다") {
-//            val memberIds = (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).map { roomRepository.addMember(roomId) }.toList()
-//            roomRepository.getById(roomId).run {
-//                idQueue shouldNotContainAll memberIds
-//                members shouldContainAll memberIds
-//            }
-//        }
-//        expect("예외가 발생한다") {
-//            shouldThrow<FullRoomException> {
-//                roomRepository.addMember(roomId)
-//            }
-//        }
-//    }
-//
-//    context("채팅방 멤버 삭제") {
-//        val roomId = roomRepository.save(NAME).id
-//        val memberIdToDelete = roomRepository.addMember(roomId)
-//        expect("2명 이상 존재하면 멤버를 삭제한다") {
-//            roomRepository.deleteMember(roomId, memberIdToDelete)?.run {
-//                idQueue shouldContain memberIdToDelete
-//                members shouldNotContain memberIdToDelete
-//            }
-//        }
-//        expect("1명만 존재하면 채팅방을 삭제한다") {
-//            roomRepository.deleteMember(roomId, MEMBERS_INITIAL_ID).shouldBeNull()
-//        }
-//    }
+    context("채팅방 멤버 추가") {
+        val roomId = roomRepository.save(NAME).id
+        expect("추가된 멤버의 id를 반환한다") {
+            val memberIds = (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).map { roomRepository.addMember(roomId) }.toList()
+            roomRepository.getById(roomId).members shouldContainAll memberIds
+        }
+        expect("예외가 발생한다") {
+            shouldThrow<FullRoomException> {
+                roomRepository.addMember(roomId)
+            }
+        }
+    }
+
+    context("채팅방 멤버 삭제") {
+        val roomId = roomRepository.save(NAME).id
+        val memberIdToDelete = roomRepository.addMember(roomId)
+        expect("2명 이상 존재하면 멤버를 삭제한다") {
+            roomRepository.deleteMember(roomId, memberIdToDelete)?.run {
+                idQueue shouldContain memberIdToDelete
+                members shouldNotContain memberIdToDelete
+            }
+        }
+        expect("1명만 존재하면 채팅방을 삭제한다") {
+            roomRepository.deleteMember(roomId, MEMBERS_INITIAL_ID).shouldBeNull()
+        }
+    }
 
     afterRootTest {
         roomRepository.deleteAll()
