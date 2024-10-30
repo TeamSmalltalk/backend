@@ -9,7 +9,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.springframework.boot.test.context.SpringBootTest
 import smalltalk.backend.apply.ID
-import smalltalk.backend.apply.MEMBERS_INITIAL_ID
+import smalltalk.backend.apply.MEMBER_INIT
 import smalltalk.backend.apply.MEMBER_SESSION_ID
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.MemberNotFoundException
@@ -25,7 +25,7 @@ class MemberRepositoryTest(private val memberRepository: MemberRepository) : Exp
     val logger = KotlinLogging.logger { }
 
     expect("채팅방 멤버를 저장한다") {
-        val savedMember = memberRepository.save(MEMBER_SESSION_ID, MEMBERS_INITIAL_ID, ID)
+        val savedMember = memberRepository.save(MEMBER_SESSION_ID, MEMBER_INIT, ID)
         memberRepository.getById(MEMBER_SESSION_ID).run {
             savedMember.id shouldBe id
             savedMember.roomId shouldBe roomId
@@ -33,10 +33,10 @@ class MemberRepositoryTest(private val memberRepository: MemberRepository) : Exp
     }
 
     context("채팅방 멤버 조회") {
-        (1L..3L).map { memberRepository.save("session-id$it", it, ID) }
+        (1L..3L).map { memberRepository.save(MEMBER_SESSION_ID + it, it, ID) }
         expect("id와 일치하는 멤버를 반환한다") {
-            memberRepository.getById(MEMBER_SESSION_ID + MEMBERS_INITIAL_ID).run {
-                id shouldBe MEMBERS_INITIAL_ID
+            memberRepository.getById(MEMBER_SESSION_ID + MEMBER_INIT).run {
+                id shouldBe MEMBER_INIT
                 roomId shouldBe ID
             }
         }
@@ -51,9 +51,9 @@ class MemberRepositoryTest(private val memberRepository: MemberRepository) : Exp
     }
 
     context("채팅방 멤버 삭제") {
-        (1L..3L).map { memberRepository.save("session-id$it", it, ID) }
+        (1L..3L).map { memberRepository.save(MEMBER_SESSION_ID + it, it, ID) }
         expect("id와 일치하는 멤버를 삭제한다") {
-            val idToDelete = MEMBER_SESSION_ID + MEMBERS_INITIAL_ID
+            val idToDelete = MEMBER_SESSION_ID + MEMBER_INIT
             memberRepository.run {
                 deleteById(idToDelete)
                 findById(idToDelete).shouldBeNull()

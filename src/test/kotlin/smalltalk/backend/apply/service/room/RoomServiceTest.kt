@@ -26,7 +26,7 @@ class RoomServiceTest : BehaviorSpec({
             Then("생성된 채팅방에 대한 정보를 반환한다") {
                 response.run {
                     id shouldBe room.id
-                    memberId shouldBe room.members.last()
+                    memberId shouldBe room.numberOfMember.toLong()
                 }
             }
         }
@@ -45,7 +45,7 @@ class RoomServiceTest : BehaviorSpec({
 
     Given("입장할 채팅방에 대한 정보가 있는 경우") {
         val room = create()
-        val enteredMemberId = room.members.last()
+        val enteredMemberId = PROVIDER_INIT
         every { roomRepository.addMember(any()) } returns enteredMemberId
         When("채팅방에 입장하면") {
             val response = roomService.enter(room.id.toString())

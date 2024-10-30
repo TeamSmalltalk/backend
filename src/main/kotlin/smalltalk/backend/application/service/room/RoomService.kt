@@ -12,9 +12,9 @@ import smalltalk.backend.presentation.dto.room.response.SimpleInfoResponse
 class RoomService(private val roomRepository: RoomRepository) {
     private val logger = KotlinLogging.logger { }
 
-    fun open(request: OpenRequest) = roomRepository.save(request.name).run { OpenResponse(id, members.last()) }
+    fun open(request: OpenRequest) = roomRepository.save(request.name).let { OpenResponse(it.id, it.numberOfMember.toLong()) }
 
-    fun getSimpleInfos() = roomRepository.findAll().map { SimpleInfoResponse(it.id, it.name, it.members.size) }
+    fun getSimpleInfos() = roomRepository.findAll().map { SimpleInfoResponse(it.id, it.name, it.numberOfMember) }
 
     fun enter(id: String) = EnterResponse(roomRepository.addMember(id.toLong()))
 }

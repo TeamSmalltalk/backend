@@ -1,7 +1,7 @@
 package smalltalk.backend.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.springframework.data.redis.connection.RedisConnection
+import org.springframework.data.redis.core.ScanOptions
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
@@ -12,110 +12,136 @@ import smalltalk.backend.util.jackson.ObjectMapperClient
 
 @Repository
 class RedisTxRoomRepository(
-    private val template: StringRedisTemplate,
-    private val client: ObjectMapperClient
+    private val redisTemplate: StringRedisTemplate,
+    private val mapper: ObjectMapperClient
 ) : RoomRepository {
-    private val logger = KotlinLogging.logger { }
-    private val operations = template.opsForValue()
     companion object {
-        private const val ID_QUEUE_INITIAL_ID = 2L
-        private const val ID_QUEUE_LIMIT_ID = 10L
-        private const val MEMBERS_INITIAL_ID = 1L
-        private const val ROOM_COUNTER_KEY = "roomCounter"
-        private const val ROOM_KEY_PREFIX = "room:"
-        private const val ROOM_KEY_PATTERN = "$ROOM_KEY_PREFIX*"
+        private const val KEY_PREFIX = "room:"
+        private const val COUNTER_KEY = "${KEY_PREFIX}counter"
+        private const val MEMBER_KEY_POSTFIX = ":member"
+        private const val PROVIDER__KEY_POSTFIX = ":provider"
+        private const val FIND_KEY_PATTERN = "$KEY_PREFIX*[^a-z]"
+        private const val DELETE_KEY_PATTERN = "$KEY_PREFIX*"
+        private const val MEMBER_INIT = 1L
+        private const val PROVIDER_INIT = 2L
+        private const val PROVIDER_LIMIT = 10L
     }
+    private val logger = KotlinLogging.logger { }
+    private val valueOperations = redisTemplate.opsForValue()
+    private val listOperations = redisTemplate.opsForList()
 
     override fun save(name: String): Room {
         val generatedId = generateId()
-        val roomToSave = Room(
-                generatedId,
-                name,
-                (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(),
-                mutableListOf(MEMBERS_INITIAL_ID)
-        )
-        operations[ROOM_KEY_PREFIX + generatedId] = client.getStringValue(roomToSave)
+        val roomToSave = Room(generatedId, name, MEMBER_INIT.toInt())
+        valueOperations[KEY_PREFIX + generatedId] = mapper.getStringValue(roomToSave)
+        listOperations.run {
+            leftPush(KEY_PREFIX + generatedId + MEMBER_KEY_POSTFIX, MEMBER_INIT.toString())
+            leftPushAll(
+                KEY_PREFIX + generatedId + PROVIDER__KEY_POSTFIX,
+                (PROVIDER_INIT..PROVIDER_LIMIT).map { it.toString() }
+            )
+        }
         return roomToSave
     }
 
-    override fun findById(id: Long) = findByKey(ROOM_KEY_PREFIX + id)
+    override fun findById(id: Long) = (KEY_PREFIX + id).let { findByKeys(it, it + MEMBER_KEY_POSTFIX) }
 
-    override fun getById(id: Long) = findByKey(ROOM_KEY_PREFIX + id) ?: throw RoomNotFoundException()
+    override fun getById(id: Long) = findById(id) ?: throw RoomNotFoundException()
 
-    override fun findAll() = findKeys().mapNotNull { findByKey(it) }
+    override fun findAll() = findKeysByPattern(FIND_KEY_PATTERN).mapNotNull { findByKeys(it, it + MEMBER_KEY_POSTFIX) }
 
     override fun deleteAll() {
-        template.run {
-            delete(ROOM_COUNTER_KEY)
-            delete(findKeys())
-        }
+        redisTemplate.delete(findKeysByPattern(DELETE_KEY_PATTERN))
     }
 
     override fun addMember(id: Long): Long {
-        val key = (ROOM_KEY_PREFIX + id).toByteArray()
+        val key = (KEY_PREFIX + id).toByteArray()
+        val keyOfMember = (KEY_PREFIX + id + MEMBER_KEY_POSTFIX).toByteArray()
+        val keyOfProvider = (KEY_PREFIX + id + PROVIDER__KEY_POSTFIX).toByteArray()
         var memberId = 0L
         do {
-            val transactionResults =
-                template.execute {
-                    return@execute it.apply {
-                        watch(key)
-                        val room = getByKey(key, it)
-                        checkFull(room)
-                        multi()
-                        stringCommands()[key] = client.getByteArrayValue(
-                            room.apply {
-                                memberId = idQueue.removeFirst()
-                                members.add(memberId)
-                            }
-                        )
-                    }.exec()
-                }
+            val transactionResults = redisTemplate.execute {
+                return@execute it.apply {
+                    watch(key, keyOfMember, keyOfProvider)
+                    val room = mapper.getExpectedValue(
+                        stringCommands()[key] ?: throw RoomNotFoundException(),
+                        Room::class.java
+                    )
+                    checkFull(room)
+                    val element = listCommands().lRange(keyOfProvider, 0, 0)?.get(0)
+                        ?: throw IllegalStateException("Doesnt exist id to add")
+                    multi()
+                    stringCommands()[key] =
+                        mapper.getByteArrayValue(Room(room.id, room.name, room.numberOfMember + 1))
+                    listCommands().run {
+                        lPop(keyOfProvider)
+                        rPushX(keyOfMember, element)
+                        memberId = mapper.getExpectedValue(element, Long::class.java)
+                    }
+                }.exec()
+            }
         } while (transactionResults.isNullOrEmpty())
         return memberId
     }
 
     override fun deleteMember(id: Long, memberId: Long): Room? {
         var room: Room? = null
-        val key = (ROOM_KEY_PREFIX + id).toByteArray()
+        val key = (KEY_PREFIX + id).toByteArray()
+        val keyOfMember = (KEY_PREFIX + id + MEMBER_KEY_POSTFIX).toByteArray()
+        val keyOfProvider = (KEY_PREFIX + id + PROVIDER__KEY_POSTFIX).toByteArray()
         do {
-            val transactionResults =
-                template.execute {
-                    return@execute it.apply {
-                        watch(key)
-                        val roomToCheck = getByKey(key, it)
-                        multi()
-                        if (checkLastMember(roomToCheck)) {
-                            room = null
-                            stringCommands().getDel(key)
+            val transactionResults = redisTemplate.execute {
+                return@execute it.apply {
+                    watch(key, keyOfMember, keyOfProvider)
+                    val foundRoom = mapper.getExpectedValue(
+                        stringCommands()[key] ?: throw RoomNotFoundException(),
+                        Room::class.java
+                    )
+                    multi()
+                    if (checkLastMember(foundRoom)) {
+                        keyCommands().del(key, keyOfMember, keyOfProvider)
+                        room = null
+                    }
+                    else {
+                        listCommands().run {
+                            val updatedRoom = Room(foundRoom.id, foundRoom.name, foundRoom.numberOfMember - 1)
+                            val value = mapper.getByteArrayValue(id)
+                            stringCommands()[key] = mapper.getByteArrayValue(updatedRoom)
+                            lRem(keyOfMember, 1, value)
+                            rPushX(keyOfProvider, value)
+                            room = updatedRoom
                         }
-                        else {
-                            roomToCheck.apply {
-                                members.remove(memberId)
-                                idQueue.add(memberId)
-                            }.let { updatedRoom ->
-                                room = updatedRoom
-                                stringCommands()[key] = client.getByteArrayValue(updatedRoom)
-                            }
-                        }
-                    }.exec()
-                }
+                    }
+                }.exec()
+            }
         } while (transactionResults.isNullOrEmpty())
         return room
     }
 
-    private fun generateId() = operations.increment(ROOM_COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
+    private fun generateId() = valueOperations.increment(COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
 
-    private fun findByKey(key: String) = operations[key]?.let { client.getExpectedValue(it, Room::class.java) }
+    /**
+     * keys[0] -> valueOperations
+     * keys[1] -> listOperations
+     */
+    private fun findByKeys(vararg keys: String) =
+        valueOperations[keys[0]]?.let { value ->
+            mapper.getExpectedValue(value, Room::class.java).let { room ->
+                Room(
+                    room.id,
+                    room.name,
+                    listOperations.size(keys[1])?.toInt() ?: throw IllegalStateException("Doesnt exist member")
+                )
+            }
+        }
 
-    private fun getByKey(key: ByteArray, connection: RedisConnection) =
-        connection.stringCommands()[key]?.let { client.getExpectedValue(it, Room::class.java) } ?: throw RoomNotFoundException()
-
-    private fun findKeys() = template.keys(ROOM_KEY_PATTERN)
+    private fun findKeysByPattern(pattern: String) =
+        redisTemplate.scan(ScanOptions.scanOptions().match(pattern).build()).iterator().asSequence().toList()
 
     private fun checkFull(room: Room) {
-        if (room.members.size == 10)
+        if (room.numberOfMember == 10)
             throw FullRoomException()
     }
 
-    private fun checkLastMember(room: Room) = (room.members.size == 1)
+    private fun checkLastMember(room: Room) = (room.numberOfMember == 1)
 }
