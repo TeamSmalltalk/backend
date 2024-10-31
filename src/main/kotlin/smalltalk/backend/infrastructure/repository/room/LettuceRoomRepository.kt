@@ -1,5 +1,6 @@
 package smalltalk.backend.infrastructure.repository.room
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.ScanOptions
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -60,10 +61,7 @@ class LettuceRoomRepository(
             val transactionResults = redisTemplate.execute {
                 return@execute it.apply {
                     watch(key, keyOfMember, keyOfProvider)
-                    val room = objectMapper.getExpectedValue(
-                        stringCommands()[key] ?: throw RoomNotFoundException(),
-                        Room::class.java
-                    )
+                    val room = getExpectedValue<Room>(stringCommands()[key] ?: throw RoomNotFoundException())
                     checkFull(room)
                     val element = listCommands().lRange(keyOfProvider, 0, 0)?.get(0)
                         ?: throw IllegalStateException("Doesnt exist id to add")
@@ -75,7 +73,7 @@ class LettuceRoomRepository(
                         lPop(keyOfProvider)
                         rPushX(keyOfMember, element)
                     }
-                    memberId = objectMapper.getExpectedValue(element, Long::class.java)
+                    memberId = getExpectedValue<Long>(element)
                 }.exec()
             }
         } while (transactionResults.isNullOrEmpty())
@@ -91,10 +89,7 @@ class LettuceRoomRepository(
             val transactionResults = redisTemplate.execute {
                 return@execute it.apply {
                     watch(key, keyOfMember, keyOfProvider)
-                    val foundRoom = objectMapper.getExpectedValue(
-                        stringCommands()[key] ?: throw RoomNotFoundException(),
-                        Room::class.java
-                    )
+                    val foundRoom = getExpectedValue<Room>(stringCommands()[key] ?: throw RoomNotFoundException())
                     multi()
                     if (checkLastMember(foundRoom)) {
                         keyCommands().del(key, keyOfMember, keyOfProvider)
@@ -124,13 +119,15 @@ class LettuceRoomRepository(
      */
     private fun findByKey(key: String) =
         valueOperations[key]?.let { value ->
-            objectMapper.getExpectedValue(value, Room::class.java).let { room ->
+            getExpectedValue<Room>(value).let { room ->
                 Room(room.id, room.name, room.numberOfMember)
             }
         }
 
     private fun findKeysByPattern(pattern: String) =
         redisTemplate.scan(ScanOptions.scanOptions().match(pattern).build()).iterator().asSequence().toList()
+
+    private inline fun <reified T : Any> getExpectedValue(value: Any) = objectMapper.getExpectedValue(value, T::class.java)
 
     private fun checkFull(room: Room) {
         if (room.numberOfMember == 10)

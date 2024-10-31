@@ -85,10 +85,10 @@ class RedissonRoomRepository(
      */
     private fun findByKey(key: String) =
         createRBucket(key).get()?.let { value ->
-            get(value).let { room ->
+            getExpectedValue<Room>(value).let { room ->
                 Room(room.id, room.name, room.numberOfMember)
             }
         }
 
-    private fun get(valueToRead: Any) = objectMapper.getExpectedValue(valueToRead, Room::class.java)
+    private inline fun <reified T : Any> getExpectedValue(value: Any) = objectMapper.getExpectedValue(value, T::class.java)
 }
