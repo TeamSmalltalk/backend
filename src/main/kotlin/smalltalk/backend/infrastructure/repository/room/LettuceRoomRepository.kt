@@ -12,7 +12,7 @@ import smalltalk.backend.util.jackson.ObjectMapperClient
 //@Repository
 class LettuceRoomRepository(
     private val redisTemplate: StringRedisTemplate,
-    private val mapper: ObjectMapperClient
+    private val objectMapper: ObjectMapperClient
 ) : RoomRepository {
     companion object {
         private const val KEY_PREFIX = "room:"
@@ -32,7 +32,7 @@ class LettuceRoomRepository(
     override fun save(name: String): Room {
         val generatedId = generateId()
         val roomToSave = Room(generatedId, name, MEMBER_INIT.toInt())
-        valueOperations[KEY_PREFIX + generatedId] = mapper.getStringValue(roomToSave)
+        valueOperations[KEY_PREFIX + generatedId] = objectMapper.getStringValue(roomToSave)
         listOperations.run {
             leftPush(KEY_PREFIX + generatedId + MEMBER_KEY_POSTFIX, MEMBER_INIT.toString())
             leftPushAll(
@@ -43,9 +43,9 @@ class LettuceRoomRepository(
         return roomToSave
     }
 
-    override fun findById(id: Long) = (KEY_PREFIX + id).let { findByKeys(it, it + MEMBER_KEY_POSTFIX) }
+    override fun findById(id: Long) = findByKey(KEY_PREFIX + id)
 
-    override fun findAll() = findKeysByPattern(FIND_KEY_PATTERN).mapNotNull { findByKeys(it, it + MEMBER_KEY_POSTFIX) }
+    override fun findAll() = findKeysByPattern(FIND_KEY_PATTERN).mapNotNull { findByKey(it) }
 
     override fun deleteAll() {
         redisTemplate.delete(findKeysByPattern(DELETE_KEY_PATTERN))
@@ -60,7 +60,7 @@ class LettuceRoomRepository(
             val transactionResults = redisTemplate.execute {
                 return@execute it.apply {
                     watch(key, keyOfMember, keyOfProvider)
-                    val room = mapper.getExpectedValue(
+                    val room = objectMapper.getExpectedValue(
                         stringCommands()[key] ?: throw RoomNotFoundException(),
                         Room::class.java
                     )
@@ -68,13 +68,14 @@ class LettuceRoomRepository(
                     val element = listCommands().lRange(keyOfProvider, 0, 0)?.get(0)
                         ?: throw IllegalStateException("Doesnt exist id to add")
                     multi()
-                    stringCommands()[key] =
-                        mapper.getByteArrayValue(Room(room.id, room.name, room.numberOfMember + 1))
+                    stringCommands()[key] = objectMapper.getByteArrayValue(
+                        Room(room.id, room.name, room.numberOfMember + 1)
+                    )
                     listCommands().run {
                         lPop(keyOfProvider)
                         rPushX(keyOfMember, element)
-                        memberId = mapper.getExpectedValue(element, Long::class.java)
                     }
+                    memberId = objectMapper.getExpectedValue(element, Long::class.java)
                 }.exec()
             }
         } while (transactionResults.isNullOrEmpty())
@@ -90,7 +91,7 @@ class LettuceRoomRepository(
             val transactionResults = redisTemplate.execute {
                 return@execute it.apply {
                     watch(key, keyOfMember, keyOfProvider)
-                    val foundRoom = mapper.getExpectedValue(
+                    val foundRoom = objectMapper.getExpectedValue(
                         stringCommands()[key] ?: throw RoomNotFoundException(),
                         Room::class.java
                     )
@@ -100,14 +101,14 @@ class LettuceRoomRepository(
                         room = null
                     }
                     else {
+                        val updatedRoom = Room(foundRoom.id, foundRoom.name, foundRoom.numberOfMember - 1)
+                        val value = objectMapper.getByteArrayValue(id)
+                        stringCommands()[key] = objectMapper.getByteArrayValue(updatedRoom)
                         listCommands().run {
-                            val updatedRoom = Room(foundRoom.id, foundRoom.name, foundRoom.numberOfMember - 1)
-                            val value = mapper.getByteArrayValue(id)
-                            stringCommands()[key] = mapper.getByteArrayValue(updatedRoom)
                             lRem(keyOfMember, 1, value)
                             rPushX(keyOfProvider, value)
-                            room = updatedRoom
                         }
+                        room = updatedRoom
                     }
                 }.exec()
             }
@@ -121,14 +122,10 @@ class LettuceRoomRepository(
      * keys[0] -> valueOperations
      * keys[1] -> listOperations
      */
-    private fun findByKeys(vararg keys: String) =
-        valueOperations[keys[0]]?.let { value ->
-            mapper.getExpectedValue(value, Room::class.java).let { room ->
-                Room(
-                    room.id,
-                    room.name,
-                    listOperations.size(keys[1])?.toInt() ?: throw IllegalStateException("Doesnt exist member")
-                )
+    private fun findByKey(key: String) =
+        valueOperations[key]?.let { value ->
+            objectMapper.getExpectedValue(value, Room::class.java).let { room ->
+                Room(room.id, room.name, room.numberOfMember)
             }
         }
 
