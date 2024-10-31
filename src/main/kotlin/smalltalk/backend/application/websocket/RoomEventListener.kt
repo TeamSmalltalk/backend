@@ -17,6 +17,7 @@ import smalltalk.backend.exception.room.situation.DOESNT_EXIST_HEADER_MESSAGE_PR
 import smalltalk.backend.exception.room.situation.DoesntExistHeaderException
 import smalltalk.backend.infrastructure.repository.member.MemberRepository
 import smalltalk.backend.infrastructure.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.room.getById
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix

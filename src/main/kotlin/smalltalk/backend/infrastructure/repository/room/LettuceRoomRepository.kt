@@ -3,15 +3,14 @@ package smalltalk.backend.infrastructure.repository.room
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.ScanOptions
 import org.springframework.data.redis.core.StringRedisTemplate
-import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-@Repository
-class RedisTxRoomRepository(
+//@Repository
+class LettuceRoomRepository(
     private val redisTemplate: StringRedisTemplate,
     private val mapper: ObjectMapperClient
 ) : RoomRepository {
@@ -45,8 +44,6 @@ class RedisTxRoomRepository(
     }
 
     override fun findById(id: Long) = (KEY_PREFIX + id).let { findByKeys(it, it + MEMBER_KEY_POSTFIX) }
-
-    override fun getById(id: Long) = findById(id) ?: throw RoomNotFoundException()
 
     override fun findAll() = findKeysByPattern(FIND_KEY_PATTERN).mapNotNull { findByKeys(it, it + MEMBER_KEY_POSTFIX) }
 
