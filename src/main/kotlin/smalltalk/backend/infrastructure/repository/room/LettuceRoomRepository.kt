@@ -1,9 +1,9 @@
 package smalltalk.backend.infrastructure.repository.room
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.ScanOptions
 import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
@@ -113,10 +113,6 @@ class LettuceRoomRepository(
 
     private fun generateId() = valueOperations.increment(COUNTER_KEY) ?: throw RoomIdNotGeneratedException()
 
-    /**
-     * keys[0] -> valueOperations
-     * keys[1] -> listOperations
-     */
     private fun findByKey(key: String) =
         valueOperations[key]?.let { value ->
             getExpectedValue<Room>(value).let { room ->
