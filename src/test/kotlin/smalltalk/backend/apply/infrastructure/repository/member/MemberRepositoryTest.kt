@@ -25,7 +25,7 @@ class MemberRepositoryTest(private val memberRepository: MemberRepository) : Exp
     val logger = KotlinLogging.logger { }
 
     expect("채팅방 멤버를 저장한다") {
-        val savedMember = memberRepository.save(MEMBER_SESSION_ID, MEMBER_INIT, ID)
+        val savedMember = memberRepository.save(MEMBER_SESSION_ID, MEMBER_INIT.toLong(), ID)
         memberRepository.getById(MEMBER_SESSION_ID).run {
             savedMember.id shouldBe id
             savedMember.roomId shouldBe roomId
