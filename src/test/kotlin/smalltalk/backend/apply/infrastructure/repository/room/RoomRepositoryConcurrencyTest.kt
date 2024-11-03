@@ -22,13 +22,10 @@ class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) 
     val logger = KotlinLogging.logger { }
 
     test("채팅방에 9명의 멤버를 동시에 추가하면 정원이 10명이어야 한다") {
-        // Given
         val numberOfThread = MEMBER_LIMIT - 1
         val threadPool = Executors.newFixedThreadPool(numberOfThread)
         val latch = CountDownLatch(numberOfThread)
         val id = roomRepository.save(NAME).id
-
-        // When
         repeat(numberOfThread) {
             threadPool.submit {
                 try {
@@ -40,20 +37,15 @@ class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) 
             }
         }
         latch.await()
-
-        // Then
         roomRepository.getById(id).numberOfMember shouldBe MEMBER_LIMIT
     }
 
     test("가득찬 채팅방에서 동시에 모든 멤버를 삭제하면 채팅방이 삭제되어야 한다") {
-        // Given
         val numberOfThread = MEMBER_LIMIT
         val threadPool = Executors.newFixedThreadPool(numberOfThread)
         val latch = CountDownLatch(numberOfThread)
         val id = roomRepository.save(NAME).id
         repeat(MEMBER_LIMIT - 1) { roomRepository.addMember(id) }
-
-        // When
         repeat(numberOfThread) {
             threadPool.submit {
                 try {
@@ -65,8 +57,6 @@ class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) 
             }
         }
         latch.await()
-
-        // Then
         roomRepository.findById(id).shouldBeNull()
     }
 
