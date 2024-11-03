@@ -12,13 +12,14 @@ import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.infrastructure.repository.room.LettuceRoomRepository
+import smalltalk.backend.infrastructure.repository.room.RedissonRoomRepository
 import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.infrastructure.repository.room.getById
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-@SpringBootTest(classes = [RedisConfig::class, LettuceRoomRepository::class, ObjectMapperClient::class])
+@SpringBootTest(classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class])
 @EnableTestContainers
 class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }

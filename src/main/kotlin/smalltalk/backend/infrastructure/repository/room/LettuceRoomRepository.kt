@@ -6,12 +6,11 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.FullRoomException
-import smalltalk.backend.exception.room.situation.MemberNotFoundException
 import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-@Repository
+//@Repository
 class LettuceRoomRepository(
     private val redisTemplate: StringRedisTemplate,
     private val objectMapper: ObjectMapperClient
