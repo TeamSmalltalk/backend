@@ -20,8 +20,8 @@ import smalltalk.backend.application.websocket.MessageHeader.*
 import smalltalk.backend.application.websocket.SystemType.ENTER
 import smalltalk.backend.application.websocket.SystemType.OPEN
 import smalltalk.backend.config.websocket.WebSocketConfig
-import smalltalk.backend.infra.repository.member.MemberRepository
-import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.member.MemberRepository
+import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.Chat
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
@@ -53,7 +53,7 @@ class WebSocketIntegrationTest(
         val messageChannel = Channel<System>()
         val sessionToOpenRoom = client.connect(url).withJsonConversions()
         launch {
-            sessionToOpenRoom.subscribe(createHeaders(destination, OPEN.name, room.members.last().toString()))
+            sessionToOpenRoom.subscribe(createHeaders(destination, OPEN.name, room.numberOfMember.toString()))
                 .take(3)
                 .collect { messageChannel.send(getExpectedValue<System>(mapperClient, it.bodyAsText)) }
         }
@@ -86,7 +86,7 @@ class WebSocketIntegrationTest(
                 createHeaders(
                     "${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}abc",
                     OPEN.name,
-                    room.members.last().toString()
+                    room.numberOfMember.toString()
                 )
             ).first().bodyAsText
         ).code shouldBe ROOM.code
@@ -108,14 +108,14 @@ class WebSocketIntegrationTest(
         val session = client.connect(url).withJsonConversions()
         getExpectedValue<Error>(
             mapperClient,
-            session.subscribe(createHeaders(getDestination(room.id), null, room.members.last().toString())).first().bodyAsText
+            session.subscribe(createHeaders(getDestination(room.id), null, room.numberOfMember.toString())).first().bodyAsText
         ).code shouldBe TYPE.code
         session.disconnect()
     }
 
     test("채팅방에 채팅 메시지를 전송하면 모든 멤버들이 수신한다") {
         val room = roomRepository.save(NAME)
-        val enteredMemberId = room.members.last()
+        val enteredMemberId = room.numberOfMember.toLong()
         val messageChannel = Channel<String>()
         val session = client.connect(url).withJsonConversions()
         launch {

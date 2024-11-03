@@ -12,24 +12,23 @@ import smalltalk.backend.util.jackson.ObjectMapperClient
 
 const val ID = 1L
 const val NAME = "room"
-const val ID_QUEUE_INITIAL_ID = 2L
-const val ID_QUEUE_LIMIT_ID = 10L
-const val MEMBERS_INITIAL_ID = 1L
+const val MEMBER_INIT = 1L
+const val PROVIDER_INIT = 2L
+const val PROVIDER_LIMIT = 10L
 const val MEMBER_SESSION_ID = "session-id"
 const val API_PREFIX = "/api/rooms"
 
-fun create(id: Long = ID, name: String = NAME) =
-    Room(id, name, (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).toMutableList(), mutableListOf(MEMBERS_INITIAL_ID))
+fun create(id: Long = ID, name: String = NAME) = Room(id, name, MEMBER_INIT.toInt())
 
 fun createRooms() = (1L..3L).map { create(it, NAME + it) }
 
 fun createOpenRequest() = OpenRequest(NAME)
 
-fun createOpenResponse() = OpenResponse(ID, MEMBERS_INITIAL_ID)
+fun createOpenResponse() = OpenResponse(ID, MEMBER_INIT)
 
-fun createSimpleInfoResponse() = (1L..3L).map { SimpleInfoResponse(it, NAME + it, MEMBERS_INITIAL_ID.toInt()) }
+fun createSimpleInfoResponse() = (1L..3L).map { SimpleInfoResponse(it, NAME + it, MEMBER_INIT.toInt()) }
 
-fun createEnterResponse() = EnterResponse(MEMBERS_INITIAL_ID)
+fun createEnterResponse() = EnterResponse(MEMBER_INIT)
 
 fun createErrorResponseWhenEnter(code: String) = Error(code)
 

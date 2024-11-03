@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus.*
 import smalltalk.backend.apply.*
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.DELETED
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.FULL
-import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.room.RoomRepository
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.room.request.OpenRequest
 import smalltalk.backend.presentation.dto.room.response.EnterResponse
@@ -34,7 +34,7 @@ class RoomControllerIntegrationTest(
             statusCode shouldBe CREATED
             body?.run {
                 id shouldBe ID
-                memberId shouldBe MEMBERS_INITIAL_ID
+                memberId shouldBe MEMBER_INIT
             }
         }
     }
@@ -50,7 +50,7 @@ class RoomControllerIntegrationTest(
     test("채팅방 입장 요청에 대하여 응답으로 생성된 멤버 정보가 반환된다") {
         template.postForEntity<EnterResponse>("$API_PREFIX/${roomRepository.save(NAME).id}").run {
             statusCode shouldBe OK
-            body?.memberId shouldBe ID_QUEUE_INITIAL_ID
+            body?.memberId shouldBe PROVIDER_LIMIT
         }
     }
 
@@ -63,7 +63,7 @@ class RoomControllerIntegrationTest(
 
     test("가득찬 채팅방 입장 요청에 대하여 응답으로 에러 정보가 반환된다") {
         val savedRoom = roomRepository.save(NAME)
-        repeat((ID_QUEUE_LIMIT_ID - MEMBERS_INITIAL_ID).toInt()) {
+        repeat((PROVIDER_LIMIT - MEMBER_INIT).toInt()) {
             roomRepository.addMember(savedRoom.id)
         }
         template.postForEntity<Error>("$API_PREFIX/${savedRoom.id}").run {

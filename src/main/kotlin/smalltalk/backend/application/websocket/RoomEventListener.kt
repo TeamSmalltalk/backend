@@ -15,8 +15,9 @@ import smalltalk.backend.application.websocket.SystemType.*
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.exception.room.situation.DOESNT_EXIST_HEADER_MESSAGE_PREFIX
 import smalltalk.backend.exception.room.situation.DoesntExistHeaderException
-import smalltalk.backend.infra.repository.member.MemberRepository
-import smalltalk.backend.infra.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.member.MemberRepository
+import smalltalk.backend.infrastructure.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.room.getById
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
@@ -25,20 +26,19 @@ import smalltalk.backend.util.message.MessageBroker
 
 @Component
 class RoomEventListener(
-    @Qualifier("clientOutboundChannel")
-    private val outboundChannel: MessageChannel,
+    @Qualifier("clientOutboundChannel") private val outboundChannel: MessageChannel,
     private val roomRepository: RoomRepository,
     private val memberRepository: MemberRepository,
     private val broker: MessageBroker,
-    private val client: ObjectMapperClient
+    private val mapper: ObjectMapperClient
 ) {
-    private val logger = KotlinLogging.logger { }
     companion object {
         const val MEMBER_NICKNAME_PREFIX = "익명"
         private const val DESTINATION_PATTERN = "^${WebSocketConfig.SUBSCRIBE_ROOM_DESTINATION_PREFIX}[0-9]+$"
         private const val ROOM_ID_START_INDEX = 7
         private const val SUBSCRIBE_COMMON_EXCEPTION_CODE = "600"
     }
+    private val logger = KotlinLogging.logger { }
 
     @EventListener
     private fun handleSubscribe(event: SessionSubscribeEvent) {
@@ -51,8 +51,8 @@ class RoomEventListener(
             val memberId = getNativeHeaderValue(accessor, MEMBER.key).toLong()
             val room = roomRepository.getById(id)
             when (getNativeHeaderValue(accessor, TYPE.key)) {
-                OPEN.name -> sendSystemMessage(destination, OPEN, room.members.size, room.name, memberId)
-                ENTER.name -> sendSystemMessage(destination, ENTER, room.members.size, room.name, memberId)
+                OPEN.name -> sendSystemMessage(destination, OPEN, room.numberOfMember, room.name, memberId)
+                ENTER.name -> sendSystemMessage(destination, ENTER, room.numberOfMember, room.name, memberId)
                 else -> throw DoesntExistHeaderException(TYPE.key)
             }
             memberRepository.save(sessionId, memberId, id)
@@ -76,7 +76,7 @@ class RoomEventListener(
             val memberIdToDelete = member.id
             memberRepository.deleteById(sessionId)
             roomRepository.deleteMember(id, memberIdToDelete)?.let { room ->
-                sendSystemMessage(getDestination(id), EXIT, room.members.size, room.name, memberIdToDelete)
+                sendSystemMessage(getDestination(id), EXIT, room.numberOfMember, room.name, memberIdToDelete)
             }
         }
     }
@@ -113,7 +113,7 @@ class RoomEventListener(
 
     private fun createErrorMessage(payload: Error, sessionId: String, subscriptionId: String) =
         MessageBuilder.createMessage(
-            client.getByteArrayValue(payload),
+            mapper.getByteArrayValue(payload),
             StompHeaderAccessor.create(StompCommand.MESSAGE).apply {
                 this.sessionId = sessionId
                 this.subscriptionId = subscriptionId

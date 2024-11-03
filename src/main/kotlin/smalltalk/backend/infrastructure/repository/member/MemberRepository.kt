@@ -1,4 +1,4 @@
-package smalltalk.backend.infra.repository.member
+package smalltalk.backend.infrastructure.repository.member
 
 import smalltalk.backend.domain.member.Member
 import smalltalk.backend.exception.room.situation.MemberNotFoundException

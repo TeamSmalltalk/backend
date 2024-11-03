@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.infra.repository.room
+package smalltalk.backend.apply.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.assertions.throwables.shouldThrow
@@ -11,13 +11,15 @@ import smalltalk.backend.apply.*
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
-import smalltalk.backend.infra.repository.room.RedisRoomRepository
-import smalltalk.backend.infra.repository.room.RoomRepository
-import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.infrastructure.repository.room.LettuceRoomRepository
+import smalltalk.backend.infrastructure.repository.room.RedissonRoomRepository
+import smalltalk.backend.infrastructure.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.room.getById
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
+import smalltalk.backend.util.jackson.ObjectMapperClient
 
-@SpringBootTest(classes = [RedisConfig::class, RoomRepository::class, RedisRoomRepository::class, ObjectMapperClient::class])
+@SpringBootTest(classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class])
 @EnableTestContainers
 class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }
@@ -26,8 +28,7 @@ class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpe
         roomRepository.save(NAME).run {
             id shouldBe ID
             name shouldBe NAME
-            idQueue shouldHaveSize 9
-            members shouldHaveSize 1
+            numberOfMember shouldBe 1
         }
     }
 
@@ -35,12 +36,13 @@ class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpe
         (1..3).map { roomRepository.save(NAME + it) }
         expect("id와 일치하는 채팅방을 조회한다") {
             roomRepository.getById(ID).run {
+                id shouldBe ID
                 name shouldBe (NAME + 1)
-                idQueue shouldHaveSize 9
-                members shouldHaveSize 1
+                numberOfMember shouldBe 1
             }
         }
         expect("예외가 발생한다") {
+            roomRepository.findById(4L).shouldBeNull()
             shouldThrow<RoomNotFoundException> {
                 roomRepository.getById(4L)
             }
@@ -61,32 +63,41 @@ class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpe
     }
 
     context("채팅방 멤버 추가") {
-        val roomId = roomRepository.save(NAME).id
+        val id = roomRepository.save(NAME).id
         expect("추가된 멤버의 id를 반환한다") {
-            val memberIds = (ID_QUEUE_INITIAL_ID..ID_QUEUE_LIMIT_ID).map { roomRepository.addMember(roomId) }.toList()
-            roomRepository.getById(roomId).run {
-                idQueue shouldNotContainAll memberIds
-                members shouldContainAll memberIds
+            repeat((PROVIDER_LIMIT - MEMBER_INIT).toInt()) {
+                roomRepository.addMember(id)
+            }
+            roomRepository.getById(id).numberOfMember shouldBe PROVIDER_LIMIT
+        }
+        expect("존재하지 않는 예외가 발생한다") {
+            shouldThrow<RoomNotFoundException> {
+                roomRepository.addMember(2L)
             }
         }
-        expect("예외가 발생한다") {
+        expect("가득찬 예외가 발생한다") {
             shouldThrow<FullRoomException> {
-                roomRepository.addMember(roomId)
+                roomRepository.addMember(id)
             }
         }
     }
 
     context("채팅방 멤버 삭제") {
-        val roomId = roomRepository.save(NAME).id
-        val memberIdToDelete = roomRepository.addMember(roomId)
+        val id = roomRepository.save(NAME).id
+        val memberIdToDelete = roomRepository.addMember(id)
         expect("2명 이상 존재하면 멤버를 삭제한다") {
-            roomRepository.deleteMember(roomId, memberIdToDelete)?.run {
-                idQueue shouldContain memberIdToDelete
-                members shouldNotContain memberIdToDelete
-            }
+            roomRepository.deleteMember(id, memberIdToDelete)?.numberOfMember shouldBe MEMBER_INIT
         }
         expect("1명만 존재하면 채팅방을 삭제한다") {
-            roomRepository.deleteMember(roomId, MEMBERS_INITIAL_ID).shouldBeNull()
+            roomRepository.run {
+                deleteMember(id, MEMBER_INIT)
+                findById(id).shouldBeNull()
+            }
+        }
+        expect("예외가 발생한다") {
+            shouldThrow<RoomNotFoundException> {
+                roomRepository.deleteMember(id, MEMBER_INIT)
+            }
         }
     }
 
