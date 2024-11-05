@@ -1,10 +1,11 @@
 package smalltalk.backend.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.redisson.api.RScript.*
+import org.redisson.api.RScript.Mode
+import org.redisson.api.RScript.ReturnType
 import org.redisson.api.RedissonClient
 import org.redisson.api.options.KeysScanParams
-import org.redisson.client.codec.StringCodec
+import org.redisson.client.codec.StringCodec.*
 import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.FullRoomException
@@ -19,12 +20,16 @@ class RedissonRoomRepository(
     companion object {
         private const val KEY_PREFIX = "room:"
         private const val COUNTER_KEY = "${KEY_PREFIX}counter"
-        private const val PROVIDER__KEY_POSTFIX = ":provider"
+        private const val PROVIDER_KEY_POSTFIX = ":provider"
+        private const val SCRIPT_KEY = "${KEY_PREFIX}script"
+        private const val ADD_MEMBER_SCRIPT_KEY = "enter"
+        private const val DELETE_MEMBER_SCRIPT_KEY = "exit"
         private const val KEY_PATTERN = "$KEY_PREFIX*[^a-z]"
         private const val MEMBER_INIT = 1
         private const val MEMBER_LIMIT = 10
     }
     private val logger = KotlinLogging.logger { }
+    private val scriptExecutor = redisson.getScript(INSTANCE)
     private val addMemberLua = """
         local value = redis.call("get", KEYS[1])
         if not value then
@@ -61,7 +66,7 @@ class RedissonRoomRepository(
     override fun save(name: String): Room {
         val generatedId = generateId()
         val roomToSave = Room(generatedId, name, MEMBER_INIT)
-        createRBucket(KEY_PREFIX + generatedId).set(objectMapper.getStringValue(roomToSave))
+        redisson.getBucket<String>(KEY_PREFIX + generatedId, INSTANCE).set(objectMapper.getStringValue(roomToSave))
         return roomToSave
     }
 
@@ -78,54 +83,53 @@ class RedissonRoomRepository(
      * KEYS[2] = "room:{id}:provider"
      * ARGV[1] = MEMBER_LIMIT
      */
-    override fun addMember(id: Long): Long {
-        val key = KEY_PREFIX + id
-        val scriptReturnValue = redisson.getScript(StringCodec.INSTANCE).eval<String>(
-            Mode.READ_WRITE,
-            addMemberLua,
-            ReturnType.VALUE,
-            listOf(key, key + PROVIDER__KEY_POSTFIX),
-            MEMBER_LIMIT.toString()
-        )
-        return when (scriptReturnValue) {
+    override fun addMember(id: Long) =
+        when (
+            val scriptReturnValue = scriptExecutor.evalSha<String>(
+                Mode.READ_WRITE,
+                loadScriptIfAbsent(ADD_MEMBER_SCRIPT_KEY, addMemberLua),
+                ReturnType.VALUE,
+                (KEY_PREFIX + id).let { listOf(it, it + PROVIDER_KEY_POSTFIX) },
+                MEMBER_LIMIT.toString()
+            )
+        ) {
             "601" -> throw RoomNotFoundException()
             "602" -> throw FullRoomException()
             else -> scriptReturnValue.toLong()
         }
-    }
 
     /**
      * KEYS[1] = "room:{id}"
      * KEYS[2] = "room:{id}:provider"
      * ARGV[1] = memberId
      */
-    override fun deleteMember(id: Long, memberId: Long): Room? {
-        val key = KEY_PREFIX + id
-        val scriptReturnValue = redisson.getScript(StringCodec.INSTANCE).eval<String>(
+    override fun deleteMember(id: Long, memberId: Long) =
+        scriptExecutor.evalSha<String>(
             Mode.READ_WRITE,
-            deleteMemberLua,
+            loadScriptIfAbsent(DELETE_MEMBER_SCRIPT_KEY, deleteMemberLua),
             ReturnType.VALUE,
-            listOf(key, key + PROVIDER__KEY_POSTFIX),
+            (KEY_PREFIX + id).let { listOf(it, it + PROVIDER_KEY_POSTFIX) },
             memberId.toString()
-        )
-        return scriptReturnValue?.let {
+        )?.let {
             when (it) {
                 "601" -> throw RoomNotFoundException()
                 else -> getExpectedValue<Room>(it)
             }
         }
-    }
 
     private fun generateId() = redisson.getAtomicLong(COUNTER_KEY).incrementAndGet()
 
-    private fun createRBucket(key: String) = redisson.getBucket<String>(key, StringCodec.INSTANCE)
-
     private fun findByKey(key: String) =
-        createRBucket(key).get()?.let { value ->
+        redisson.getBucket<String>(key, INSTANCE).get()?.let { value ->
             getExpectedValue<Room>(value).let { room ->
                 Room(room.id, room.name, room.numberOfMember)
             }
         }
+
+    private fun loadScriptIfAbsent(key: String, script: String): String {
+        val scriptStorage = redisson.getMap<String, String>(SCRIPT_KEY, INSTANCE)
+        return scriptStorage[key] ?: scriptExecutor.scriptLoad(script).also { scriptStorage.fastPut(key, it) }
+    }
 
     private inline fun <reified T : Any> getExpectedValue(value: Any) = objectMapper.getExpectedValue(value, T::class.java)
 }

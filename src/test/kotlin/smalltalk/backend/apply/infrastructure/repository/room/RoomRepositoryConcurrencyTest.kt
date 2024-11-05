@@ -45,7 +45,7 @@ class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) 
         val threadPool = Executors.newFixedThreadPool(numberOfThread)
         val latch = CountDownLatch(numberOfThread)
         val id = roomRepository.save(NAME).id
-        repeat(MEMBER_LIMIT - 1) { roomRepository.addMember(id) }
+        repeat(numberOfThread - 1) { roomRepository.addMember(id) }
         repeat(numberOfThread) {
             threadPool.submit {
                 try {
