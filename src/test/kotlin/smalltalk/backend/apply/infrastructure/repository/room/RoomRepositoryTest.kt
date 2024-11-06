@@ -68,7 +68,6 @@ class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpe
             shouldThrow<RoomNotFoundException> { roomRepository.addMember(2L) }
         }
         expect("가득찬 예외가 발생한다") {
-            logger.info { roomRepository.getById(id).numberOfMember }
             shouldThrow<FullRoomException> { roomRepository.addMember(id) }
         }
     }
