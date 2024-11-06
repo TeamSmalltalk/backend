@@ -18,7 +18,7 @@ class LettuceMemberRepository(
     }
 
     override fun save(sessionId: String, id: Long, roomId: Long): Member {
-        val memberToSave = Member(id, roomId)
+        val memberToSave = Member(sessionId, id, roomId)
         operations[createKey(sessionId)] = client.getStringValue(memberToSave)
         return memberToSave
     }
