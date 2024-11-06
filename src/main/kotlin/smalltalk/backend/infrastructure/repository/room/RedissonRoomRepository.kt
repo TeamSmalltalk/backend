@@ -25,7 +25,6 @@ class RedissonRoomRepository(
         private const val MEMBER_LIMIT = 10
     }
     private val logger = KotlinLogging.logger { }
-    private val scriptExecutor = redisson.script
     private val addMemberLua = """
         local value = redis.call("get", KEYS[1])
         if not value then
@@ -81,7 +80,7 @@ class RedissonRoomRepository(
      */
     override fun addMember(id: Long) =
         when (
-            val scriptReturnValue = scriptExecutor.eval<String>(
+            val scriptReturnValue = redisson.script.eval<String>(
                 Mode.READ_WRITE,
                 addMemberLua,
                 ReturnType.VALUE,
@@ -100,7 +99,7 @@ class RedissonRoomRepository(
      * ARGV[1] = memberId
      */
     override fun deleteMember(id: Long, memberId: Long) =
-        scriptExecutor.eval<String>(
+        redisson.script.eval<String>(
             Mode.READ_WRITE,
             deleteMemberLua,
             ReturnType.VALUE,
