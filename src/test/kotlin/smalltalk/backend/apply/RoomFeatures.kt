@@ -13,7 +13,7 @@ import smalltalk.backend.util.jackson.ObjectMapperClient
 const val ID = 1L
 const val NAME = "room"
 const val MEMBER_INIT = 1
-const val MEMBER_LIMIT = 10
+const val MEMBER_LIMIT = 100
 const val MEMBER_SESSION_ID = "session-id"
 const val API_PREFIX = "/api/rooms"
 

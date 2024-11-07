@@ -19,7 +19,7 @@ import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-@SpringBootTest(classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class])
+@SpringBootTest(classes = [RedisConfig::class, LettuceRoomRepository::class, ObjectMapperClient::class])
 @EnableTestContainers
 class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }

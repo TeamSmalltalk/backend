@@ -10,7 +10,7 @@ import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-//@Repository
+@Repository
 class LettuceRoomRepository(
     private val redisTemplate: StringRedisTemplate,
     private val objectMapper: ObjectMapperClient
@@ -22,11 +22,10 @@ class LettuceRoomRepository(
         private const val FIND_KEY_PATTERN = "$KEY_PREFIX*[^a-z]"
         private const val DELETE_KEY_PATTERN = "$KEY_PREFIX*"
         private const val MEMBER_INIT = 1
-        private const val MEMBER_LIMIT = 10
+        private const val MEMBER_LIMIT = 100
     }
     private val logger = KotlinLogging.logger { }
     private val valueOperations = redisTemplate.opsForValue()
-    private val listOperations = redisTemplate.opsForList()
 
     override fun save(name: String): Room {
         val generatedId = generateId()

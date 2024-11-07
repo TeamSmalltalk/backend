@@ -16,7 +16,7 @@ import smalltalk.backend.support.EnableTestContainers
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
-@SpringBootTest(classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class])
+@SpringBootTest(classes = [RedisConfig::class, LettuceRoomRepository::class, ObjectMapperClient::class])
 @EnableTestContainers
 class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) : FunSpec({
     val logger = KotlinLogging.logger { }

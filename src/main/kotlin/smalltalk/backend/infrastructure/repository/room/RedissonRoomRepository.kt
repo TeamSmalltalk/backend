@@ -11,7 +11,7 @@ import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-@Repository
+//@Repository
 class RedissonRoomRepository(
     private val redisson: RedissonClient,
     private val objectMapper: ObjectMapperClient
