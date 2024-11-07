@@ -10,7 +10,7 @@ import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-@Repository
+//@Repository
 class LettuceRoomRepository(
     private val redisTemplate: StringRedisTemplate,
     private val objectMapper: ObjectMapperClient

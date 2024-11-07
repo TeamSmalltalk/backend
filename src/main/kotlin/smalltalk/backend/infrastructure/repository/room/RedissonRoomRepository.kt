@@ -11,7 +11,7 @@ import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-//@Repository
+@Repository
 class RedissonRoomRepository(
     private val redisson: RedissonClient,
     private val objectMapper: ObjectMapperClient
@@ -22,7 +22,7 @@ class RedissonRoomRepository(
         private const val PROVIDER_KEY_POSTFIX = ":provider"
         private const val KEY_PATTERN = "$KEY_PREFIX*[^a-z]"
         private const val MEMBER_INIT = 1
-        private const val MEMBER_LIMIT = 10
+        private const val MEMBER_LIMIT = 100
     }
     private val logger = KotlinLogging.logger { }
     private val addMemberLua = """

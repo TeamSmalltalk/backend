@@ -16,12 +16,12 @@ import smalltalk.backend.support.EnableTestContainers
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
-@SpringBootTest(classes = [RedisConfig::class, LettuceRoomRepository::class, ObjectMapperClient::class])
+@SpringBootTest(classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class])
 @EnableTestContainers
 class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) : FunSpec({
     val logger = KotlinLogging.logger { }
 
-    test("채팅방에 9명의 멤버를 동시에 추가하면 정원이 10명이어야 한다") {
+    test("채팅방에 멤버를 동시에 추가하면 가득차야 한다") {
         val numberOfThread = MEMBER_LIMIT - 1
         val threadPool = Executors.newFixedThreadPool(numberOfThread)
         val latch = CountDownLatch(numberOfThread)
