@@ -17,7 +17,7 @@ import smalltalk.backend.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
 @SpringBootTest(
-    classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class, RedisLuaScriptLoader::class]
+    classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class, RedisLuaLoader::class]
 )
 @EnableTestContainers
 class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpec({

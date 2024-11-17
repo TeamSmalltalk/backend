@@ -14,7 +14,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
 @SpringBootTest(
-    classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class, RedisLuaScriptLoader::class]
+    classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class, RedisLuaLoader::class]
 )
 @EnableTestContainers
 class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) : FunSpec({

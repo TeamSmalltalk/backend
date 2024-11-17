@@ -6,7 +6,7 @@ import org.redisson.api.RedissonClient
 import org.springframework.stereotype.Component
 
 @Component
-class RedisLuaScriptLoader(private val redisson: RedissonClient) {
+class RedisLuaLoader(private val redisson: RedissonClient) {
     companion object {
         const val ROOM_SCRIPT_KEY = "room:script"
         const val ROOM_ADD_MEMBER_KEY = "enter"

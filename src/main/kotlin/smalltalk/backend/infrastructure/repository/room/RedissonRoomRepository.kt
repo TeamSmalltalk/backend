@@ -16,7 +16,7 @@ import smalltalk.backend.util.jackson.ObjectMapperClient
 class RedissonRoomRepository(
     private val redisson: RedissonClient,
     private val objectMapper: ObjectMapperClient,
-    private val scriptLoader: RedisLuaScriptLoader
+    private val scriptLoader: RedisLuaLoader
 ) : RoomRepository {
     companion object {
         private const val KEY_PREFIX = "room:"
@@ -52,7 +52,7 @@ class RedissonRoomRepository(
         when (
             val scriptReturnValue = redisson.script.evalSha<String>(
                 Mode.READ_WRITE,
-                scriptLoader.getShaCode(RedisLuaScriptLoader.ROOM_ADD_MEMBER_KEY),
+                scriptLoader.getShaCode(RedisLuaLoader.ROOM_ADD_MEMBER_KEY),
                 ReturnType.VALUE,
                 (KEY_PREFIX + id).let { listOf(it, it + PROVIDER_KEY_POSTFIX) },
                 MEMBER_LIMIT.toString()
@@ -71,7 +71,7 @@ class RedissonRoomRepository(
     override fun deleteMember(id: Long, memberId: Long) =
         redisson.script.evalSha<String>(
             Mode.READ_WRITE,
-            scriptLoader.getShaCode(RedisLuaScriptLoader.ROOM_DELETE_MEMBER_KEY),
+            scriptLoader.getShaCode(RedisLuaLoader.ROOM_DELETE_MEMBER_KEY),
             ReturnType.VALUE,
             (KEY_PREFIX + id).let { listOf(it, it + PROVIDER_KEY_POSTFIX) },
             memberId.toString()
