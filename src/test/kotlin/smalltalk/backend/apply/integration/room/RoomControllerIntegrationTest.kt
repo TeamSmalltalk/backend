@@ -50,7 +50,7 @@ class RoomControllerIntegrationTest(
     test("채팅방 입장 요청에 대하여 응답으로 생성된 멤버 정보가 반환된다") {
         template.postForEntity<EnterResponse>("$API_PREFIX/${roomRepository.save(NAME).id}").run {
             statusCode shouldBe OK
-            body?.memberId shouldBe PROVIDER_LIMIT
+            body?.memberId shouldBe 2L
         }
     }
 
@@ -63,9 +63,7 @@ class RoomControllerIntegrationTest(
 
     test("가득찬 채팅방 입장 요청에 대하여 응답으로 에러 정보가 반환된다") {
         val savedRoom = roomRepository.save(NAME)
-        repeat((PROVIDER_LIMIT - MEMBER_INIT).toInt()) {
-            roomRepository.addMember(savedRoom.id)
-        }
+        repeat(MEMBER_LIMIT - MEMBER_INIT) { roomRepository.addMember(savedRoom.id) }
         template.postForEntity<Error>("$API_PREFIX/${savedRoom.id}").run {
             statusCode shouldBe BAD_REQUEST
             body?.code shouldBe FULL.code

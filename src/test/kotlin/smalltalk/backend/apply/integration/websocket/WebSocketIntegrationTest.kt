@@ -59,19 +59,20 @@ class WebSocketIntegrationTest(
         }
         val openRoomMessage = messageChannel.receive()
         val enteredMemberId = roomRepository.addMember(room.id)
+        val enteredMemberNickname = getNickname(enteredMemberId)
         val sessionToEnterRoom = client.connect(url)
         sessionToEnterRoom.subscribe(createHeaders(destination, ENTER.name, enteredMemberId.toString())).first()
         openRoomMessage.run {
-            numberOfMember shouldBe 1
+            numberOfMember shouldBe MEMBER_INIT
             text shouldBe (room.name + SystemTextPostfix.OPEN)
         }
         messageChannel.receive().let { enterRoomMessage ->
             enterRoomMessage.numberOfMember shouldBe 2
-            enterRoomMessage.text shouldBe (getNickname(enteredMemberId) + SystemTextPostfix.ENTER)
+            enterRoomMessage.text shouldBe (enteredMemberNickname + SystemTextPostfix.ENTER)
         }
         messageChannel.receive().let { exitRoomMessage ->
-            exitRoomMessage.numberOfMember shouldBe 1
-            exitRoomMessage.text shouldBe (getNickname(enteredMemberId) + SystemTextPostfix.EXIT)
+            exitRoomMessage.numberOfMember shouldBe MEMBER_INIT
+            exitRoomMessage.text shouldBe (enteredMemberNickname + SystemTextPostfix.EXIT)
         }
         sessionToEnterRoom.disconnect()
         sessionToOpenRoom.disconnect()
@@ -127,7 +128,9 @@ class WebSocketIntegrationTest(
         val sender = getNickname(enteredMemberId)
         val text = "안녕하세요!"
         session.convertAndSend(
-            WebSocketConfig.SEND_DESTINATION_PREFIX + room.id, TestChatMessage(sender, text), TestChatMessage.serializer()
+            WebSocketConfig.SEND_DESTINATION_PREFIX + room.id,
+            TestChatMessage(sender, text),
+            TestChatMessage.serializer()
         )
         getExpectedValue<Chat>(mapperClient, messageChannel.receive()).let {
             it.sender shouldBe sender

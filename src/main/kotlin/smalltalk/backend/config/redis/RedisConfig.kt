@@ -3,6 +3,7 @@ package smalltalk.backend.config.redis
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.redisson.Redisson
 import org.redisson.api.RedissonClient
+import org.redisson.client.codec.StringCodec
 import org.redisson.config.Config
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -29,5 +30,8 @@ class RedisConfig {
 
     @Bean(destroyMethod = "shutdown")
     fun redissonClient(): RedissonClient =
-        Redisson.create(Config().apply { useSingleServer().setAddress("redis://$host:$port") })
+        Redisson.create(Config().apply {
+            useSingleServer().setAddress("redis://$host:$port")
+            codec = StringCodec.INSTANCE
+        })
 }
