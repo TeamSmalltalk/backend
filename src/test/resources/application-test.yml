@@ -4,6 +4,20 @@ spring:
       host: localhost
       port: 6379
 
+room:
+  key:
+    prefix: "room:"
+    counter: "${room.key.prefix}counter"
+    providerPostfix: ":provider"
+  library:
+    nameOfAddMember: "add_member_lib"
+    nameOfDeleteMember: "delete_member_lib"
+    functionKeyOfAddMember: "add_member"
+    functionKeyOfDeleteMember: "delete_member"
+  member:
+    init: 1
+    limit: 100
+
 logging:
   level:
     root: INFO

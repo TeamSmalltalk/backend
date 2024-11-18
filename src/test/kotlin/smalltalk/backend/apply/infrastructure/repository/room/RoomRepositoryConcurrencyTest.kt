@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
 import smalltalk.backend.apply.*
 import smalltalk.backend.config.redis.RedisConfig
@@ -14,8 +15,9 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
 @SpringBootTest(
-    classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class, RedisLuaLoader::class]
+    classes = [RedisConfig::class, RoomRedisFunctionsLoader::class, RedissonRoomRepository::class, ObjectMapperClient::class]
 )
+@EnableConfigurationProperties(value = [RoomYamlProperties::class])
 @EnableTestContainers
 class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) : FunSpec({
     val logger = KotlinLogging.logger { }
