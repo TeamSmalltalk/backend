@@ -18,38 +18,6 @@ class RoomRedisFunctionsLoader(
     private val libraryNameOfDeleteMember = properties.getLibraryNameOfDeleteMember()
     private val keyOfAddMember = "'${properties.getLibraryFunctionKeyOfAddMember()}'"
     private val keyofDeleteMember = "'${properties.getLibraryFunctionKeyOfDeleteMember()}'"
-//    private val addMemberLua = """
-//        local value = redis.call("get", KEYS[1])
-//        if not value then
-//            return "601"
-//        end
-//        local room = cjson.decode(value)
-//        if room.numberOfMember == tonumber(ARGV[1]) then
-//            return "602"
-//        end
-//        local memberId = room.numberOfMember + 1
-//        room.numberOfMember = memberId
-//        redis.call("set", KEYS[1], cjson.encode(room))
-//        if redis.call("llen", KEYS[2]) ~= 0 then
-//            return redis.call("lpop", KEYS[2])
-//        end
-//        return tostring(memberId)
-//    """
-//    private val deleteMemberLua = """
-//        local value = redis.call("get", KEYS[1])
-//        if not value then
-//            return "601"
-//        end
-//        local room = cjson.decode(value)
-//        if room.numberOfMember == 1 then
-//            redis.call("del", KEYS[1], KEYS[2])
-//            return nil
-//        end
-//        room.numberOfMember = room.numberOfMember - 1
-//        redis.call("rpush", KEYS[2], ARGV[1])
-//        redis.call("set", KEYS[1], cjson.encode(room))
-//        return cjson.encode(room)
-//    """
     private val functionOfAddMember = """
         function(keys, args)
             local value = redis.call("get", keys[1])

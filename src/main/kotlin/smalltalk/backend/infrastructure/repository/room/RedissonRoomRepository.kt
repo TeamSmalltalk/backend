@@ -37,7 +37,7 @@ class RedissonRoomRepository(
 
     override fun findById(id: Long) = findByKey(keyPrefix + id)
 
-    override fun findAll(): List<Room> = redisson.keys.getKeys(KeysScanParams().pattern(keyPattern)).mapNotNull { findByKey(it) }
+    override fun findAll() = redisson.keys.getKeys(KeysScanParams().pattern(keyPattern)).mapNotNull { findByKey(it) }
 
     override fun deleteAll() {
         redisson.keys.flushdb()
@@ -50,13 +50,6 @@ class RedissonRoomRepository(
      */
     override fun addMember(id: Long) =
         when (
-//            val scriptReturnValue = redisson.script.evalSha<String>(
-//                Mode.READ_WRITE,
-//                scriptLoader.getShaCode(RedisFunctionsLoader.ROOM_ADD_MEMBER_KEY),
-//                ReturnType.VALUE,
-//                (KEY_PREFIX + id).let { listOf(it, it + PROVIDER_KEY_POSTFIX) },
-//                MEMBER_LIMIT.toString()
-//            )
             val functionReturnValue = redisson.function.call<String>(
                 FunctionMode.WRITE,
                 functionKeyOfAddMember,
@@ -76,13 +69,6 @@ class RedissonRoomRepository(
      * ARGV[1] = initNumberOfMember
      */
     override fun deleteMember(id: Long, memberId: Long) =
-//        redisson.script.evalSha<String>(
-//            Mode.READ_WRITE,
-//            scriptLoader.getShaCode(RedisFunctionsLoader.ROOM_DELETE_MEMBER_KEY),
-//            ReturnType.VALUE,
-//            (KEY_PREFIX + id).let { listOf(it, it + PROVIDER_KEY_POSTFIX) },
-//            memberId.toString()
-//        )
         redisson.function.call<String>(
             FunctionMode.WRITE,
             functionKeyOfDeleteMember,
