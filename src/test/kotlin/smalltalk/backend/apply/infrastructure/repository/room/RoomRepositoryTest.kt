@@ -6,6 +6,7 @@ import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.collections.*
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
 import smalltalk.backend.apply.*
 import smalltalk.backend.config.redis.RedisConfig
@@ -17,8 +18,9 @@ import smalltalk.backend.support.spec.afterRootTest
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
 @SpringBootTest(
-    classes = [RedisConfig::class, RedissonRoomRepository::class, ObjectMapperClient::class, RedisLuaLoader::class]
+    classes = [RedisConfig::class, RoomRedisFunctionsLoader::class, RedissonRoomRepository::class, ObjectMapperClient::class]
 )
+@EnableConfigurationProperties(value = [RoomYamlProperties::class])
 @EnableTestContainers
 class RoomRepositoryTest(private val roomRepository: RoomRepository) : ExpectSpec({
     val logger = KotlinLogging.logger { }

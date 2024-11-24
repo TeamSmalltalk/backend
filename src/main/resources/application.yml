@@ -1,35 +1,41 @@
 spring:
-
   profiles:
     active: dev
 
-#  servlet:
-#    multipart:
-#      max-file-size: 20MB
-#      max-request-size: 20MB
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
-#cloud:
-#  aws:
-#    region:
-#      static: ${aws.region}
-#    credentials:
-#      access-key: ${aws.access-key}
-#      secret-key: ${aws.secret-key}
-#    s3:
-#      bucket: ${aws.bucket}
-#
-#jwt:
-#  secret: ${jwt.secret-key}
+room:
+  key:
+    prefix: "room:"
+    counter: "${room.key.prefix}counter"
+    providerPostfix: ":provider"
+  library:
+    nameOfAddMember: "add_member_lib"
+    nameOfDeleteMember: "delete_member_lib"
+    functionKeyOfAddMember: "add_member"
+    functionKeyOfDeleteMember: "delete_member"
+  member:
+    init: 1
+    limit: 100
 
-#springdoc:
-#  packages-to-scan : smalltalk.backend
-#  swagger-ui :
-#    path : /api
-#  api-docs :
-#    path : /api-docs/json
-#    groups :
-#      enabled : true
-#  cache :
-#    disabled : true
-#  default-consumes-media-type : application/json;charset=UTF-8
-#  default-produces-media-type : application/json;charset=UTF-8
+logging:
+  level:
+    root: INFO
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_LOCAL_PORT}

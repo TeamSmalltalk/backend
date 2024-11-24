@@ -12,6 +12,7 @@ import org.hildan.krossbow.stomp.StompClient
 import org.hildan.krossbow.stomp.conversions.kxserialization.convertAndSend
 import org.hildan.krossbow.stomp.conversions.kxserialization.json.withJsonConversions
 import org.hildan.krossbow.websocket.spring.asKrossbowWebSocketClient
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
@@ -22,6 +23,7 @@ import smalltalk.backend.application.websocket.SystemType.OPEN
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.infrastructure.repository.member.MemberRepository
 import smalltalk.backend.infrastructure.repository.room.RoomRepository
+import smalltalk.backend.infrastructure.repository.room.RoomYamlProperties
 import smalltalk.backend.presentation.dto.message.Chat
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
@@ -36,6 +38,7 @@ import smalltalk.backend.support.spec.afterRootTest
  * 채팅방 구독 취소 -> 채팅방 퇴장
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@EnableConfigurationProperties(value = [RoomYamlProperties::class])
 @EnableTestContainers
 class WebSocketIntegrationTest(
     @LocalServerPort private val port: Int,

@@ -1,8 +1,8 @@
 package smalltalk.backend.infrastructure.repository.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.redisson.api.RScript.Mode
-import org.redisson.api.RScript.ReturnType
+import org.redisson.api.FunctionMode
+import org.redisson.api.FunctionResult
 import org.redisson.api.RedissonClient
 import org.redisson.api.options.KeysScanParams
 import org.springframework.stereotype.Repository
@@ -16,65 +16,65 @@ import smalltalk.backend.util.jackson.ObjectMapperClient
 class RedissonRoomRepository(
     private val redisson: RedissonClient,
     private val objectMapper: ObjectMapperClient,
-    private val scriptLoader: RedisLuaLoader
+    properties: RoomProperties
 ) : RoomRepository {
-    companion object {
-        private const val KEY_PREFIX = "room:"
-        private const val COUNTER_KEY = "${KEY_PREFIX}counter"
-        private const val PROVIDER_KEY_POSTFIX = ":provider"
-        private const val KEY_PATTERN = "$KEY_PREFIX*[^a-z]"
-        private const val MEMBER_INIT = 1
-        private const val MEMBER_LIMIT = 100
-    }
     private val logger = KotlinLogging.logger { }
+    private val keyPrefix = properties.getKeyPrefix()
+    private val keyOfCounter = properties.getCounterKey()
+    private val keyPostfixOfProvider = properties.getProviderKeyPostfix()
+    private val functionKeyOfAddMember = properties.getLibraryFunctionKeyOfAddMember()
+    private val functionKeyOfDeleteMember = properties.getLibraryFunctionKeyOfDeleteMember()
+    private val keyPattern = "$keyPrefix*[^a-z]"
+    private val initNumberOfMember = properties.getInitNumberOfMember()
+    private val limitNumberOfMember = properties.getLimitNumberOfMember()
 
     override fun save(name: String): Room {
         val generatedId = generateId()
-        val roomToSave = Room(generatedId, name, MEMBER_INIT)
-        redisson.getBucket<String>(KEY_PREFIX + generatedId).set(objectMapper.getStringValue(roomToSave))
+        val roomToSave = Room(generatedId, name, initNumberOfMember)
+        redisson.getBucket<String>(keyPrefix + generatedId).set(objectMapper.getStringValue(roomToSave))
         return roomToSave
     }
 
-    override fun findById(id: Long) = findByKey(KEY_PREFIX + id)
+    override fun findById(id: Long) = findByKey(keyPrefix + id)
 
-    override fun findAll(): List<Room> = redisson.keys.getKeys(KeysScanParams().pattern(KEY_PATTERN)).mapNotNull { findByKey(it) }
+    override fun findAll() = redisson.keys.getKeys(KeysScanParams().pattern(keyPattern)).mapNotNull { findByKey(it) }
 
     override fun deleteAll() {
         redisson.keys.flushdb()
     }
 
     /**
-     * KEYS[1] = "room:{id}"
-     * KEYS[2] = "room:{id}:provider"
-     * ARGV[1] = MEMBER_LIMIT
+     * KEYS[1] = keyPrefix + id
+     * KEYS[2] = keyPrefix + id + providerKeyPostfix
+     * ARGV[1] = limitNumberOfMember
      */
     override fun addMember(id: Long) =
         when (
-            val scriptReturnValue = redisson.script.evalSha<String>(
-                Mode.READ_WRITE,
-                scriptLoader.getShaCode(RedisLuaLoader.ROOM_ADD_MEMBER_KEY),
-                ReturnType.VALUE,
-                (KEY_PREFIX + id).let { listOf(it, it + PROVIDER_KEY_POSTFIX) },
-                MEMBER_LIMIT.toString()
+            val functionReturnValue = redisson.function.call<String>(
+                FunctionMode.WRITE,
+                functionKeyOfAddMember,
+                FunctionResult.STRING,
+                (keyPrefix + id).let { listOf(it, it + keyPostfixOfProvider) },
+                limitNumberOfMember.toString()
             )
         ) {
             DELETED.code -> throw RoomNotFoundException()
             FULL.code -> throw FullRoomException()
-            else -> scriptReturnValue.toLong()
+            else -> functionReturnValue.toLong()
         }
 
     /**
-     * KEYS[1] = "room:{id}"
-     * KEYS[2] = "room:{id}:provider"
-     * ARGV[1] = memberId
+     * KEYS[1] = keyPrefix + id
+     * KEYS[2] = keyPrefix + id + providerKeyPostfix
+     * ARGV[1] = initNumberOfMember
      */
     override fun deleteMember(id: Long, memberId: Long) =
-        redisson.script.evalSha<String>(
-            Mode.READ_WRITE,
-            scriptLoader.getShaCode(RedisLuaLoader.ROOM_DELETE_MEMBER_KEY),
-            ReturnType.VALUE,
-            (KEY_PREFIX + id).let { listOf(it, it + PROVIDER_KEY_POSTFIX) },
-            memberId.toString()
+        redisson.function.call<String>(
+            FunctionMode.WRITE,
+            functionKeyOfDeleteMember,
+            FunctionResult.STRING,
+            (keyPrefix + id).let { listOf(it, it + keyPostfixOfProvider) },
+            initNumberOfMember.toString()
         )?.let {
             when (it) {
                 DELETED.code -> throw RoomNotFoundException()
@@ -82,7 +82,7 @@ class RedissonRoomRepository(
             }
         }
 
-    private fun generateId() = redisson.getAtomicLong(COUNTER_KEY).incrementAndGet()
+    private fun generateId() = redisson.getAtomicLong(keyOfCounter).incrementAndGet()
 
     private fun findByKey(key: String) =
         redisson.getBucket<String>(key).get()?.let { value ->
