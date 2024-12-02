@@ -1,10 +1,3 @@
-## 요구사항
-익명 N : N 채팅 API 서버입니다.
-- Spring-boot 3.3.5
-- Kotlin & JDK 21
-- API 개수 최소화
-<br>
-
 ## Rest API
 ### POST /rooms
 - 채팅방을 생성하는 요청
