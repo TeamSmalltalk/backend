@@ -3,14 +3,13 @@ package smalltalk.backend.infrastructure.repository.room
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.ScanOptions
 import org.springframework.data.redis.core.StringRedisTemplate
-import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.util.jackson.ObjectMapperClient
 
-//@Repository
+@Deprecated(message = "Doesn't use anymore", replaceWith = ReplaceWith("RedissonRoomRepository"))
 class LettuceRoomRepository(
     private val redisTemplate: StringRedisTemplate,
     private val objectMapper: ObjectMapperClient
