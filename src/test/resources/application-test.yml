@@ -8,7 +8,7 @@ room:
   key:
     prefix: "room:"
     counter: "${room.key.prefix}counter"
-    providerPostfix: ":provider"
+    postfixOfProvider: ":provider"
   library:
     nameOfAddMember: "add_member_lib"
     nameOfDeleteMember: "delete_member_lib"

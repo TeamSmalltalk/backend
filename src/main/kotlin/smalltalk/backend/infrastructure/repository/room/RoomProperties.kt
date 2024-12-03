@@ -2,8 +2,8 @@ package smalltalk.backend.infrastructure.repository.room
 
 interface RoomProperties {
     fun getKeyPrefix(): String
-    fun getCounterKey(): String
-    fun getProviderKeyPostfix(): String
+    fun getKeyOfCounter(): String
+    fun getKeyPostfixOfProvider(): String
     fun getLibraryNameOfAddMember(): String
     fun getLibraryNameOfDeleteMember(): String
     fun getLibraryFunctionKeyOfAddMember(): String

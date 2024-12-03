@@ -20,8 +20,8 @@ class RedissonRoomRepository(
 ) : RoomRepository {
     private val logger = KotlinLogging.logger { }
     private val keyPrefix = properties.getKeyPrefix()
-    private val keyOfCounter = properties.getCounterKey()
-    private val keyPostfixOfProvider = properties.getProviderKeyPostfix()
+    private val keyOfCounter = properties.getKeyOfCounter()
+    private val keyPostfixOfProvider = properties.getKeyPostfixOfProvider()
     private val functionKeyOfAddMember = properties.getLibraryFunctionKeyOfAddMember()
     private val functionKeyOfDeleteMember = properties.getLibraryFunctionKeyOfDeleteMember()
     private val keyPattern = "$keyPrefix*[^a-z]"
@@ -45,7 +45,7 @@ class RedissonRoomRepository(
 
     /**
      * KEYS[1] = keyPrefix + id
-     * KEYS[2] = keyPrefix + id + providerKeyPostfix
+     * KEYS[2] = keyPrefix + id + keyPostfixOfProvider
      * ARGV[1] = limitNumberOfMember
      */
     override fun addMember(id: Long) =
@@ -65,7 +65,7 @@ class RedissonRoomRepository(
 
     /**
      * KEYS[1] = keyPrefix + id
-     * KEYS[2] = keyPrefix + id + providerKeyPostfix
+     * KEYS[2] = keyPrefix + id + keyPostfixOfProvider
      * ARGV[1] = initNumberOfMember
      */
     override fun deleteMember(id: Long, memberId: Long) =

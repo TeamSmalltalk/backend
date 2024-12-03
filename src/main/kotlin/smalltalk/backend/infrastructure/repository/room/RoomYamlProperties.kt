@@ -11,7 +11,7 @@ data class RoomYamlProperties(
     data class KeyYamlProperties(
         val prefix: String,
         val counter: String,
-        val providerPostfix: String
+        val postfixOfProvider: String
     )
 
     data class LibraryYamlProperties(
@@ -27,8 +27,8 @@ data class RoomYamlProperties(
     )
 
     override fun getKeyPrefix() = key.prefix
-    override fun getCounterKey() = key.counter
-    override fun getProviderKeyPostfix() = key.providerPostfix
+    override fun getKeyOfCounter() = key.counter
+    override fun getKeyPostfixOfProvider() = key.postfixOfProvider
     override fun getLibraryNameOfAddMember() = library.nameOfAddMember
     override fun getLibraryNameOfDeleteMember() = library.nameOfDeleteMember
     override fun getLibraryFunctionKeyOfAddMember() = library.functionKeyOfAddMember
