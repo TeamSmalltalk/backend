@@ -56,8 +56,7 @@ class RoomEventListener(
                 else -> throw DoesntExistHeaderException(TYPE.key)
             }
             memberRepository.save(sessionId, memberId, id)
-        }
-        catch (exceptionToHandle: Exception) {
+        } catch (exceptionToHandle: Exception) {
             var message = exceptionToHandle.message
             message?.let {
                 if (checkExceptionMessagePrefix(it))

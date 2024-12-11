@@ -31,8 +31,7 @@ class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) 
             threadPool.submit {
                 try {
                     roomRepository.addMember(id)
-                }
-                finally {
+                } finally {
                     latch.countDown()
                 }
             }
@@ -51,8 +50,7 @@ class RoomRepositoryConcurrencyTest(private val roomRepository: RoomRepository) 
             threadPool.submit {
                 try {
                     roomRepository.deleteMember(id, (it + 1).toLong())
-                }
-                finally {
+                } finally {
                     latch.countDown()
                 }
             }
