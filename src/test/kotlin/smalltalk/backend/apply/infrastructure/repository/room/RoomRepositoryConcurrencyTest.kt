@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import smalltalk.backend.apply.*
 import smalltalk.backend.config.redis.RedisConfig
 import smalltalk.backend.infrastructure.repository.room.*
-import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.infrastructure.repository.ObjectMapperClient
 import smalltalk.backend.support.EnableTestContainers
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors

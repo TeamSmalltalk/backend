@@ -16,7 +16,7 @@ import smalltalk.backend.infrastructure.repository.member.RedissonMemberReposito
 import smalltalk.backend.infrastructure.repository.member.getById
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
-import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.infrastructure.repository.ObjectMapperClient
 
 @SpringBootTest(classes = [RedisConfig::class, RedissonMemberRepository::class, ObjectMapperClient::class])
 @EnableTestContainers

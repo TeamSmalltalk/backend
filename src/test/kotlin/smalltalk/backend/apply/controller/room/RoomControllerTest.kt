@@ -18,7 +18,7 @@ import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.FULL
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.presentation.controller.room.RoomController
-import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.infrastructure.repository.ObjectMapperClient
 import smalltalk.backend.support.spec.afterRootTest
 
 @WebMvcTest(RoomController::class)

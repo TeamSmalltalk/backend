@@ -21,8 +21,8 @@ import smalltalk.backend.infrastructure.repository.room.getById
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
-import smalltalk.backend.util.jackson.ObjectMapperClient
-import smalltalk.backend.util.message.MessageBroker
+import smalltalk.backend.infrastructure.repository.ObjectMapperClient
+import smalltalk.backend.infrastructure.broker.MessageBroker
 
 @Component
 class RoomEventListener(

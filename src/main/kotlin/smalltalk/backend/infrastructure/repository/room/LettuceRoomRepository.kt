@@ -7,7 +7,7 @@ import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomIdNotGeneratedException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
-import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.infrastructure.repository.ObjectMapperClient
 
 @Deprecated(message = "Doesn't use anymore", replaceWith = ReplaceWith("RedissonRoomRepository"))
 class LettuceRoomRepository(

@@ -28,7 +28,7 @@ import smalltalk.backend.presentation.dto.message.Chat
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
-import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.infrastructure.repository.ObjectMapperClient
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
 

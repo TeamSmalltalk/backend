@@ -5,7 +5,7 @@ import org.redisson.api.RedissonClient
 import org.redisson.api.options.KeysScanParams
 import org.springframework.stereotype.Repository
 import smalltalk.backend.domain.member.Member
-import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.infrastructure.repository.ObjectMapperClient
 
 @Repository
 class RedissonMemberRepository(

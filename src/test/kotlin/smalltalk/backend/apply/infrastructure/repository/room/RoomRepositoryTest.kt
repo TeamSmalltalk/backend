@@ -15,7 +15,7 @@ import smalltalk.backend.exception.room.situation.RoomNotFoundException
 import smalltalk.backend.infrastructure.repository.room.*
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
-import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.infrastructure.repository.ObjectMapperClient
 
 @SpringBootTest(
     classes = [RedisConfig::class, RoomRedisFunctionsLoader::class, RedissonRoomRepository::class, ObjectMapperClient::class]

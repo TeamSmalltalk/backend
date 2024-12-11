@@ -10,7 +10,7 @@ import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.advice.RoomExceptionSituationCode.*
 import smalltalk.backend.exception.room.situation.FullRoomException
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
-import smalltalk.backend.util.jackson.ObjectMapperClient
+import smalltalk.backend.infrastructure.repository.ObjectMapperClient
 
 @Repository
 class RedissonRoomRepository(
