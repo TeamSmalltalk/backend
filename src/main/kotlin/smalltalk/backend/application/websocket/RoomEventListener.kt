@@ -15,14 +15,14 @@ import smalltalk.backend.application.websocket.SystemType.*
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.exception.room.situation.DOESNT_EXIST_HEADER_MESSAGE_PREFIX
 import smalltalk.backend.exception.room.situation.DoesntExistHeaderException
-import smalltalk.backend.infrastructure.repository.member.MemberRepository
-import smalltalk.backend.infrastructure.repository.room.RoomRepository
-import smalltalk.backend.infrastructure.repository.room.getById
+import smalltalk.backend.domain.member.MemberRepository
+import smalltalk.backend.domain.room.RoomRepository
+import smalltalk.backend.domain.room.getById
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
-import smalltalk.backend.infrastructure.repository.ObjectMapperClient
-import smalltalk.backend.infrastructure.broker.MessageBroker
+import smalltalk.backend.util.ObjectMapperClient
+import smalltalk.backend.application.MessageBroker
 
 @Component
 class RoomEventListener(

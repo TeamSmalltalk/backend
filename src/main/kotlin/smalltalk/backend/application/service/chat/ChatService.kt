@@ -4,7 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import smalltalk.backend.config.websocket.WebSocketConfig
 import smalltalk.backend.presentation.dto.message.Chat
-import smalltalk.backend.infrastructure.broker.MessageBroker
+import smalltalk.backend.application.MessageBroker
 
 @Service
 class ChatService(private val broker: MessageBroker) {

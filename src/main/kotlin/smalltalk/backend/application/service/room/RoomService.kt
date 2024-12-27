@@ -2,7 +2,7 @@ package smalltalk.backend.application.service.room
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
-import smalltalk.backend.infrastructure.repository.room.RoomRepository
+import smalltalk.backend.domain.room.RoomRepository
 import smalltalk.backend.presentation.dto.room.request.OpenRequest
 import smalltalk.backend.presentation.dto.room.response.EnterResponse
 import smalltalk.backend.presentation.dto.room.response.OpenResponse
