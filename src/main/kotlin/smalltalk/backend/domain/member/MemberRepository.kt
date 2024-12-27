@@ -1,6 +1,5 @@
-package smalltalk.backend.infrastructure.repository.member
+package smalltalk.backend.domain.member
 
-import smalltalk.backend.domain.member.Member
 import smalltalk.backend.exception.room.situation.MemberNotFoundException
 
 fun MemberRepository.getById(sessionId: String) = findById(sessionId) ?: throw MemberNotFoundException()

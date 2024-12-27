@@ -1,4 +1,4 @@
-package smalltalk.backend.infrastructure.repository.room
+package smalltalk.backend.config.property
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 

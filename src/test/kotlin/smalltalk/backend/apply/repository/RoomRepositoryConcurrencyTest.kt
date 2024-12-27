@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.infrastructure.repository.room
+package smalltalk.backend.apply.repository
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -7,9 +7,13 @@ import io.kotest.matchers.shouldBe
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest
 import smalltalk.backend.apply.*
+import smalltalk.backend.config.property.RoomYamlProperties
 import smalltalk.backend.config.redis.RedisConfig
-import smalltalk.backend.infrastructure.repository.room.*
-import smalltalk.backend.infrastructure.repository.ObjectMapperClient
+import smalltalk.backend.domain.room.RedissonRoomRepository
+import smalltalk.backend.domain.room.RoomRedisFunctionsLoader
+import smalltalk.backend.domain.room.RoomRepository
+import smalltalk.backend.domain.room.getById
+import smalltalk.backend.util.ObjectMapperClient
 import smalltalk.backend.support.EnableTestContainers
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors

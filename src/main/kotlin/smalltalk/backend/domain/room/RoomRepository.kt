@@ -1,6 +1,5 @@
-package smalltalk.backend.infrastructure.repository.room
+package smalltalk.backend.domain.room
 
-import smalltalk.backend.domain.room.Room
 import smalltalk.backend.exception.room.situation.RoomNotFoundException
 
 fun RoomRepository.getById(id: Long) = findById(id) ?: throw RoomNotFoundException()

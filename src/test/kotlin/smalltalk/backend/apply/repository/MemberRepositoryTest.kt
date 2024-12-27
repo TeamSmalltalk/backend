@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.infrastructure.repository.member
+package smalltalk.backend.apply.repository
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.ExpectSpec
@@ -11,12 +11,12 @@ import smalltalk.backend.apply.ID
 import smalltalk.backend.apply.MEMBER_INIT
 import smalltalk.backend.apply.MEMBER_SESSION_ID
 import smalltalk.backend.config.redis.RedisConfig
-import smalltalk.backend.infrastructure.repository.member.MemberRepository
-import smalltalk.backend.infrastructure.repository.member.RedissonMemberRepository
-import smalltalk.backend.infrastructure.repository.member.getById
+import smalltalk.backend.domain.member.MemberRepository
+import smalltalk.backend.domain.member.RedissonMemberRepository
+import smalltalk.backend.domain.member.getById
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
-import smalltalk.backend.infrastructure.repository.ObjectMapperClient
+import smalltalk.backend.util.ObjectMapperClient
 
 @SpringBootTest(classes = [RedisConfig::class, RedissonMemberRepository::class, ObjectMapperClient::class])
 @EnableTestContainers

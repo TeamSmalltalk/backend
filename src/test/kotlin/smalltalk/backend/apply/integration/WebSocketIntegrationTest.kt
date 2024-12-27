@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.integration.websocket
+package smalltalk.backend.apply.integration
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.FunSpec
@@ -21,14 +21,14 @@ import smalltalk.backend.application.websocket.MessageHeader.*
 import smalltalk.backend.application.websocket.SystemType.ENTER
 import smalltalk.backend.application.websocket.SystemType.OPEN
 import smalltalk.backend.config.websocket.WebSocketConfig
-import smalltalk.backend.infrastructure.repository.member.MemberRepository
-import smalltalk.backend.infrastructure.repository.room.RoomRepository
-import smalltalk.backend.infrastructure.repository.room.RoomYamlProperties
+import smalltalk.backend.domain.member.MemberRepository
+import smalltalk.backend.domain.room.RoomRepository
+import smalltalk.backend.config.property.RoomYamlProperties
 import smalltalk.backend.presentation.dto.message.Chat
 import smalltalk.backend.presentation.dto.message.Error
 import smalltalk.backend.presentation.dto.message.System
 import smalltalk.backend.presentation.dto.message.SystemTextPostfix
-import smalltalk.backend.infrastructure.repository.ObjectMapperClient
+import smalltalk.backend.util.ObjectMapperClient
 import smalltalk.backend.support.EnableTestContainers
 import smalltalk.backend.support.spec.afterRootTest
 

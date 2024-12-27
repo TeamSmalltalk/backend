@@ -1,4 +1,4 @@
-package smalltalk.backend.infrastructure.broker
+package smalltalk.backend.application
 
 
 interface MessageBroker {

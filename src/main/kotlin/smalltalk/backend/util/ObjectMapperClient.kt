@@ -1,4 +1,4 @@
-package smalltalk.backend.infrastructure.repository
+package smalltalk.backend.util
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Component

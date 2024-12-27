@@ -1,9 +1,8 @@
-package smalltalk.backend.infrastructure.repository.member
+package smalltalk.backend.domain.member
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.StringRedisTemplate
-import smalltalk.backend.domain.member.Member
-import smalltalk.backend.infrastructure.repository.ObjectMapperClient
+import smalltalk.backend.util.ObjectMapperClient
 
 //@Repository
 class LettuceMemberRepository(

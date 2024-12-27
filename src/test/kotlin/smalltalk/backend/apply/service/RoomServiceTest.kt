@@ -1,4 +1,4 @@
-package smalltalk.backend.apply.service.room
+package smalltalk.backend.apply.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.kotest.core.spec.style.BehaviorSpec
@@ -9,7 +9,7 @@ import io.mockk.every
 import io.mockk.mockk
 import smalltalk.backend.application.service.room.RoomService
 import smalltalk.backend.apply.*
-import smalltalk.backend.infrastructure.repository.room.RoomRepository
+import smalltalk.backend.domain.room.RoomRepository
 import smalltalk.backend.support.spec.afterRootTest
 
 class RoomServiceTest : BehaviorSpec({
